@@ -20,8 +20,13 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
     "@types/nunjucks": "^3.2.6",
+    "cheerio": "^1.2.0",
     "hono": "^4.12.30",
-    "nunjucks": "^3.2.4"
+    "linkedom": "^0.18.13",
+    "nunjucks": "^3.2.4",
+    "recipe-scrapers": "^1.9.0",
+    "zod": "^4.4.3"
   }
 }

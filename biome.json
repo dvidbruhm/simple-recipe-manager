@@ -9,7 +9,8 @@
       "!**/dist/**",
       "!src/ui/templates/**",
       "!src/ui/css/**",
-      "!src/ui/static/**"
+      "!src/ui/static/**",
+      "!tests/fixtures/**"
     ]
   }
 }
