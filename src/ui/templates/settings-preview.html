@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="settings-preview">
+  <h1>Import Preview</h1>
+  <p class="filename">{{ filename }} — {{ new_count }} new, {{ dup_count }} duplicates</p>
+
+  {% if recipes.length == 0 %}
+    <p>No recipes found in the file.</p>
+    <a href="/settings" class="btn">Try another file</a>
+  {% else %}
+
+  <form action="/settings/import/commit" method="post">
+    <input type="hidden" name="session" value="{{ session_id }}">
+
+    {% if new_count > 0 %}
+    <h2>New (will be imported)</h2>
+    <ul class="recipe-list">
+      {% for r in recipes %}
+        {% if r.status.status == "new" %}
+        <li>
+          <input type="hidden" name="decision_{{ loop.index0 }}" value="import">
+          <strong>{{ r.title }}</strong>
+          {% if r.source_url %}<span class="meta">{{ r.source_url }}</span>{% endif %}
+        </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if dup_count > 0 %}
+    <h2>Duplicates</h2>
+    <ul class="recipe-list">
+      {% for r in recipes %}
+        {% if r.status.status == "duplicate" %}
+        <li>
+          <strong>{{ r.title }}</strong>
+          <span class="meta">matches existing recipe #{{ r.status.existingId }} ({{ r.status.reason }})</span>
+          <fieldset>
+            <label><input type="radio" name="decision_{{ loop.index0 }}" value="skip" checked> Skip</label>
+            <label><input type="radio" name="decision_{{ loop.index0 }}" value="replace_{{ r.status.existingId }}"> Replace existing</label>
+          </fieldset>
+        </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <button type="submit">Confirm import ({{ new_count }} new)</button>
+    <a href="/settings" class="btn-cancel">Cancel</a>
+  </form>
+
+  {% endif %}
+</section>
+{% endblock %}

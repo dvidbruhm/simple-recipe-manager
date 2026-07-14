@@ -11,6 +11,7 @@ import { exportRoutes } from "@/export/routes";
 import { importRoutes } from "@/import/routes";
 import { RecipeRepository } from "@/recipes/repository";
 import { recipeRoutes } from "@/recipes/routes";
+import { settingsRoutes } from "@/settings/routes";
 import { tagRoutes } from "@/tags/routes";
 
 const IMAGE_MIME: Record<string, string> = {
@@ -49,6 +50,7 @@ export function buildApp(opts?: { config?: Config; dataDir?: string }) {
 	app.route("/", importRoutes(config, new RecipeRepository(db)));
 	app.route("/", exportRoutes(db, config));
 	app.route("/", recipeRoutes(db, config));
+	app.route("/", settingsRoutes(db, config, new RecipeRepository(db)));
 	app.route("/", tagRoutes(db));
 
 	return app;

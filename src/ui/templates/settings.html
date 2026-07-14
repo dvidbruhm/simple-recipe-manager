@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="settings-page">
+  <h1>Settings</h1>
+
+  <div class="settings-grid">
+    <div class="settings-col">
+      <h2>Export</h2>
+      <p>Download your recipes in various formats.</p>
+      <div class="export-buttons">
+        <a href="/export/formats/pdf" class="btn" download>Export as PDF (A4)</a>
+        <a href="/export/formats/md-zip" class="btn" download>Export as Markdown zip</a>
+        <a href="/export/formats/json-ld-zip" class="btn" download>Export as JSON-LD zip</a>
+      </div>
+    </div>
+
+    <div class="settings-col">
+      <h2>Import from file</h2>
+      <p>Upload a JSON-LD file (single or array), a RecipeSage export, a JSON-LD zip, or a Markdown zip.</p>
+      <form action="/settings/import/preview" method="post" enctype="multipart/form-data" class="import-form">
+        <input type="file" name="file" accept=".json,.jsonld,.zip" required>
+        <button type="submit">Preview import</button>
+      </form>
+      <p class="hint">Max 50 MB. RecipeSage JSON-LD exports supported. If you reload this page, you'll need to re-upload the file.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
