@@ -8,6 +8,7 @@ import type { Config } from "@/config";
 import { RecipeRepository } from "@/recipes/repository";
 import { TagRepository } from "@/tags/repository";
 import { type RecipeWithTags, recipeFilename, renderRecipeMarkdown } from "./markdown";
+import { renderPdf } from "./pdf";
 
 export function exportRoutes(db: Database, config: Config): Hono {
 	const app = new Hono();
@@ -16,11 +17,23 @@ export function exportRoutes(db: Database, config: Config): Hono {
 
 	app.get("/export/formats/:format", async (c) => {
 		const fmt = c.req.param("format");
+		const list = recipes.list();
+
+		if (fmt === "pdf") {
+			const withTags: RecipeWithTags[] = list.map((r) => ({
+				...r,
+				tags: tagRepo.listForRecipe(r.id).map((t) => t.name),
+			}));
+			const arrayBuf = await renderPdf(withTags, config.dataDir);
+			const today = new Date().toISOString().slice(0, 10);
+			c.header("Content-Type", "application/pdf");
+			c.header("Content-Disposition", `attachment; filename="recipes-${today}.pdf"`);
+			return c.body(arrayBuf);
+		}
+
 		if (fmt !== "md-zip") {
 			return c.body(`Unsupported format: ${fmt}`, 400);
 		}
-
-		const list = recipes.list();
 		const withTags: RecipeWithTags[] = list.map((r) => ({
 			...r,
 			tags: tagRepo.listForRecipe(r.id).map((t) => t.name),

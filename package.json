@@ -23,11 +23,13 @@
     "@mozilla/readability": "^0.6.0",
     "@types/archiver": "^8.0.0",
     "@types/nunjucks": "^3.2.6",
+    "@types/pdfkit": "^0.17.6",
     "archiver": "^8.0.0",
     "cheerio": "^1.2.0",
     "hono": "^4.12.30",
     "linkedom": "^0.18.13",
     "nunjucks": "^3.2.4",
+    "pdfkit": "^0.19.1",
     "recipe-scrapers": "^1.9.0",
     "zod": "^4.4.3"
   }
