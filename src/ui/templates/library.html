@@ -8,6 +8,22 @@
 {% endblock %}
 
 {% block content %}
+{% if toast %}
+<div class="toast" data-toast>
+  <span class="toast-msg">{{ toast }}</span>
+  {% if undo_url %}
+  <a href="{{ undo_url }}" class="toast-undo">Undo</a>
+  {% endif %}
+  <button class="toast-close" aria-label="Dismiss" onclick="this.parentElement.remove()">&times;</button>
+</div>
+<script>
+  setTimeout(() => {
+    const t = document.querySelector("[data-toast]");
+    if (t) t.remove();
+  }, 10000);
+</script>
+{% endif %}
+
 <div class="library-layout flex gap-6 max-w-5xl mx-auto">
   <aside class="sidebar w-48 shrink-0">
     <h3 class="text-sm font-semibold text-[color:var(--color-muted)] uppercase tracking-wide mb-2">Tags</h3>

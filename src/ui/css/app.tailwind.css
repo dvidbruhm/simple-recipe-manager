@@ -111,3 +111,73 @@ body {
 a {
 	color: var(--color-accent);
 }
+
+.toast {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: 4px;
+	padding: 12px 16px;
+	margin-bottom: 16px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.toast-msg {
+	flex: 1;
+}
+
+.toast-undo {
+	color: var(--color-accent);
+	font-weight: 600;
+	text-decoration: underline;
+}
+
+.toast-close {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 18px;
+	color: var(--color-muted);
+	padding: 0 4px;
+}
+
+@media print {
+	.site-header,
+	.theme-form,
+	.recipe-footer,
+	.toast {
+		display: none !important;
+	}
+	body {
+		background: white !important;
+		color: black !important;
+	}
+	.recipe-header {
+		text-align: center;
+	}
+	.recipe-header img {
+		max-height: 8cm;
+		width: auto;
+	}
+	.recipe-body {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1cm;
+	}
+	.ingredients,
+	.steps {
+		page-break-inside: avoid;
+	}
+	a {
+		color: black !important;
+		text-decoration: none !important;
+	}
+}
+
+@media print and (max-width: 8cm) {
+	.recipe-body {
+		display: block;
+	}
+}

@@ -21,12 +21,16 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		if (c.req.header("HX-Request") === "true") {
 			return c.html(render("partials/grid.html", { recipes: list }));
 		}
+		const toast = c.req.query("toast") ?? "";
+		const undoUrl = c.req.query("undo_url") ?? "";
 		return c.html(
 			render("library.html", {
 				recipes: list,
 				tags: tagList,
 				q,
 				active_tag: tag,
+				toast,
+				undo_url: undoUrl,
 				title: "recipes",
 				...themeVars(c),
 			}),
