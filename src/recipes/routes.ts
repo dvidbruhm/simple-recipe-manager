@@ -1,11 +1,13 @@
 import type { Database } from "bun:sqlite";
 import { Hono } from "hono";
+import type { Config } from "@/config";
 import { TagRepository } from "@/tags/repository";
 import { render } from "@/ui/nunjucks";
+import { removeImage, saveUploadedImage } from "./image-upload";
 import { RecipeRepository } from "./repository";
 import { searchRecipes } from "./search";
 
-export function recipeRoutes(db: Database): Hono {
+export function recipeRoutes(db: Database, config: Config): Hono {
 	const app = new Hono();
 	const recipes = new RecipeRepository(db);
 	const tags = new TagRepository(db);
@@ -27,6 +29,105 @@ export function recipeRoutes(db: Database): Hono {
 				title: "recipes",
 			}),
 		);
+	});
+
+	app.get("/recipes/:id", (c) => {
+		const id = Number(c.req.param("id"));
+		const recipe = recipes.getById(id);
+		if (!recipe || recipe.deleted_at) return c.notFound();
+		const tagRows = tags.listForRecipe(id);
+		return c.html(
+			render("recipe-view.html", {
+				r: recipe,
+				tags: tagRows.map((t) => t.name),
+				title: recipe.title,
+			}),
+		);
+	});
+
+	app.get("/recipes/:id/edit", (c) => {
+		const id = Number(c.req.param("id"));
+		const recipe = recipes.getById(id);
+		if (!recipe) return c.notFound();
+		const tagRows = tags.listForRecipe(id);
+		const mode = c.req.query("mode") ?? "";
+		return c.html(
+			render("recipe-edit.html", {
+				r: recipe,
+				tags: tagRows.map((t) => t.name),
+				ingredients_text: recipe.ingredients.join("\n"),
+				steps_text: recipe.steps.join("\n"),
+				tags_text: tagRows.map((t) => t.name).join(", "),
+				mode,
+				title: `Edit ${recipe.title}`,
+			}),
+		);
+	});
+
+	app.post("/recipes/:id", async (c) => {
+		const id = Number(c.req.param("id"));
+		const existing = recipes.getById(id);
+		if (!existing) return c.notFound();
+		const form = await c.req.formData();
+		const title = String(form.get("title") ?? "");
+		if (!title.trim()) return c.body("title required", 400);
+		const ingredientsRaw = String(form.get("ingredients") ?? "");
+		const stepsRaw = String(form.get("steps") ?? "");
+		const tagsRaw = String(form.get("tags") ?? "");
+		const tagsList = tagsRaw
+			.split(",")
+			.map((s) => s.trim())
+			.filter(Boolean);
+
+		recipes.update(id, {
+			title,
+			description: String(form.get("description") ?? ""),
+			ingredients: ingredientsRaw
+				.split("\n")
+				.map((s) => s.trim())
+				.filter(Boolean),
+			steps: stepsRaw
+				.split("\n")
+				.map((s) => s.trim())
+				.filter(Boolean),
+			notes: String(form.get("notes") ?? ""),
+			source_url: String(form.get("source_url") ?? ""),
+			rating: Number(form.get("rating") ?? 0) || 0,
+		});
+		tags.replaceForRecipe(id, tagsList);
+
+		const file = form.get("image");
+		if (file instanceof File && file.size > 0) {
+			const filename = await saveUploadedImage(config.dataDir, file);
+			if (filename) {
+				if (existing.image_filename) {
+					await removeImage(config.dataDir, existing.image_filename);
+				}
+				recipes.update(id, { image_filename: filename });
+			}
+		}
+
+		return c.redirect(`/recipes/${id}`);
+	});
+
+	app.post("/recipes/:id/delete", (c) => {
+		const id = Number(c.req.param("id"));
+		const recipe = recipes.getById(id);
+		if (!recipe) return c.notFound();
+		recipes.softDelete(id);
+		const toast = `Deleted "${recipe.title ?? ""}"`;
+		const undo = `/recipes/${id}/restore`;
+		return c.redirect(
+			`/recipes?toast=${encodeURIComponent(toast)}&undo_url=${encodeURIComponent(undo)}`,
+		);
+	});
+
+	app.post("/recipes/:id/restore", (c) => {
+		const id = Number(c.req.param("id"));
+		const recipe = recipes.getById(id);
+		if (!recipe) return c.notFound();
+		recipes.restore(id);
+		return c.redirect(`/recipes/${id}`);
 	});
 
 	return app;

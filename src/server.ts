@@ -17,7 +17,7 @@ export function buildApp(opts?: { config?: Config; dataDir?: string }) {
 
 	app.use("*", authMiddleware(config));
 	app.route("/", authRoutes(config));
-	app.route("/", recipeRoutes(db));
+	app.route("/", recipeRoutes(db, config));
 
 	return app;
 }
