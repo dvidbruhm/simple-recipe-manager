@@ -7,6 +7,8 @@ import { authMiddleware } from "@/auth/middleware";
 import { authRoutes } from "@/auth/routes";
 import { type Config, loadConfig } from "@/config";
 import { openDatabase } from "@/db/connection";
+import { importRoutes } from "@/import/routes";
+import { RecipeRepository } from "@/recipes/repository";
 import { recipeRoutes } from "@/recipes/routes";
 import { tagRoutes } from "@/tags/routes";
 
@@ -43,6 +45,7 @@ export function buildApp(opts?: { config?: Config; dataDir?: string }) {
 
 	app.use("*", authMiddleware(config));
 	app.route("/", authRoutes(config));
+	app.route("/", importRoutes(config, new RecipeRepository(db)));
 	app.route("/", recipeRoutes(db, config));
 	app.route("/", tagRoutes(db));
 
