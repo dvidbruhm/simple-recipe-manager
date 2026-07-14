@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title | default('recipes') }} · recipes</title>
   <link rel="stylesheet" href="/static/app.css">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#5a7a4f">
 </head>
 <body>
   <header class="site-header">
@@ -18,5 +20,12 @@
   <main class="site-main">
     {% block content %}{{ body_content | safe }}{% endblock %}
   </main>
+  <script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    });
+  }
+  </script>
 </body>
 </html>
