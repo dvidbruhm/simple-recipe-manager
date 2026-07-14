@@ -1,10 +1,24 @@
 import { Hono } from "hono";
+import { authMiddleware } from "@/auth/middleware";
+import { authRoutes } from "@/auth/routes";
+import { type Config, loadConfig } from "@/config";
+import { openDatabase } from "@/db/connection";
 
-const app = new Hono();
-app.get("/", (c) => c.text("ok"));
+export function buildApp(opts?: { config?: Config; dataDir?: string }) {
+	const config = opts?.config ?? loadConfig();
+	openDatabase(opts?.dataDir ?? config.dataDir);
+	const app = new Hono();
+
+	app.use("*", authMiddleware(config));
+	app.route("/", authRoutes(config));
+
+	app.get("/recipes", (c) => c.text("library placeholder"));
+
+	return app;
+}
 
 export default {
 	port: 3000,
 	hostname: "0.0.0.0",
-	fetch: app.fetch,
+	fetch: (req: Request, env?: unknown) => buildApp().fetch(req, env as Response),
 };
