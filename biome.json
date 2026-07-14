@@ -1,5 +1,8 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
   "linter": { "enabled": true, "rules": { "recommended": true } },
-  "formatter": { "enabled": true, "indentStyle": "tab", "lineWidth": 100 }
+  "formatter": { "enabled": true, "indentStyle": "tab", "lineWidth": 100 },
+  "files": {
+    "includes": ["**", "!**/node_modules/**", "!**/dist/**", "!src/ui/templates/**"]
+  }
 }

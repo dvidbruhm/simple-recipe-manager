@@ -16,6 +16,8 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "hono": "^4.12.30"
+    "@types/nunjucks": "^3.2.6",
+    "hono": "^4.12.30",
+    "nunjucks": "^3.2.4"
   }
 }

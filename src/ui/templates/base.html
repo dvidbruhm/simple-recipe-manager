@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" class="{{ theme | default('auto') }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title | default('recipes') }} · recipes</title>
+  <style>
+    :root {
+      --bg: #f8f8f7;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --muted: #888;
+      --accent: #5a7a4f;
+      --border: #e0e0de;
+      --radius: 4px;
+    }
+    @media (prefers-color-scheme: dark) {
+      html.auto, html.dark {
+        --bg: #1a1a1c;
+        --surface: #242427;
+        --text: #e8e8e6;
+        --muted: #8a8a8a;
+        --accent: #94b386;
+        --border: #2e2e32;
+      }
+    }
+    html.dark {
+      --bg: #1a1a1c;
+      --surface: #242427;
+      --text: #e8e8e6;
+      --muted: #8a8a8a;
+      --accent: #94b386;
+      --border: #2e2e32;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, system-ui, sans-serif;
+      line-height: 1.5;
+    }
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .site-header .logo {
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .site-header .theme-toggle {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .site-main {
+      max-width: 480px;
+      margin: 4rem auto;
+      padding: 0 1rem;
+    }
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      background: var(--surface);
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .login-form label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .login-form input[type="password"] {
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      color: var(--text);
+      background: var(--bg);
+    }
+    .login-form button {
+      padding: 0.6rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/recipes" class="logo">recipes</a>
+    {% block header_extra %}{% endblock %}
+    <span class="theme-toggle" aria-label="Toggle theme">☀/🌙</span>
+  </header>
+  <main class="site-main">
+    {% block content %}{{ body_content | safe }}{% endblock %}
+  </main>
+</body>
+</html>

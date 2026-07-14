@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { setCookie } from "hono/cookie";
 import type { Config } from "@/config";
+import { render } from "@/ui/nunjucks";
 import { createSessionCookie, SESSION_COOKIE_NAME, SESSION_TTL_SECONDS } from "./session";
 
 export function authRoutes(config: Config): Hono {
@@ -8,9 +9,7 @@ export function authRoutes(config: Config): Hono {
 
 	app.get("/login", (c) => {
 		const returnTo = c.req.query("return") ?? "/recipes";
-		return c.html(
-			`<!DOCTYPE html><html><body><form action="/login" method="post"><input type="hidden" name="return" value="${returnTo}"><input type="password" name="password"><button>Sign in</button></form></body></html>`,
-		);
+		return c.html(render("login.html", { return_to: returnTo }));
 	});
 
 	app.post("/login", async (c) => {
