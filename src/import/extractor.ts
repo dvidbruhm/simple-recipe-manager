@@ -9,6 +9,8 @@ export interface PartialRecipe {
 	source_url?: string;
 	image?: string | null;
 	notes?: string;
+	tags?: string[];
+	rating?: number;
 }
 
 export type ImportOutcome =

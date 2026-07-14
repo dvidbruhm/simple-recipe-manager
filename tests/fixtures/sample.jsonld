@@ -1,0 +1,17 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Recipe",
+  "name": "Sample Cake",
+  "description": "A test recipe",
+  "image": "",
+  "recipeIngredient": ["2 cups flour", "1 cup sugar", "3 eggs"],
+  "recipeInstructions": [
+    { "@type": "HowToStep", "text": "Mix dry ingredients" },
+    { "@type": "HowToStep", "text": "Add eggs and mix well" },
+    { "@type": "HowToStep", "text": "Bake at 350F for 30 minutes" }
+  ],
+  "recipeCategory": "dessert",
+  "keywords": "dessert,baking,cake",
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": 4, "ratingCount": 1 },
+  "x-recipe-manager-notes": "Family favorite"
+}
