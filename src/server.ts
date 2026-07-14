@@ -17,8 +17,15 @@ export function buildApp(opts?: { config?: Config; dataDir?: string }) {
 	return app;
 }
 
+let _app: Hono | null = null;
+
+function getApp(): Hono {
+	if (_app === null) _app = buildApp();
+	return _app;
+}
+
 export default {
 	port: 3000,
 	hostname: "0.0.0.0",
-	fetch: (req: Request, env?: unknown) => buildApp().fetch(req, env as Response),
+	fetch: (req: Request, env?: unknown) => getApp().fetch(req, env as Response),
 };
