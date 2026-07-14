@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import type { Config } from "@/config";
 import { TagRepository } from "@/tags/repository";
 import { render } from "@/ui/nunjucks";
+import { themeVars } from "@/ui/theme";
 import { removeImage, saveUploadedImage } from "./image-upload";
 import { RecipeRepository } from "./repository";
 import { searchRecipes } from "./search";
@@ -27,6 +28,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 				q,
 				active_tag: tag,
 				title: "recipes",
+				...themeVars(c),
 			}),
 		);
 	});
@@ -41,6 +43,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 				r: recipe,
 				tags: tagRows.map((t) => t.name),
 				title: recipe.title,
+				...themeVars(c),
 			}),
 		);
 	});
@@ -60,6 +63,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 				tags_text: tagRows.map((t) => t.name).join(", "),
 				mode,
 				title: `Edit ${recipe.title}`,
+				...themeVars(c),
 			}),
 		);
 	});

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { setCookie } from "hono/cookie";
 import type { Config } from "@/config";
 import { render } from "@/ui/nunjucks";
+import { themeVars } from "@/ui/theme";
 import { createSessionCookie, SESSION_COOKIE_NAME, SESSION_TTL_SECONDS } from "./session";
 
 export function authRoutes(config: Config): Hono {
@@ -9,7 +10,7 @@ export function authRoutes(config: Config): Hono {
 
 	app.get("/login", (c) => {
 		const returnTo = c.req.query("return") ?? "/recipes";
-		return c.html(render("login.html", { return_to: returnTo }));
+		return c.html(render("login.html", { return_to: returnTo, ...themeVars(c) }));
 	});
 
 	app.post("/login", async (c) => {
@@ -36,6 +37,19 @@ export function authRoutes(config: Config): Hono {
 	app.post("/logout", (c) => {
 		setCookie(c, SESSION_COOKIE_NAME, "", { httpOnly: true, path: "/", maxAge: 0 });
 		return c.redirect("/login");
+	});
+
+	app.post("/theme", async (c) => {
+		const body = await c.req.parseBody();
+		const theme = String(body.theme ?? "");
+		if (theme !== "light" && theme !== "dark" && theme !== "auto") return c.body("Bad theme", 400);
+		setCookie(c, "theme", theme, {
+			httpOnly: false,
+			sameSite: "Lax",
+			path: "/",
+			maxAge: 60 * 60 * 24 * 365,
+		});
+		return c.redirect(c.req.header("Referer") ?? "/recipes");
 	});
 
 	return app;

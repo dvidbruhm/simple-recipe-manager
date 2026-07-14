@@ -10,7 +10,10 @@
   <header class="site-header">
     <a href="/recipes" class="logo">recipes</a>
     {% block header_extra %}{% endblock %}
-    <span class="theme-toggle" aria-label="Toggle theme">☀/🌙</span>
+    <form method="post" action="/theme" class="theme-form">
+      <input type="hidden" name="theme" value="{{ next_theme | default('dark') }}">
+      <button type="submit" class="theme-toggle" aria-label="Toggle theme">{{ theme_icon | default('☀') }}</button>
+    </form>
   </header>
   <main class="site-main">
     {% block content %}{{ body_content | safe }}{% endblock %}
