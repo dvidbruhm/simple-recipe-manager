@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { serveStatic } from "hono/bun";
 import { authMiddleware } from "@/auth/middleware";
 import { authRoutes } from "@/auth/routes";
 import { type Config, loadConfig } from "@/config";
@@ -8,6 +9,10 @@ export function buildApp(opts?: { config?: Config; dataDir?: string }) {
 	const config = opts?.config ?? loadConfig();
 	openDatabase(opts?.dataDir ?? config.dataDir);
 	const app = new Hono();
+
+	app.use("/static/*", serveStatic({ root: "./src/ui/" }));
+	app.get("/manifest.webmanifest", serveStatic({ path: "./src/ui/static/manifest.webmanifest" }));
+	app.get("/sw.js", serveStatic({ path: "./src/ui/static/sw.js" }));
 
 	app.use("*", authMiddleware(config));
 	app.route("/", authRoutes(config));
