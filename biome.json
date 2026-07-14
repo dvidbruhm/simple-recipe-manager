@@ -3,6 +3,13 @@
   "linter": { "enabled": true, "rules": { "recommended": true } },
   "formatter": { "enabled": true, "indentStyle": "tab", "lineWidth": 100 },
   "files": {
-    "includes": ["**", "!**/node_modules/**", "!**/dist/**", "!src/ui/templates/**"]
+    "includes": [
+      "**",
+      "!**/node_modules/**",
+      "!**/dist/**",
+      "!src/ui/templates/**",
+      "!src/ui/css/**",
+      "!src/ui/static/**"
+    ]
   }
 }
