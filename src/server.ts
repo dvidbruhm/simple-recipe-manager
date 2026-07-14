@@ -4,10 +4,11 @@ import { authMiddleware } from "@/auth/middleware";
 import { authRoutes } from "@/auth/routes";
 import { type Config, loadConfig } from "@/config";
 import { openDatabase } from "@/db/connection";
+import { recipeRoutes } from "@/recipes/routes";
 
 export function buildApp(opts?: { config?: Config; dataDir?: string }) {
 	const config = opts?.config ?? loadConfig();
-	openDatabase(opts?.dataDir ?? config.dataDir);
+	const db = openDatabase(opts?.dataDir ?? config.dataDir);
 	const app = new Hono();
 
 	app.use("/static/*", serveStatic({ root: "./src/ui/" }));
@@ -16,8 +17,7 @@ export function buildApp(opts?: { config?: Config; dataDir?: string }) {
 
 	app.use("*", authMiddleware(config));
 	app.route("/", authRoutes(config));
-
-	app.get("/recipes", (c) => c.text("library placeholder"));
+	app.route("/", recipeRoutes(db));
 
 	return app;
 }

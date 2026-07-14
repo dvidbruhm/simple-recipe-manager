@@ -10,6 +10,21 @@ const env = new nunjucks.Environment(new nunjucks.FileSystemLoader(TEMPLATE_DIR)
 	throwOnUndefined: true,
 });
 
+env.addGlobal("domain", (url: string) => {
+	if (!url) return "";
+	try {
+		return new URL(url).hostname.replace(/^www\./, "");
+	} catch {
+		return "";
+	}
+});
+
+env.addGlobal("stars", (rating: number) => {
+	const full = "★".repeat(Math.max(0, Math.min(5, rating)));
+	const empty = "☆".repeat(5 - full.length);
+	return full + empty;
+});
+
 export function render(name: string, ctx: Record<string, unknown>): string {
 	return env.render(name, ctx);
 }

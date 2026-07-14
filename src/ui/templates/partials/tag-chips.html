@@ -1,0 +1,9 @@
+{% for t in tags %}
+  <a href="/recipes?tag={{ t.name | urlencode }}"
+     class="chip inline-flex items-center gap-1 px-3 py-1 rounded-full border border-[color:var(--color-border)] text-sm no-underline hover:border-[color:var(--color-accent)] {% if t.name == active_tag %}active bg-[color:var(--color-accent)] text-white border-transparent{% endif %}"
+     hx-get="/recipes?tag={{ t.name | urlencode }}"
+     hx-target="#grid"
+     hx-include="[name='q']">{{ t.name }} <span class="count opacity-70">{{ t.cnt }}</span></a>
+{% else %}
+  <p class="empty text-[color:var(--color-muted)] text-sm">No tags yet.</p>
+{% endfor %}

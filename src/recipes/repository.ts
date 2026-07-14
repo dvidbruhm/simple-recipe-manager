@@ -16,6 +16,23 @@ export interface Recipe {
 	deleted_at: string | null;
 }
 
+export function deserializeRecipe(row: Record<string, unknown>): Recipe {
+	return {
+		id: row.id as number,
+		title: row.title as string,
+		description: row.description as string,
+		ingredients: JSON.parse((row.ingredients as string) || "[]"),
+		steps: JSON.parse((row.steps as string) || "[]"),
+		notes: row.notes as string,
+		source_url: row.source_url as string,
+		image_filename: (row.image_filename as string | null) ?? null,
+		rating: row.rating as number,
+		created_at: row.created_at as string,
+		updated_at: row.updated_at as string,
+		deleted_at: (row.deleted_at as string | null) ?? null,
+	};
+}
+
 export class RecipeRepository {
 	constructor(private db: Database) {}
 
@@ -43,14 +60,14 @@ export class RecipeRepository {
 			unknown
 		> | null;
 		if (!row) return null;
-		return this.deserialize(row);
+		return deserializeRecipe(row);
 	}
 
 	list(): Recipe[] {
 		const rows = this.db
 			.query("SELECT * FROM recipes WHERE deleted_at IS NULL ORDER BY created_at DESC")
 			.all() as Record<string, unknown>[];
-		return rows.map((r) => this.deserialize(r));
+		return rows.map((r) => deserializeRecipe(r));
 	}
 
 	update(id: number, patch: Partial<RecipeInput>): void {
@@ -76,22 +93,5 @@ export class RecipeRepository {
 
 	restore(id: number): void {
 		this.db.prepare("UPDATE recipes SET deleted_at = NULL WHERE id = ?").run(id);
-	}
-
-	private deserialize(row: Record<string, unknown>): Recipe {
-		return {
-			id: row.id as number,
-			title: row.title as string,
-			description: row.description as string,
-			ingredients: JSON.parse((row.ingredients as string) || "[]"),
-			steps: JSON.parse((row.steps as string) || "[]"),
-			notes: row.notes as string,
-			source_url: row.source_url as string,
-			image_filename: (row.image_filename as string | null) ?? null,
-			rating: row.rating as number,
-			created_at: row.created_at as string,
-			updated_at: row.updated_at as string,
-			deleted_at: (row.deleted_at as string | null) ?? null,
-		};
 	}
 }

@@ -1,0 +1,7 @@
+<div id="grid" class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
+{% for r in recipes %}
+  {% include "partials/recipe-card.html" %}
+{% else %}
+  <p class="empty text-[color:var(--color-muted)] col-span-full">No recipes found.</p>
+{% endfor %}
+</div>

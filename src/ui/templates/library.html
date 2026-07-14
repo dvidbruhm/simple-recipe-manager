@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block header_extra %}
+<form class="search-form flex-1 flex justify-center" hx-get="/recipes" hx-target="#grid" hx-trigger="input changed delay:200ms" hx-include="[name='tag']:checked">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search recipes, ingredients, steps..." class="w-full max-w-md px-3 py-1.5 rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]">
+</form>
+<a href="/import" class="btn px-3 py-1.5 rounded border border-[color:var(--color-border)] no-underline text-[color:var(--color-text)] hover:border-[color:var(--color-accent)]">+ Import</a>
+{% endblock %}
+
+{% block content %}
+<div class="library-layout flex gap-6 max-w-5xl mx-auto">
+  <aside class="sidebar w-48 shrink-0">
+    <h3 class="text-sm font-semibold text-[color:var(--color-muted)] uppercase tracking-wide mb-2">Tags</h3>
+    <div id="tag-chips" class="flex flex-wrap gap-2" hx-target="#grid" hx-trigger="click">
+      {% include "partials/tag-chips.html" %}
+    </div>
+  </aside>
+  <main class="flex-1 min-w-0">
+    {% include "partials/grid.html" %}
+  </main>
+</div>
+{% endblock %}
