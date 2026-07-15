@@ -1,4 +1,4 @@
-const CACHE = "recipe-manager-v1";
+const CACHE = "recipe-manager-v2";
 const SHELL = [
   "/static/app.css",
   "/static/htmx.min.js",
@@ -39,13 +39,15 @@ self.addEventListener("fetch", (event) => {
 
   if (event.request.method === "GET" && url.pathname.startsWith("/static/")) {
     event.respondWith(
-      caches.match(event.request).then((cached) => cached || fetch(event.request).then((resp) => {
-        if (resp.ok) {
-          const copy = resp.clone();
-          caches.open(CACHE).then((c) => c.put(event.request, copy)).catch(() => {});
-        }
-        return resp;
-      }).catch(() => cached))
+      fetch(event.request)
+        .then((resp) => {
+          if (resp.ok) {
+            const copy = resp.clone();
+            caches.open(CACHE).then((c) => c.put(event.request, copy)).catch(() => {});
+          }
+          return resp;
+        })
+        .catch(() => caches.match(event.request).then((cached) => cached || Response.error()))
     );
     return;
   }

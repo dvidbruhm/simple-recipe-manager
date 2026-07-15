@@ -47,7 +47,7 @@ describe("PWA endpoints", () => {
 		const { app } = await setupApp();
 		const res = await app.request("/sw.js");
 		const body = await res.text();
-		expect(body).toContain("recipe-manager-v1");
+		expect(body).toMatch(/recipe-manager-v\d+/);
 	});
 
 	it("GET /sw.js installs + activates handlers", async () => {
