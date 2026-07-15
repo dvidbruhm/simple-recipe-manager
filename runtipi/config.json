@@ -8,7 +8,7 @@
   "source": "https://github.com/dvidbruhm/simple-recipe-manager",
   "port": 3000,
   "categories": [
-    "food"
+    "utilities"
   ],
   "version": "1.0.0",
   "tipi_version": 1,
