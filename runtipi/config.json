@@ -10,7 +10,7 @@
   "categories": [
     "utilities"
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "tipi_version": 1,
   "exposable": true,
   "dynamic_config": true,
