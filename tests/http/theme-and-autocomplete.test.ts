@@ -50,25 +50,23 @@ function auth(
 
 describe("theme toggle, tag autocomplete, and image serving", () => {
 	describe("GET /tags/autocomplete", () => {
-		it("returns matching tag chips for a query prefix", async () => {
+		it("returns matching tag names as JSON for a query prefix", async () => {
 			const { app, cookie } = await setupApp();
 			const res = await app.request("/tags/autocomplete?q=des", auth(cookie));
 			expect(res.status).toBe(200);
-			const body = await res.text();
-			expect(body).toContain('<li class="chip"');
-			expect(body.toLowerCase()).toContain("dessert");
-			expect(body.toLowerCase()).not.toContain("italian");
-			expect(body).toContain('data-name="dessert"');
+			expect(res.headers.get("Content-Type") ?? "").toContain("application/json");
+			expect(JSON.parse(await res.text())).toEqual(["dessert"]);
 		});
 
-		it("returns an empty body when q is missing", async () => {
+		it("returns an empty JSON array when q is missing", async () => {
 			const { app, cookie } = await setupApp();
 			const res = await app.request("/tags/autocomplete", auth(cookie));
 			expect(res.status).toBe(200);
-			expect(await res.text()).toBe("");
+			expect(res.headers.get("Content-Type") ?? "").toContain("application/json");
+			expect(JSON.parse(await res.text())).toEqual([]);
 		});
 
-		it("escapes HTML-unsafe characters in tag names", async () => {
+		it("round-trips tag names with HTML-special characters as JSON data", async () => {
 			process.env.APP_PASSWORD = "pw";
 			process.env.SESSION_SECRET = SECRET;
 			const dataDir = freshDataDir();
@@ -84,9 +82,8 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 			const cookie = await createSessionCookie(SECRET, 3600);
 			const res = await app.request("/tags/autocomplete?q=%3Cb", auth(cookie));
 			expect(res.status).toBe(200);
-			const body = await res.text();
-			expect(body).toContain("&lt;b&gt;bold&lt;/b&gt;");
-			expect(body).not.toContain("<b>bold</b>");
+			expect(res.headers.get("Content-Type") ?? "").toContain("application/json");
+			expect(JSON.parse(await res.text())).toEqual(["<b>bold</b>"]);
 		});
 	});
 
