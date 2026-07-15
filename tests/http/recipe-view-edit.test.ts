@@ -120,6 +120,8 @@ describe("recipe view & edit pages", () => {
 		expect(body).toContain("best served warm");
 		expect(body).toContain("https://example.com/pancakes");
 		expect(body).toContain("★★★★");
+		expect(body).not.toContain("dessert");
+		expect(body).not.toContain("italian");
 	});
 
 	it("POST /recipes/:id with empty title returns 400", async () => {
