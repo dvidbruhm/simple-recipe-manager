@@ -80,7 +80,10 @@ describe("recipe view & edit pages", () => {
 		expect(body).toContain("egg");
 		expect(body).toContain("bake");
 		expect(body).toContain("keep chilled");
-		expect(body).toContain("dessert, italian");
+		expect(body).toContain('data-chip="dessert"');
+		expect(body).toContain('data-chip="italian"');
+		expect(body).toContain('name="tags" value="dessert"');
+		expect(body).toContain('name="tags" value="italian"');
 		expect(body).toContain('name="image"');
 		expect(body).toContain('name="rating"');
 	});

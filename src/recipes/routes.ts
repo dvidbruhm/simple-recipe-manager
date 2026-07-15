@@ -64,7 +64,6 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 				tags: tagRows.map((t) => t.name),
 				ingredients_text: recipe.ingredients.join("\n"),
 				steps_text: recipe.steps.join("\n"),
-				tags_text: tagRows.map((t) => t.name).join(", "),
 				mode,
 				title: `Edit ${recipe.title}`,
 				...themeVars(c),
