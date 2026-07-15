@@ -5,11 +5,13 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production
 
 # Stage 2: build CSS (Tailwind v4 CLI)
+# MUST include templates so Tailwind can scan for class names
 FROM oven/bun:1-debian AS css-builder
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY src/ui/css/ src/ui/css/
+COPY src/ui/templates/ src/ui/templates/
 COPY scripts/build-css.ts scripts/build-css.ts
 RUN mkdir -p src/ui/static && bun run build:css
 
