@@ -49,7 +49,7 @@
       </select>
     </div>
     <div>
-      <label class="block text-sm font-medium text-[color:var(--color-text)] mb-1">Tags</label>
+      <label for="tags-field" class="block text-sm font-medium text-[color:var(--color-text)] mb-1">Tags</label>
       <div class="tags-input" data-tags-input>
         <ul class="tags-input__chips" data-tags-chips>
           {% for name in tags %}
@@ -59,7 +59,7 @@
             </li>
           {% endfor %}
         </ul>
-        <input type="text" data-tags-field class="tags-input__field" placeholder="Type a tag and press Enter" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tags-suggestions">
+        <input type="text" id="tags-field" data-tags-field class="tags-input__field" placeholder="Type a tag and press Enter" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tags-suggestions">
         <ul class="tags-input__suggestions" id="tags-suggestions" role="listbox" data-tags-suggestions hidden></ul>
         {% for name in tags %}
           <input type="hidden" name="tags" value="{{ name }}">
@@ -89,6 +89,7 @@
   </form>
 </div>
 
+<script src="/static/tags-input.js" defer></script>
 <script>
 window.addEventListener('paste', (e) => {
   const items = e.clipboardData?.items ?? [];

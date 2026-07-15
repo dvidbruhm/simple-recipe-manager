@@ -56,6 +56,15 @@ describe("static files", () => {
 		expect(res.status).toBe(200);
 	});
 
+	it("GET /static/tags-input.js returns the chips controller JS", async () => {
+		const app = setup();
+		const res = await app.request("/static/tags-input.js");
+		expect(res.status).toBe(200);
+		const body = await res.text();
+		expect(body.length).toBeGreaterThan(100);
+		expect(body).toContain("TagsInput");
+	});
+
 	it("GET /static/missing.txt does not 500", async () => {
 		const app = setup();
 		const res = await app.request("/static/does-not-exist.txt");
