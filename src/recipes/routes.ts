@@ -81,10 +81,9 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		if (!title.trim()) return c.body("title required", 400);
 		const ingredientsRaw = String(form.get("ingredients") ?? "");
 		const stepsRaw = String(form.get("steps") ?? "");
-		const tagsRaw = String(form.get("tags") ?? "");
-		const tagsList = tagsRaw
-			.split(",")
-			.map((s) => s.trim())
+		const tagsList = form
+			.getAll("tags")
+			.map((s) => String(s).trim())
 			.filter(Boolean);
 
 		recipes.update(id, {

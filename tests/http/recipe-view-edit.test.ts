@@ -143,7 +143,8 @@ describe("recipe view & edit pages", () => {
 		fd.set("ingredients", "mascarpone");
 		fd.set("steps", "layer");
 		fd.set("rating", "0");
-		fd.set("tags", "spicy, quick");
+		fd.append("tags", "spicy");
+		fd.append("tags", "quick");
 
 		const res = await app.request(`/recipes/${id1}`, {
 			method: "POST",
