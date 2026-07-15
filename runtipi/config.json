@@ -1,0 +1,31 @@
+{
+  "name": "Recipe Manager",
+  "id": "recipe-manager",
+  "available": true,
+  "short_desc": "Self-hosted recipe library with URL import",
+  "description": "A minimal recipe manager with URL import from major French and English recipe sites, full-text search, tagging, and Android share-to-import via PWA.",
+  "author": "dvidbruhm",
+  "source": "https://github.com/dvidbruhm/recipe-manager",
+  "port": 3000,
+  "categories": ["food"],
+  "version": "1.0.0",
+  "tipi_version": 1,
+  "exposable": true,
+  "dynamic_config": true,
+  "supported_architectures": ["amd64", "arm64"],
+  "min_tipi_version": "4.5.0",
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "App password (shared by all family users)",
+      "required": true,
+      "env_variable": "APP_PASSWORD"
+    },
+    {
+      "type": "text",
+      "label": "Session secret (optional, defaults to APP_PASSWORD)",
+      "required": false,
+      "env_variable": "SESSION_SECRET"
+    }
+  ]
+}

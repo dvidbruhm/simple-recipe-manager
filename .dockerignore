@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.mockups/
+.superpowers/
+.data/
+docs/
+tests/
+*.log
+.env
+.env.*
+.git/
+.gitignore
+.github/
+README.md
+biome.json

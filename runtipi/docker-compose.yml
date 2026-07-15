@@ -1,0 +1,16 @@
+services:
+  recipe-manager:
+    image: ghcr.io/dvidbruhm/recipe-manager:latest
+    environment:
+      - APP_PASSWORD=${APP_PASSWORD}
+      - SESSION_SECRET=${SESSION_SECRET:-}
+      - DATA_DIR=/data
+      - PORT=3000
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+
+x-runtipi:
+  schema_version: 2
