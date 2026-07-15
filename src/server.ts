@@ -63,8 +63,17 @@ function getApp(): Hono {
 	return _app;
 }
 
+let _bootConfig: Config | null = null;
+
+function bootConfig(): Config {
+	if (_bootConfig === null) _bootConfig = loadConfig();
+	return _bootConfig;
+}
+
 export default {
-	port: 3000,
+	get port() {
+		return bootConfig().port;
+	},
 	hostname: "0.0.0.0",
 	fetch: (req: Request, env?: unknown) => getApp().fetch(req, env as Response),
 };
