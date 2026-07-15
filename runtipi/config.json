@@ -1,6 +1,6 @@
 {
   "name": "Recipe Manager",
-  "id": "recipe-manager",
+  "id": "simple-recipe-manager",
   "available": true,
   "short_desc": "Self-hosted recipe library with URL import",
   "description": "A minimal recipe manager with URL import from major French and English recipe sites, full-text search, tagging, and Android share-to-import via PWA.",

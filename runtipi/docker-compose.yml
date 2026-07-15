@@ -1,5 +1,5 @@
 services:
-  recipe-manager:
+  simple-recipe-manager:
     image: ghcr.io/dvidbruhm/simple-recipe-manager:latest
     environment:
       - APP_PASSWORD=${APP_PASSWORD}
