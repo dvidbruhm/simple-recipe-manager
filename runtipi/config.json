@@ -5,7 +5,7 @@
   "short_desc": "Self-hosted recipe library with URL import",
   "description": "A minimal recipe manager with URL import from major French and English recipe sites, full-text search, tagging, and Android share-to-import via PWA.",
   "author": "dvidbruhm",
-  "source": "https://github.com/dvidbruhm/recipe-manager",
+  "source": "https://github.com/dvidbruhm/simple-recipe-manager",
   "port": 3000,
   "categories": ["food"],
   "version": "1.0.0",

@@ -42,8 +42,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/recipe-manager:latest
-            ghcr.io/${{ github.repository_owner }}/recipe-manager:${{ steps.version.outputs.VERSION }}
+            ghcr.io/${{ github.repository_owner }}/simple-recipe-manager:latest
+            ghcr.io/${{ github.repository_owner }}/simple-recipe-manager:${{ steps.version.outputs.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
