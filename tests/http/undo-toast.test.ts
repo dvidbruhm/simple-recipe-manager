@@ -43,6 +43,18 @@ describe("undo toast on library", () => {
 		expect(body).toContain("Undo");
 	});
 
+	it("renders Undo as a POST form to the restore route, not a GET link", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes?toast=Deleted&undo_url=/recipes/1/restore", {
+			headers: { Cookie: `session=${cookie}` },
+		});
+		const body = await res.text();
+		expect(body).toContain('method="post"');
+		expect(body).toContain('action="/recipes/1/restore"');
+		expect(body).toContain('class="toast-undo"');
+		expect(body).not.toContain('href="/recipes/1/restore"');
+	});
+
 	it("GET /recipes without toast params does NOT render the toast", async () => {
 		const { app, cookie } = await setupApp();
 		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });

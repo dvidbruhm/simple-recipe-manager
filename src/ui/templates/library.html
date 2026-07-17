@@ -49,21 +49,7 @@
 {% endblock %}
 
 {% block content %}
-{% if toast %}
-<div class="toast" data-toast>
-  <span class="toast-msg">{{ toast }}</span>
-  {% if undo_url %}
-  <a href="{{ undo_url }}" class="toast-undo">Undo</a>
-  {% endif %}
-  <button class="toast-close" aria-label="Dismiss" onclick="this.parentElement.remove()">&times;</button>
-</div>
-<script>
-  setTimeout(() => {
-    const t = document.querySelector("[data-toast]");
-    if (t) t.remove();
-  }, 10000);
-</script>
-{% endif %}
+<div id="toast-area">{% include "partials/toast.html" %}</div>
 
 <div class="library-layout max-w-6xl mx-auto">
   <section class="tag-bar mb-4">

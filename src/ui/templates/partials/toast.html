@@ -1,0 +1,18 @@
+{% if toast %}
+<div class="toast" data-toast>
+  <span class="toast-msg">{{ toast }}</span>
+  {% if undo_url %}
+  <form class="toast-undo-form"
+    {% if undo_ids and undo_ids.length %}
+      hx-post="{{ undo_url }}" hx-target="#grid" hx-swap="innerHTML"
+      hx-include="[name='q'], #current-sort, [name='tag']:checked"
+    {% else %}
+      method="post" action="{{ undo_url }}"
+    {% endif %}>
+    {% for id in undo_ids %}<input type="hidden" name="ids" value="{{ id }}">{% endfor %}
+    <button type="submit" class="toast-undo">Undo</button>
+  </form>
+  {% endif %}
+  <button type="button" class="toast-close" aria-label="Dismiss" onclick="this.closest('[data-toast]').remove()">&times;</button>
+</div>
+{% endif %}

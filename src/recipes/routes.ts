@@ -74,6 +74,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 				is_filtered: data.filtering,
 				toast,
 				undo_url: undoUrl,
+				undo_ids: [],
 				title: "recipes",
 				...themeVars(c),
 			}),
