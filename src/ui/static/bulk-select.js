@@ -1,6 +1,8 @@
 (function () {
   const LONG_PRESS_MS = 500;
   const MOVE_THRESHOLD = 10;
+  const LEAVE_MS = 150;
+  const FLIP_MS = 280;
 
   class BulkSelect {
     constructor(root) {
@@ -16,6 +18,8 @@
       this._timer = null;
       this._press = null;
       this._suppressClick = false;
+      this._flipFirst = null;
+      this._deleting = false;
 
       this.bindCards();
       this.bindControls();
@@ -51,8 +55,13 @@
       if (this.clearBtn) this.clearBtn.addEventListener("click", () => this.clear());
       if (this.cancelBtn) this.cancelBtn.addEventListener("click", () => this.exit());
       if (this.deleteBtn) {
+        this.deleteBtn.addEventListener("htmx:confirm", (e) => {
+          e.preventDefault();
+          this.animateDelete(() => e.detail.issueRequest(true));
+        });
         this.deleteBtn.addEventListener("htmx:afterRequest", (e) => {
           if (e.detail && e.detail.successful) this.onDeleted();
+          else this.cancelDeleteAnim();
         });
       }
     }
@@ -64,8 +73,17 @@
       document.body.addEventListener("htmx:afterSwap", (e) => {
         const t = e.detail && e.detail.target;
         if (t && t.id === "grid") {
-          this.bindCards();
-          this.applySelection();
+          if (this._flipFirst) {
+            const first = this._flipFirst;
+            this._flipFirst = null;
+            this.bindCards();
+            this.flipPlay(first);
+            this.applySelection();
+          } else {
+            this.bindCards();
+            this.applySelection();
+            this.gridFade();
+          }
         }
         this.wireToasts();
       });
@@ -156,8 +174,83 @@
     }
 
     onDeleted() {
+      this._deleting = false;
       this.selected.clear();
       this.exit();
+    }
+
+    animateDelete(issueRequest) {
+      if (this._deleting) return;
+      this._deleting = true;
+      const leaving = [];
+      this.selected.forEach((id) => {
+        const card = this.root.querySelector('[data-recipe-id="' + id + '"]');
+        if (card) {
+          card.classList.add("bulk-leaving");
+          leaving.push(card);
+        }
+      });
+      const first = this.captureFirst();
+      const wait = leaving.length ? LEAVE_MS : 0;
+      setTimeout(() => {
+        this._flipFirst = first;
+        issueRequest();
+      }, wait);
+    }
+
+    captureFirst() {
+      const map = {};
+      this.cards().forEach((card) => {
+        const id = card.getAttribute("data-recipe-id");
+        const r = card.getBoundingClientRect();
+        map[id] = { x: r.left, y: r.top };
+      });
+      return map;
+    }
+
+    flipPlay(first) {
+      const movers = [];
+      this.cards().forEach((card) => {
+        const id = card.getAttribute("data-recipe-id");
+        const old = first[id];
+        if (!old) return;
+        const r = card.getBoundingClientRect();
+        const dx = old.x - r.left;
+        const dy = old.y - r.top;
+        if (!dx && !dy) return;
+        card.style.transition = "none";
+        card.style.transform = "translate(" + dx + "px," + dy + "px)";
+        movers.push(card);
+      });
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          movers.forEach((card) => {
+            card.style.transition = "transform " + FLIP_MS + "ms ease-out";
+            card.style.transform = "";
+          });
+        });
+      });
+      setTimeout(() => {
+        movers.forEach((card) => {
+          card.style.transition = "";
+          card.style.transform = "";
+        });
+      }, FLIP_MS + 80);
+    }
+
+    gridFade() {
+      const grid = document.getElementById("grid");
+      if (!grid) return;
+      grid.classList.remove("is-swapping");
+      void grid.offsetWidth;
+      grid.classList.add("is-swapping");
+      setTimeout(() => grid.classList.remove("is-swapping"), 280);
+    }
+
+    cancelDeleteAnim() {
+      this._deleting = false;
+      this._flipFirst = null;
+      this.cards().forEach((card) => card.classList.remove("bulk-leaving"));
     }
 
     onCardClick(e, id) {

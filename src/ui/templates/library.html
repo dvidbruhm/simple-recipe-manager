@@ -76,16 +76,6 @@
     const hidden = document.getElementById('current-sort');
     if (hidden && btn.dataset.sort) hidden.value = btn.dataset.sort;
   }
-
-  document.body.addEventListener('htmx:afterSwap', (e) => {
-    const grid = e.detail.target;
-    if (grid && grid.id === 'grid') {
-      grid.classList.remove('is-swapping');
-      void grid.offsetWidth;
-      grid.classList.add('is-swapping');
-      setTimeout(() => grid.classList.remove('is-swapping'), 280);
-    }
-  });
 </script>
 <script src="/static/bulk-select.js" defer></script>
 {% endblock %}

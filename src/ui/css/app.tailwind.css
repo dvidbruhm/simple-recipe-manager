@@ -583,6 +583,13 @@ details[open] > div {
   background: var(--color-accent);
   border-color: var(--color-accent);
 }
+.card-wrap.bulk-leaving,
+.list-wrap.bulk-leaving {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none;
+}
 @media (hover: hover) {
   .card-wrap:hover .check,
   .list-wrap:hover .check {
