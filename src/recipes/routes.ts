@@ -141,6 +141,45 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		return c.redirect(`/recipes/${id}`);
 	});
 
+	function parseIds(values: FormDataEntryValue[]): number[] {
+		const ids: number[] = [];
+		for (const v of values) {
+			const n = Number(String(v));
+			if (Number.isInteger(n) && n > 0 && !ids.includes(n)) ids.push(n);
+		}
+		return ids;
+	}
+
+	app.post("/recipes/bulk-delete", async (c) => {
+		const form = await c.req.formData();
+		const ids = parseIds(form.getAll("ids"));
+		if (ids.length === 0) return c.body("no ids", 400);
+		recipes.softDeleteMany(ids);
+		const n = ids.length;
+		const toast = `Deleted ${n} recipe${n === 1 ? "" : "s"}.`;
+		if (c.req.header("HX-Request") === "true") {
+			const grid = libraryGridHtml(libraryList(c));
+			const toastHtml = render("partials/toast.html", {
+				toast,
+				undo_url: "/recipes/bulk-restore",
+				undo_ids: ids,
+			});
+			return c.html(`${grid}<div id="toast-area" hx-swap-oob="true">${toastHtml}</div>`);
+		}
+		return c.redirect(`/recipes?toast=${encodeURIComponent(toast)}`);
+	});
+
+	app.post("/recipes/bulk-restore", async (c) => {
+		const form = await c.req.formData();
+		const ids = parseIds(form.getAll("ids"));
+		if (ids.length === 0) return c.body("no ids", 400);
+		recipes.restoreMany(ids);
+		if (c.req.header("HX-Request") === "true") {
+			return c.html(`${libraryGridHtml(libraryList(c))}<div id="toast-area" hx-swap-oob="true"></div>`);
+		}
+		return c.redirect("/recipes");
+	});
+
 	app.get("/recipes/:id", (c) => {
 		const id = Number(c.req.param("id"));
 		const recipe = recipes.getById(id);
