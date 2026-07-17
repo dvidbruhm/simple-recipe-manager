@@ -51,4 +51,30 @@ describe("RecipeRepository", () => {
 		repo.restore(id);
 		expect(repo.list().find((r) => r.id === id)).toBeTruthy();
 	});
+
+	it("soft-deletes many recipes at once", () => {
+		const repo = setup();
+		const a = repo.insert({ title: "A" });
+		repo.insert({ title: "B" });
+		const c = repo.insert({ title: "C" });
+		repo.softDeleteMany([a, c]);
+		expect(repo.list().map((r) => r.title)).toEqual(["B"]);
+	});
+
+	it("restores many recipes at once and ignores empty input", () => {
+		const repo = setup();
+		const a = repo.insert({ title: "A" });
+		const b = repo.insert({ title: "B" });
+		repo.softDeleteMany([a, b]);
+		expect(repo.list()).toHaveLength(0);
+		repo.restoreMany([a, b]);
+		expect(
+			repo
+				.list()
+				.map((r) => r.title)
+				.sort(),
+		).toEqual(["A", "B"]);
+		repo.restoreMany([]);
+		expect(repo.list()).toHaveLength(2);
+	});
 });

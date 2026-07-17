@@ -100,4 +100,20 @@ export class RecipeRepository {
 	restore(id: number): void {
 		this.db.prepare("UPDATE recipes SET deleted_at = NULL WHERE id = ?").run(id);
 	}
+
+	softDeleteMany(ids: number[]): void {
+		if (ids.length === 0) return;
+		const placeholders = ids.map(() => "?").join(", ");
+		this.db
+			.prepare(`UPDATE recipes SET deleted_at = datetime('now') WHERE id IN (${placeholders})`)
+			.run(...ids);
+	}
+
+	restoreMany(ids: number[]): void {
+		if (ids.length === 0) return;
+		const placeholders = ids.map(() => "?").join(", ");
+		this.db
+			.prepare(`UPDATE recipes SET deleted_at = NULL WHERE id IN (${placeholders})`)
+			.run(...ids);
+	}
 }
