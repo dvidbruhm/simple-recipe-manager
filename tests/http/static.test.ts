@@ -65,6 +65,15 @@ describe("static files", () => {
 		expect(body).toContain("TagsInput");
 	});
 
+	it("GET /static/bulk-select.js returns the bulk-select controller JS", async () => {
+		const app = setup();
+		const res = await app.request("/static/bulk-select.js");
+		expect(res.status).toBe(200);
+		const body = await res.text();
+		expect(body.length).toBeGreaterThan(100);
+		expect(body).toContain("BulkSelect");
+	});
+
 	it("GET /static/missing.txt does not 500", async () => {
 		const app = setup();
 		const res = await app.request("/static/does-not-exist.txt");
