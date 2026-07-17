@@ -1,0 +1,12 @@
+<form id="bulk-delete-form" hidden aria-hidden="true"></form>
+<div class="bulk-actionbar" data-bulk-actionbar role="toolbar" aria-label="Bulk actions">
+  <span class="bulk-count" aria-live="polite"><span class="bulk-count__n" data-bulk-count>0</span> selected</span>
+  <span class="bulk-spacer"></span>
+  <button type="button" class="btn" data-bulk-select-all>Select all</button>
+  <button type="button" class="btn" data-bulk-clear>Clear</button>
+  <button type="button" class="btn btn--danger" data-bulk-delete disabled
+    hx-post="/recipes/bulk-delete" hx-target="#grid" hx-swap="innerHTML"
+    hx-include="#bulk-delete-form, [name='q'], #current-sort, [name='tag']:checked"
+    hx-disabled-elt="this">Delete</button>
+  <button type="button" class="btn" data-bulk-cancel>Cancel</button>
+</div>

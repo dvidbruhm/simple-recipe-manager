@@ -149,4 +149,16 @@ describe("library page", () => {
 		expect(body).toContain('data-recipe-id=');
 		expect(body).toContain('class="check"');
 	});
+
+	it("renders the bulk action bar and hidden delete form", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
+		const body = await res.text();
+		expect(body).toContain('data-bulk-select');
+		expect(body).toContain('data-bulk-actionbar');
+		expect(body).toContain('id="bulk-delete-form"');
+		expect(body).toContain('data-bulk-delete');
+		expect(body).toContain('hx-post="/recipes/bulk-delete"');
+		expect(body).toContain("Cancel");
+	});
 });
