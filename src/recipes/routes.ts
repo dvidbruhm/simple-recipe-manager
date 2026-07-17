@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
 import { getCookie } from "hono/cookie";
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import type { Config } from "@/config";
 import { TagRepository } from "@/tags/repository";
 import { render } from "@/ui/nunjucks";
@@ -14,7 +14,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	const recipes = new RecipeRepository(db);
 	const tags = new TagRepository(db);
 
-	app.get("/recipes", (c) => {
+	function libraryList(c: Context) {
 		const q = c.req.query("q") ?? "";
 		const selTags = (c.req.queries("tag") ?? []).filter(Boolean);
 		const favOnly = selTags.includes("favorites");
@@ -28,6 +28,32 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		if (sort) list = sortRecipes(list, sort);
 		const tagMap = tags.listForRecipes(list.map((r) => r.id));
 		const recipesWithTags = list.map((r) => ({ ...r, tags: tagMap.get(r.id) ?? [] }));
+		return {
+			q,
+			selTags,
+			sort,
+			view,
+			filtering,
+			recipesWithTags,
+			hasAny: recipes.list().length > 0,
+		};
+	}
+
+	function libraryGridHtml(c: Context): string {
+		const data = libraryList(c);
+		return render("partials/grid.html", {
+			recipes: data.recipesWithTags,
+			view: data.view,
+			has_any: data.hasAny,
+			is_filtered: data.filtering,
+		});
+	}
+
+	app.get("/recipes", (c) => {
+		const data = libraryList(c);
+		if (c.req.header("HX-Request") === "true") {
+			return c.html(libraryGridHtml(c));
+		}
 		const favCount = (
 			db
 				.query("SELECT COUNT(*) AS c FROM recipes WHERE favorite = 1 AND deleted_at IS NULL")
@@ -35,30 +61,18 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		).c;
 		const tagList = tags.listAllWithCounts();
 		tagList.unshift({ name: "favorites", cnt: favCount });
-		const hasAny = recipes.list().length > 0;
-		const isFiltered = filtering;
-		if (c.req.header("HX-Request") === "true") {
-			return c.html(
-				render("partials/grid.html", {
-					recipes: recipesWithTags,
-					view,
-					has_any: hasAny,
-					is_filtered: isFiltered,
-				}),
-			);
-		}
 		const toast = c.req.query("toast") ?? "";
 		const undoUrl = c.req.query("undo_url") ?? "";
 		return c.html(
 			render("library.html", {
-				recipes: recipesWithTags,
+				recipes: data.recipesWithTags,
 				tags: tagList,
-				q,
-				active_tags: selTags,
-				active_sort: sort || "date-new",
-				view,
-				has_any: hasAny,
-				is_filtered: isFiltered,
+				q: data.q,
+				active_tags: data.selTags,
+				active_sort: data.sort || "date-new",
+				view: data.view,
+				has_any: data.hasAny,
+				is_filtered: data.filtering,
 				toast,
 				undo_url: undoUrl,
 				title: "recipes",
