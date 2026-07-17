@@ -556,3 +556,85 @@ details[open] > div {
 	background: var(--color-bg);
 	color: var(--color-accent);
 }
+
+.check {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.4rem;
+  z-index: 3;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.check:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+.check.on {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+@media (hover: hover) {
+  .card-wrap:hover .check,
+  .list-wrap:hover .check {
+    display: flex;
+  }
+}
+[data-bulk-select].is-selecting .check {
+  display: flex;
+}
+.card-wrap.is-selected .card,
+.list-wrap.is-selected > .list-row {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+[data-bulk-select].is-selecting .card,
+[data-bulk-select].is-selecting .list-row {
+  cursor: default;
+}
+
+.bulk-actionbar {
+  display: none;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0.8rem;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+}
+[data-bulk-select].is-selecting .bulk-actionbar {
+  display: flex;
+}
+.bulk-count {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.bulk-count__n {
+  color: var(--color-accent);
+}
+.bulk-spacer {
+  flex: 1;
+}
+.bulk-actionbar [data-bulk-delete][disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.toast-undo-form {
+  display: inline;
+  margin: 0;
+}
