@@ -1,4 +1,5 @@
-<div class="card-wrap relative h-full">
+<div class="card-wrap relative h-full" data-recipe-id="{{ r.id }}">
+  <button type="button" class="check" aria-label="Select {{ r.title }}">&#10003;</button>
   <a href="/recipes/{{ r.id }}" class="card flex flex-col h-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] overflow-hidden no-underline hover:border-[color:var(--color-accent)]">
     {% if r.image_filename %}
       <img src="/static/images/{{ r.image_filename }}" alt="{{ r.title }}" loading="lazy" class="block w-full h-36 object-cover shrink-0" onerror="this.onerror=null;this.src='/static/placeholder.svg';this.style.objectFit='contain';this.style.padding='1.5rem'">

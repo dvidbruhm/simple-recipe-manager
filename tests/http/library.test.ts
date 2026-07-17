@@ -141,4 +141,12 @@ describe("library page", () => {
 		expect(body).not.toContain("<html");
 		expect(body).toContain("Tiramisu");
 	});
+
+	it("renders selection hooks (data-recipe-id + check) on each card", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
+		const body = await res.text();
+		expect(body).toContain('data-recipe-id=');
+		expect(body).toContain('class="check"');
+	});
 });
