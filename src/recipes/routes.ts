@@ -39,8 +39,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		};
 	}
 
-	function libraryGridHtml(c: Context): string {
-		const data = libraryList(c);
+	function libraryGridHtml(data: ReturnType<typeof libraryList>): string {
 		return render("partials/grid.html", {
 			recipes: data.recipesWithTags,
 			view: data.view,
@@ -52,7 +51,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	app.get("/recipes", (c) => {
 		const data = libraryList(c);
 		if (c.req.header("HX-Request") === "true") {
-			return c.html(libraryGridHtml(c));
+			return c.html(libraryGridHtml(data));
 		}
 		const favCount = (
 			db
