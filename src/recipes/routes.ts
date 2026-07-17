@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
+import { type Context, Hono } from "hono";
 import { getCookie } from "hono/cookie";
-import { Hono, type Context } from "hono";
 import type { Config } from "@/config";
 import { TagRepository } from "@/tags/repository";
 import { render } from "@/ui/nunjucks";
@@ -126,8 +126,14 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		const id = recipes.insert({
 			title,
 			description: String(form.get("description") ?? ""),
-			ingredients: ingredientsRaw.split("\n").map((s) => s.trim()).filter(Boolean),
-			steps: stepsRaw.split("\n").map((s) => s.trim()).filter(Boolean),
+			ingredients: ingredientsRaw
+				.split("\n")
+				.map((s) => s.trim())
+				.filter(Boolean),
+			steps: stepsRaw
+				.split("\n")
+				.map((s) => s.trim())
+				.filter(Boolean),
 			notes: String(form.get("notes") ?? ""),
 			source_url: String(form.get("source_url") ?? ""),
 			rating: Number(form.get("rating") ?? 0) || 0,
@@ -175,7 +181,9 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		if (ids.length === 0) return c.body("no ids", 400);
 		recipes.restoreMany(ids);
 		if (c.req.header("HX-Request") === "true") {
-			return c.html(`${libraryGridHtml(libraryList(c))}<div id="toast-area" hx-swap-oob="true"></div>`);
+			return c.html(
+				`${libraryGridHtml(libraryList(c))}<div id="toast-area" hx-swap-oob="true"></div>`,
+			);
 		}
 		return c.redirect("/recipes");
 	});

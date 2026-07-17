@@ -87,7 +87,7 @@ describe("bulk delete / restore", () => {
 	});
 
 	it("POST /recipes/bulk-restore (HX) restores ids and clears the toast", async () => {
-		const { app, cookie, id1, id2, id3 } = await setupApp();
+		const { app, cookie, id1, id2 } = await setupApp();
 		const fd = new FormData();
 		fd.append("ids", String(id1));
 		fd.append("ids", String(id2));
