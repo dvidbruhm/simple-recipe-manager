@@ -15,6 +15,7 @@
       this.mode = false;
       this._timer = null;
       this._press = null;
+      this._suppressClick = false;
 
       this.bindCards();
       this.bindControls();
@@ -37,6 +38,7 @@
       card.addEventListener("pointermove", (e) => this.onPointerMove(e));
       card.addEventListener("pointerup", () => this.cancelPress());
       card.addEventListener("pointerleave", () => this.cancelPress());
+      card.addEventListener("pointercancel", () => this.cancelPress());
       card.addEventListener("contextmenu", (e) => {
         if (this.mode) e.preventDefault();
       });
@@ -153,6 +155,10 @@
     }
 
     onCardClick(e, id) {
+      if (this._suppressClick) {
+        this._suppressClick = false;
+        return;
+      }
       if (!this.mode) return;
       if (e.target.closest(".fav-btn") || e.target.closest(".check")) return;
       e.preventDefault();
@@ -160,6 +166,10 @@
     }
 
     onCheckClick(e, id) {
+      if (this._suppressClick) {
+        this._suppressClick = false;
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
       if (!this.mode) this.enter(null);
@@ -173,7 +183,7 @@
       this._timer = setTimeout(() => {
         this._timer = null;
         if (this._press) {
-          e.preventDefault();
+          this._suppressClick = true;
           this.enter(id);
         }
       }, LONG_PRESS_MS);
