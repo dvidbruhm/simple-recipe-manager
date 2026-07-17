@@ -6,6 +6,7 @@ import { createSessionCookie } from "@/auth/session";
 import { migrate } from "@/db/migrate";
 import { RecipeRepository } from "@/recipes/repository";
 import { buildApp } from "@/server";
+import { TagRepository } from "@/tags/repository";
 
 const SECRET = "test-secret";
 
@@ -123,5 +124,37 @@ describe("bulk delete / restore", () => {
 		await app.request("/recipes/bulk-restore", { method: "POST", body: rfd, ...auth(cookie) });
 		lib = await (await app.request("/recipes", auth(cookie))).text();
 		expect(lib).toContain("Tiramisu");
+	});
+
+	it("POST /recipes/bulk-delete (HX) honors an active tag filter sent in the body", async () => {
+		process.env.APP_PASSWORD = "pw";
+		process.env.SESSION_SECRET = SECRET;
+		const dataDir = freshDataDir();
+		process.env.DATA_DIR = dataDir;
+		const db = new Database(`${dataDir}/recipes.db`);
+		migrate(db);
+		const recipes = new RecipeRepository(db);
+		const tags = new TagRepository(db);
+		const cake = recipes.insert({ title: "Chocolate Cake", ingredients: ["cocoa"] });
+		const soup = recipes.insert({ title: "Onion Soup", ingredients: ["onion"] });
+		tags.replaceForRecipe(cake, ["dessert"]);
+		tags.replaceForRecipe(soup, ["soup"]);
+		db.close();
+		const app = buildApp();
+		const cookie = await createSessionCookie(SECRET, 3600);
+
+		const fd = new FormData();
+		fd.append("ids", String(cake));
+		fd.append("tag", "dessert");
+		const res = await app.request("/recipes/bulk-delete", {
+			method: "POST",
+			body: fd,
+			...hx(cookie),
+		});
+		expect(res.status).toBe(200);
+		const body = await res.text();
+		// grid is filtered to the dessert tag and the deleted cake is gone → empty dessert result
+		expect(body).not.toContain("Chocolate Cake");
+		expect(body).not.toContain("Onion Soup");
 	});
 });

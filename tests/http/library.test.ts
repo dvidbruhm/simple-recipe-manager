@@ -121,7 +121,6 @@ describe("library page", () => {
 		expect(body).toContain("list-row");
 	});
 
-
 	it("GET /recipes?q=flour finds recipe by ingredient", async () => {
 		const { app, cookie } = await setupApp();
 		const res = await app.request("/recipes?q=flour", {
@@ -146,7 +145,7 @@ describe("library page", () => {
 		const { app, cookie } = await setupApp();
 		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
 		const body = await res.text();
-		expect(body).toContain('data-recipe-id=');
+		expect(body).toContain("data-recipe-id=");
 		expect(body).toContain('class="check"');
 	});
 
@@ -154,10 +153,10 @@ describe("library page", () => {
 		const { app, cookie } = await setupApp();
 		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
 		const body = await res.text();
-		expect(body).toContain('data-bulk-select');
-		expect(body).toContain('data-bulk-actionbar');
+		expect(body).toContain("data-bulk-select");
+		expect(body).toContain("data-bulk-actionbar");
 		expect(body).toContain('id="bulk-delete-form"');
-		expect(body).toContain('data-bulk-delete');
+		expect(body).toContain("data-bulk-delete");
 		expect(body).toContain('hx-post="/recipes/bulk-delete"');
 		expect(body).toContain("Cancel");
 	});

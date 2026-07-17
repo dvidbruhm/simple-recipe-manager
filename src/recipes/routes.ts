@@ -14,12 +14,12 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	const recipes = new RecipeRepository(db);
 	const tags = new TagRepository(db);
 
-	function libraryList(c: Context) {
-		const q = c.req.query("q") ?? "";
-		const selTags = (c.req.queries("tag") ?? []).filter(Boolean);
+	function libraryList(c: Context, opts?: { q?: string; tags?: string[]; sort?: string }) {
+		const q = opts?.q ?? c.req.query("q") ?? "";
+		const selTags = (opts?.tags ?? c.req.queries("tag") ?? []).filter(Boolean);
 		const favOnly = selTags.includes("favorites");
 		const normalTags = selTags.filter((t) => t !== "favorites");
-		const sort = c.req.query("sort") ?? "";
+		const sort = opts?.sort ?? c.req.query("sort") ?? "";
 		const view = getCookie(c, "view") === "list" ? "list" : "cards";
 		const filtering = !!(q || normalTags.length || favOnly);
 		let list = filtering
@@ -156,6 +156,17 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		return ids;
 	}
 
+	function formFilter(form: FormData) {
+		return {
+			q: String(form.get("q") ?? ""),
+			tags: form
+				.getAll("tag")
+				.map((s) => String(s))
+				.filter(Boolean),
+			sort: String(form.get("sort") ?? ""),
+		};
+	}
+
 	app.post("/recipes/bulk-delete", async (c) => {
 		const form = await c.req.formData();
 		const ids = parseIds(form.getAll("ids"));
@@ -164,7 +175,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		const n = ids.length;
 		const toast = `Deleted ${n} recipe${n === 1 ? "" : "s"}.`;
 		if (c.req.header("HX-Request") === "true") {
-			const grid = libraryGridHtml(libraryList(c));
+			const grid = libraryGridHtml(libraryList(c, formFilter(form)));
 			const toastHtml = render("partials/toast.html", {
 				toast,
 				undo_url: "/recipes/bulk-restore",
@@ -182,7 +193,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		recipes.restoreMany(ids);
 		if (c.req.header("HX-Request") === "true") {
 			return c.html(
-				`${libraryGridHtml(libraryList(c))}<div id="toast-area" hx-swap-oob="true"></div>`,
+				`${libraryGridHtml(libraryList(c, formFilter(form)))}<div id="toast-area" hx-swap-oob="true"></div>`,
 			);
 		}
 		return c.redirect("/recipes");

@@ -100,7 +100,10 @@
       if (!card) return;
       card.classList.toggle("is-selected", on);
       const check = card.querySelector(".check");
-      if (check) check.classList.toggle("on", on);
+      if (check) {
+        check.classList.toggle("on", on);
+        check.setAttribute("aria-pressed", String(on));
+      }
     }
 
     applySelection() {
@@ -109,7 +112,10 @@
         const on = this.selected.has(id);
         card.classList.toggle("is-selected", on);
         const check = card.querySelector(".check");
-        if (check) check.classList.toggle("on", on);
+        if (check) {
+          check.classList.toggle("on", on);
+          check.setAttribute("aria-pressed", String(on));
+        }
       });
     }
 
