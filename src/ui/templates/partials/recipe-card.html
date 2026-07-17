@@ -1,14 +1,24 @@
-<a href="/recipes/{{ r.id }}" class="card block rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] overflow-hidden no-underline hover:border-[color:var(--color-accent)]">
-  {% if r.image_filename %}
-    <img src="/static/images/{{ r.image_filename }}" alt="{{ r.title }}" loading="lazy" class="block w-full h-40 object-cover">
-  {% else %}
-    <div class="placeholder flex items-center justify-center h-40 text-[color:var(--color-muted)] text-sm">no image</div>
-  {% endif %}
-  <div class="card-body p-3">
-    <div class="card-title font-medium text-[color:var(--color-text)] truncate">{{ r.title }}</div>
-    <div class="card-meta flex items-center justify-between text-xs text-[color:var(--color-muted)] mt-1">
-      <span class="truncate">{{ domain(r.source_url) }}</span>
-      <span class="stars whitespace-nowrap">{{ stars(r.rating) | safe }}</span>
+<div class="card-wrap relative h-full">
+  <a href="/recipes/{{ r.id }}" class="card flex flex-col h-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] overflow-hidden no-underline hover:border-[color:var(--color-accent)]">
+    {% if r.image_filename %}
+      <img src="/static/images/{{ r.image_filename }}" alt="{{ r.title }}" loading="lazy" class="block w-full h-36 object-cover shrink-0" onerror="this.onerror=null;this.src='/static/placeholder.svg';this.style.objectFit='contain';this.style.padding='1.5rem'">
+    {% else %}
+      <div class="flex items-center justify-center h-36 bg-[color:var(--color-bg)] shrink-0">
+        <img src="/static/placeholder.svg" alt="" class="h-20 w-auto opacity-70">
+      </div>
+    {% endif %}
+    <div class="card-body p-3 flex-1 flex flex-col">
+      <div class="card-title font-medium text-[color:var(--color-text)] truncate">{{ r.title }}</div>
+      <div class="card-meta flex items-center justify-between text-xs text-[color:var(--color-muted)] mt-1">
+        <span class="truncate">{{ domain(r.source_url) }}</span>
+        <span class="stars whitespace-nowrap">{{ stars(r.rating) | safe }}</span>
+      </div>
+      <div class="card-tags flex flex-wrap gap-1 mt-auto pt-2">
+        {% for t in r.tags %}
+          <span class="tag text-xs px-1.5 py-0.5 rounded-full border" style="--tag-color: {{ tagColor(t) }}">{{ t }}</span>
+        {% endfor %}
+      </div>
     </div>
-  </div>
-</a>
+  </a>
+  {% include "partials/favorite-btn.html" %}
+</div>

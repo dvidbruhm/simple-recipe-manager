@@ -1,0 +1,26 @@
+<div class="list-wrap relative">
+  <a href="/recipes/{{ r.id }}" class="list-row flex items-center gap-3 rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] no-underline hover:border-[color:var(--color-accent)]">
+    {% if r.image_filename %}
+      <img src="/static/images/{{ r.image_filename }}" alt="{{ r.title }}" loading="lazy" class="shrink-0 w-16 h-16 object-cover rounded-l" onerror="this.onerror=null;this.src='/static/placeholder.svg';this.style.objectFit='contain';this.style.padding='0.4rem'">
+    {% else %}
+      <div class="shrink-0 w-16 h-16 flex items-center justify-center bg-[color:var(--color-bg)] rounded-l">
+        <img src="/static/placeholder.svg" alt="" class="h-10 w-auto opacity-70">
+      </div>
+    {% endif %}
+    <div class="flex-1 min-w-0 pr-8">
+      <div class="font-medium text-[color:var(--color-text)] truncate">{{ r.title }}</div>
+      <div class="flex items-center gap-2 text-xs text-[color:var(--color-muted)] mt-0.5">
+        <span class="truncate">{{ domain(r.source_url) }}</span>
+        <span class="stars whitespace-nowrap">{{ stars(r.rating) | safe }}</span>
+      </div>
+      {% if r.tags and r.tags.length %}
+      <div class="flex flex-wrap gap-1 mt-1">
+        {% for t in r.tags %}
+          <span class="tag text-xs px-1.5 py-0.5 rounded-full border" style="--tag-color: {{ tagColor(t) }}">{{ t }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </a>
+  {% include "partials/favorite-btn.html" %}
+</div>

@@ -44,4 +44,21 @@ describe("migrate", () => {
 		const row = db.query("SELECT rowid FROM recipes_fts WHERE recipes_fts MATCH 'pomme'").get();
 		expect(row).toBeTruthy();
 	});
+
+	it("adds the favorite column and backfills it on an existing database", () => {
+		const db = new Database(":memory:");
+		db.exec(
+			`CREATE TABLE recipes (id INTEGER PRIMARY KEY, title TEXT NOT NULL DEFAULT '',
+			  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+			  updated_at TEXT NOT NULL DEFAULT (datetime('now')), deleted_at TEXT)`,
+		);
+		db.exec("INSERT INTO recipes (title) VALUES ('old')");
+		migrate(db);
+		const cols = db.query("PRAGMA table_info(recipes)").all() as { name: string }[];
+		expect(cols.map((c) => c.name)).toContain("favorite");
+		const row = db.query("SELECT favorite FROM recipes WHERE title = 'old'").get() as {
+			favorite: number;
+		};
+		expect(row.favorite).toBe(0);
+	});
 });

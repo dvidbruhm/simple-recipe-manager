@@ -64,6 +64,64 @@ describe("library page", () => {
 		expect(body).not.toContain("Bolognese");
 	});
 
+	it("GET /recipes?tag=dessert&tag=dinner returns recipes matching any tag (OR)", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes?tag=dessert&tag=dinner", {
+			headers: { Cookie: `session=${cookie}` },
+		});
+		const body = await res.text();
+		expect(body).toContain("Tiramisu");
+		expect(body).toContain("Bolognese");
+	});
+
+	it("selected tags render checked checkboxes for active tags", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes?tag=italian", {
+			headers: { Cookie: `session=${cookie}` },
+		});
+		const body = await res.text();
+		expect(body).toContain('value="italian"');
+	});
+
+	it("shows a friendly empty state when there are no recipes", async () => {
+		process.env.APP_PASSWORD = "pw";
+		process.env.SESSION_SECRET = SECRET;
+		process.env.DATA_DIR = freshDataDir();
+		const app = buildApp();
+		const cookie = await createSessionCookie(SECRET, 3600);
+		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
+		const body = await res.text();
+		expect(body).toContain("Your recipe book is empty");
+		expect(body).toContain("New recipe");
+	});
+
+	it("POST /view sets the view cookie and redirects to the referer", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/view", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+				Referer: "/recipes",
+				Cookie: `session=${cookie}`,
+			},
+			body: "view=list",
+		});
+		expect(res.status).toBe(302);
+		expect(res.headers.get("location")).toBe("/recipes");
+		expect(res.headers.get("Set-Cookie") ?? "").toContain("view=list");
+	});
+
+	it("GET /recipes with view=list renders the list layout", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes", {
+			headers: { Cookie: `session=${cookie}; view=list` },
+		});
+		const body = await res.text();
+		expect(body).toContain("list-view");
+		expect(body).toContain("list-row");
+	});
+
+
 	it("GET /recipes?q=flour finds recipe by ingredient", async () => {
 		const { app, cookie } = await setupApp();
 		const res = await app.request("/recipes?q=flour", {

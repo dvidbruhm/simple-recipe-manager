@@ -39,4 +39,14 @@ describe("loadConfig", () => {
 		expect(cfg.dataDir).toBe("/data");
 		expect(cfg.sessionSecret).toBe("pw");
 	});
+
+	it("defaults fetchProxy to the Jina reader and honors FETCH_PROXY", () => {
+		process.env.APP_PASSWORD = "pw";
+		delete process.env.FETCH_PROXY;
+		expect(loadConfig().fetchProxy).toBe("https://r.jina.ai/{url}");
+		process.env.FETCH_PROXY = "https://example.com/proxy?url={urlEncoded}";
+		expect(loadConfig().fetchProxy).toBe("https://example.com/proxy?url={urlEncoded}");
+		process.env.FETCH_PROXY = "";
+		expect(loadConfig().fetchProxy).toBe("");
+	});
 });

@@ -1,0 +1,1 @@
+<button class="fav-btn {% if r.favorite %}is-fav{% endif %}" hx-post="/recipes/{{ r.id }}/favorite" hx-target="this" hx-swap="outerHTML" aria-pressed="{% if r.favorite %}true{% else %}false{% endif %}" aria-label="Toggle favorite">{% if r.favorite %}♥{% else %}♡{% endif %}</button>

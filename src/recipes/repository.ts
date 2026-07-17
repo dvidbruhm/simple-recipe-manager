@@ -11,6 +11,7 @@ export interface Recipe {
 	source_url: string;
 	image_filename: string | null;
 	rating: number;
+	favorite: boolean;
 	created_at: string;
 	updated_at: string;
 	deleted_at: string | null;
@@ -27,6 +28,7 @@ export function deserializeRecipe(row: Record<string, unknown>): Recipe {
 		source_url: row.source_url as string,
 		image_filename: (row.image_filename as string | null) ?? null,
 		rating: row.rating as number,
+		favorite: Boolean(row.favorite),
 		created_at: row.created_at as string,
 		updated_at: row.updated_at as string,
 		deleted_at: (row.deleted_at as string | null) ?? null,
@@ -38,8 +40,8 @@ export class RecipeRepository {
 
 	insert(input: RecipeInput): number {
 		const stmt = this.db.query(
-			`INSERT INTO recipes (title, description, ingredients, steps, notes, source_url, image_filename, rating)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			`INSERT INTO recipes (title, description, ingredients, steps, notes, source_url, image_filename, rating, favorite)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		);
 		const result = stmt.run(
 			input.title ?? "",
@@ -50,6 +52,7 @@ export class RecipeRepository {
 			input.source_url ?? "",
 			input.image_filename ?? null,
 			input.rating ?? 0,
+			input.favorite ? 1 : 0,
 		);
 		return Number(result.lastInsertRowid);
 	}
@@ -77,6 +80,9 @@ export class RecipeRepository {
 			if (k === "ingredients" || k === "steps") {
 				cols.push(`${k} = ?`);
 				vals.push(JSON.stringify(v ?? []));
+			} else if (k === "favorite") {
+				cols.push(`${k} = ?`);
+				vals.push(v ? 1 : 0);
 			} else {
 				cols.push(`${k} = ?`);
 				vals.push((v ?? null) as SQLQueryBindings);

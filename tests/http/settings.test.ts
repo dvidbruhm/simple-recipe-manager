@@ -75,11 +75,39 @@ describe("settings page", () => {
 		});
 		expect(res.status).toBe(200);
 		const body = await res.text();
+		expect(body).toContain("/export/formats/json");
 		expect(body).toContain("/export/formats/pdf");
 		expect(body).toContain("/export/formats/md-zip");
 		expect(body).toContain("/export/formats/json-ld-zip");
 		expect(body).toContain('action="/settings/import/preview"');
 		expect(body).toContain('name="file"');
+	});
+
+	it("GET /settings renders the appearance theme selector and about section", async () => {
+		const ctx = await setupApp();
+		restore = ctx.restore;
+		const res = await ctx.app.request("/settings", {
+			headers: { Cookie: `session=${ctx.cookie}` },
+		});
+		const body = await res.text();
+		expect(body).toContain("Appearance");
+		expect(body).toContain('name="theme"');
+		expect(body).toContain("About");
+		expect(body).toContain("Version 1.0.0");
+		expect(body).toContain("github.com");
+	});
+
+	it("GET /export/formats/json returns a JSON array of all recipes", async () => {
+		const ctx = await setupApp(true);
+		restore = ctx.restore;
+		const res = await ctx.app.request("/export/formats/json", {
+			headers: { Cookie: `session=${ctx.cookie}` },
+		});
+		expect(res.status).toBe(200);
+		expect(res.headers.get("Content-Type") ?? "").toContain("application/json");
+		const arr = JSON.parse(await res.text());
+		expect(Array.isArray(arr)).toBe(true);
+		expect(arr[0].name).toBe("Sample Cake");
 	});
 
 	it("POST /settings/import/preview with a JSON-LD file shows the parsed recipes", async () => {

@@ -1,10 +1,51 @@
 {% extends "base.html" %}
 
 {% block header_extra %}
-<form class="search-form flex-1 flex justify-center" hx-get="/recipes" hx-target="#grid" hx-trigger="input changed delay:200ms" hx-include="[name='tag']:checked">
-  <input type="search" name="q" value="{{ q }}" placeholder="Search recipes, ingredients, steps..." class="w-full max-w-md px-3 py-1.5 rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]">
-</form>
-<a href="/import" class="btn px-3 py-1.5 rounded border border-[color:var(--color-border)] no-underline text-[color:var(--color-text)] hover:border-[color:var(--color-accent)]">+ Import</a>
+<div class="flex-1 flex justify-center items-center gap-2">
+  <details class="add-menu relative">
+    <summary class="btn btn--primary list-none whitespace-nowrap">+ Add recipe</summary>
+    <div class="absolute right-0 mt-1 w-44 rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] shadow z-10">
+      <a href="/recipes/new" class="block px-3 py-2 no-underline text-[color:var(--color-text)] hover:bg-[color:var(--color-surface)]">New recipe</a>
+      <a href="/import" class="block px-3 py-2 no-underline text-[color:var(--color-text)] hover:bg-[color:var(--color-surface)] border-t border-[color:var(--color-border)]">Import from URL</a>
+    </div>
+  </details>
+  <form class="search-form w-72 md:w-96" hx-get="/recipes" hx-target="#grid" hx-trigger="input changed delay:200ms" hx-include="[name='tag']:checked,[name='sort']" hx-push-url="true" hx-indicator="#grid-spinner">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search recipes, ingredients, steps..." class="w-full px-3 py-1.5 rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]">
+  </form>
+  <input type="hidden" name="sort" id="current-sort" value="{{ active_sort }}">
+  <details class="sort-menu relative">
+    <summary class="btn list-none" aria-label="Sort recipes">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m7 15 5 5 5-5"/>
+        <path d="m7 9 5-5 5 5"/>
+      </svg>
+    </summary>
+    <div class="absolute right-0 mt-1 w-56 rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] shadow z-10">
+      <button type="button" class="sort-option block w-full text-left px-3 py-2 text-[color:var(--color-text)] hover:bg-[color:var(--color-surface)] border-b border-[color:var(--color-border)] cursor-pointer {% if active_sort == 'name-asc' %}sort-option--active{% endif %}"
+              data-sort="name-asc" hx-get="/recipes" hx-target="#grid" hx-include="[name='q'],[name='tag']:checked" hx-vals='{"sort":"name-asc"}' hx-push-url="true" hx-indicator="#grid-spinner"
+              onclick="selectSort(this)">Name (A → Z)</button>
+      <button type="button" class="sort-option block w-full text-left px-3 py-2 text-[color:var(--color-text)] hover:bg-[color:var(--color-surface)] border-b border-[color:var(--color-border)] cursor-pointer {% if active_sort == 'name-desc' %}sort-option--active{% endif %}"
+              data-sort="name-desc" hx-get="/recipes" hx-target="#grid" hx-include="[name='q'],[name='tag']:checked" hx-vals='{"sort":"name-desc"}' hx-push-url="true" hx-indicator="#grid-spinner"
+              onclick="selectSort(this)">Name (Z → A)</button>
+      <button type="button" class="sort-option block w-full text-left px-3 py-2 text-[color:var(--color-text)] hover:bg-[color:var(--color-surface)] border-b border-[color:var(--color-border)] cursor-pointer {% if active_sort == 'date-new' %}sort-option--active{% endif %}"
+              data-sort="date-new" hx-get="/recipes" hx-target="#grid" hx-include="[name='q'],[name='tag']:checked" hx-vals='{"sort":"date-new"}' hx-push-url="true" hx-indicator="#grid-spinner"
+              onclick="selectSort(this)">Date added (New → Old)</button>
+      <button type="button" class="sort-option block w-full text-left px-3 py-2 text-[color:var(--color-text)] hover:bg-[color:var(--color-surface)] cursor-pointer {% if active_sort == 'date-old' %}sort-option--active{% endif %}"
+              data-sort="date-old" hx-get="/recipes" hx-target="#grid" hx-include="[name='q'],[name='tag']:checked" hx-vals='{"sort":"date-old"}' hx-push-url="true" hx-indicator="#grid-spinner"
+              onclick="selectSort(this)">Date added (Old → New)</button>
+    </div>
+  </details>
+  <form method="post" action="/view" class="view-form">
+    <input type="hidden" name="view" value="{% if view == 'list' %}cards{% else %}list{% endif %}">
+    <button type="submit" class="btn view-toggle" aria-label="Switch to {% if view == 'list' %}card{% else %}list{% endif %} view">
+      {% if view == 'list' %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      {% else %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      {% endif %}
+    </button>
+  </form>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -24,15 +65,39 @@
 </script>
 {% endif %}
 
-<div class="library-layout flex gap-6 max-w-5xl mx-auto">
-  <aside class="sidebar w-48 shrink-0">
+<div class="library-layout max-w-6xl mx-auto">
+  <section class="tag-bar mb-4">
     <h3 class="text-sm font-semibold text-[color:var(--color-muted)] uppercase tracking-wide mb-2">Tags</h3>
-    <div id="tag-chips" class="flex flex-wrap gap-2" hx-target="#grid" hx-trigger="click">
+    <div id="tag-chips" class="flex flex-wrap gap-2">
       {% include "partials/tag-chips.html" %}
     </div>
-  </aside>
-  <main class="flex-1 min-w-0">
-    {% include "partials/grid.html" %}
+  </section>
+  <main class="min-w-0">
+    <div id="grid-spinner" class="htmx-indicator flex justify-center py-2"><span class="spinner"></span></div>
+    <div id="grid" class="{% if view == 'list' %}list-view flex flex-col gap-2{% else %}grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] auto-rows-fr gap-4{% endif %}">
+      {% include "partials/grid.html" %}
+    </div>
   </main>
 </div>
+
+<script>
+  function selectSort(btn) {
+    const details = btn.closest('details');
+    if (details) details.removeAttribute('open');
+    document.querySelectorAll('.sort-option').forEach(o => o.classList.remove('sort-option--active'));
+    btn.classList.add('sort-option--active');
+    const hidden = document.getElementById('current-sort');
+    if (hidden && btn.dataset.sort) hidden.value = btn.dataset.sort;
+  }
+
+  document.body.addEventListener('htmx:afterSwap', (e) => {
+    const grid = e.detail.target;
+    if (grid && grid.id === 'grid') {
+      grid.classList.remove('is-swapping');
+      void grid.offsetWidth;
+      grid.classList.add('is-swapping');
+      setTimeout(() => grid.classList.remove('is-swapping'), 280);
+    }
+  });
+</script>
 {% endblock %}

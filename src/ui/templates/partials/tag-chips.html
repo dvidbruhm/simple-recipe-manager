@@ -1,9 +1,17 @@
 {% for t in tags %}
-  <a href="/recipes?tag={{ t.name | urlencode }}"
-     class="chip inline-flex items-center gap-1 px-3 py-1 rounded-full border border-[color:var(--color-border)] text-sm no-underline hover:border-[color:var(--color-accent)] {% if t.name == active_tag %}active bg-[color:var(--color-accent)] text-white border-transparent{% endif %}"
-     hx-get="/recipes?tag={{ t.name | urlencode }}"
-     hx-target="#grid"
-     hx-include="[name='q']">{{ t.name }} <span class="count opacity-70">{{ t.cnt }}</span></a>
+  {% if t.name == "favorites" %}
+  <label class="tag-chip tag inline-flex items-center gap-1 px-3 py-1 rounded-full border text-sm cursor-pointer" style="--tag-color: #ff5a5a">
+    <input type="checkbox" name="tag" value="favorites" class="hidden" {% if "favorites" in active_tags %}checked{% endif %}
+           hx-get="/recipes" hx-target="#grid" hx-trigger="change" hx-include="[name='q'],[name='tag']:checked,[name='sort']" hx-push-url="true" hx-indicator="#grid-spinner">
+    ♥ Favorites <span id="fav-count" class="count opacity-70">{{ t.cnt }}</span>
+  </label>
+  {% else %}
+  <label class="tag-chip tag inline-flex items-center gap-1 px-3 py-1 rounded-full border text-sm cursor-pointer" style="--tag-color: {{ tagColor(t.name) }}">
+    <input type="checkbox" name="tag" value="{{ t.name }}" class="hidden" {% if t.name in active_tags %}checked{% endif %}
+           hx-get="/recipes" hx-target="#grid" hx-trigger="change" hx-include="[name='q'],[name='tag']:checked,[name='sort']" hx-push-url="true" hx-indicator="#grid-spinner">
+    {{ t.name }} <span class="count opacity-70">{{ t.cnt }}</span>
+  </label>
+  {% endif %}
 {% else %}
   <p class="empty text-[color:var(--color-muted)] text-sm">No tags yet.</p>
 {% endfor %}

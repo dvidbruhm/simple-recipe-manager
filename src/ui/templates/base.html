@@ -1,21 +1,26 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="{{ theme | default('auto') }}">
+<html lang="en" data-theme="{{ theme | default('dark') }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title | default('recipes') }} · recipes</title>
   <link rel="stylesheet" href="/static/app.css">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <script src="/static/htmx.min.js" defer></script>
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#5a7a4f">
 </head>
 <body>
   <header class="site-header">
-    <a href="/recipes" class="logo">recipes</a>
+    <a href="/recipes" class="logo" aria-label="recipes"><img src="/static/favicon.svg" alt="" class="logo-icon"></a>
     {% block header_extra %}{% endblock %}
     <form method="post" action="/theme" class="theme-form">
       <input type="hidden" name="theme" value="{{ next_theme | default('dark') }}">
-      <button type="submit" class="theme-toggle" aria-label="Toggle theme">{{ theme_icon | default('☀') }}</button>
+      <button type="submit" class="btn theme-toggle" aria-label="Toggle theme">{{ theme_icon | default('☀') }}</button>
     </form>
+    <a href="/settings" class="btn settings-gear" aria-label="Settings">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
   </header>
   <main class="site-main">
     {% block content %}{{ body_content | safe }}{% endblock %}

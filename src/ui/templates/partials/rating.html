@@ -1,0 +1,5 @@
+<div id="rating" class="stars rating text-2xl text-[color:var(--color-accent)] mt-2 tracking-widest" data-rating="{{ r.rating }}">
+  {% for n in [1,2,3,4,5] %}
+    <button type="button" class="star" data-val="{{ n }}" hx-post="/recipes/{{ r.id }}/rating" hx-vals='{"rating":"{{ n }}"}' hx-target="#rating" hx-swap="outerHTML" aria-label="{{ n }} star{{ '' if n == 1 else 's' }}">{{ "★" if n <= (r.rating or 0) else "☆" }}</button>
+  {% endfor %}
+</div>

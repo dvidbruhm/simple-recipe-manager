@@ -1,6 +1,8 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import nunjucks from "nunjucks";
+import { toFractions } from "./fractions";
+import { tagColor } from "./tag-color";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_DIR = join(__dirname, "templates");
@@ -18,6 +20,10 @@ env.addGlobal("domain", (url: string) => {
 		return "";
 	}
 });
+
+env.addGlobal("tagColor", (name: string) => tagColor(name));
+
+env.addFilter("fractions", (text: string) => toFractions(text));
 
 env.addGlobal("stars", (rating: number) => {
 	const full = "★".repeat(Math.max(0, Math.min(5, rating)));

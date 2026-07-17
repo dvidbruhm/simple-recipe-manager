@@ -1,8 +1,8 @@
 import type { Context } from "hono";
 import { getCookie } from "hono/cookie";
 
-const NEXT = { light: "dark", dark: "auto", auto: "light" } as const;
-const ICON = { light: "🌙", dark: "♆", auto: "☀" } as const;
+const NEXT = { light: "dark", dark: "light" } as const;
+const ICON = { light: "🌙", dark: "☀" } as const;
 
 export type Theme = keyof typeof NEXT;
 
@@ -13,8 +13,8 @@ export interface ThemeVars {
 }
 
 function normalize(value: string | undefined): Theme {
-	if (value === "light" || value === "dark" || value === "auto") return value;
-	return "auto";
+	if (value === "light" || value === "dark") return value;
+	return "dark";
 }
 
 export function themeVars(c: Context): ThemeVars {

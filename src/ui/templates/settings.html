@@ -1,29 +1,58 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="settings-page">
-  <h1>Settings</h1>
+<section class="settings-page max-w-3xl mx-auto px-4">
+  <h1 class="text-2xl font-bold mb-6 text-[color:var(--color-text)]">Settings</h1>
 
-  <div class="settings-grid">
-    <div class="settings-col">
-      <h2>Export</h2>
-      <p>Download your recipes in various formats.</p>
-      <div class="export-buttons">
-        <a href="/export/formats/pdf" class="btn" download>Export as PDF (A4)</a>
-        <a href="/export/formats/md-zip" class="btn" download>Export as Markdown zip</a>
-        <a href="/export/formats/json-ld-zip" class="btn" download>Export as JSON-LD zip</a>
+  <div class="settings-card rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5 mb-5">
+    <h2 class="text-lg font-semibold text-[color:var(--color-text)] mb-1">Appearance</h2>
+    <p class="text-sm text-[color:var(--color-muted)] mb-3">Choose the color theme.</p>
+    <form method="post" action="/theme" class="flex items-center gap-3">
+      <label for="theme-select" class="text-sm text-[color:var(--color-text)]">Theme</label>
+      <select id="theme-select" name="theme" onchange="this.form.submit()"
+              class="px-3 py-1.5 rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]">
+        <option value="light" {% if theme == 'light' %}selected{% endif %}>Light</option>
+        <option value="dark" {% if theme != 'light' %}selected{% endif %}>Dark</option>
+      </select>
+      <noscript><button type="submit" class="btn">Apply</button></noscript>
+    </form>
+  </div>
+
+  <div class="settings-card rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5 mb-5">
+    <h2 class="text-lg font-semibold text-[color:var(--color-text)] mb-1">Export</h2>
+    <p class="text-sm text-[color:var(--color-muted)] mb-3">Download all your recipes in the format you need.</p>
+    <div class="export-buttons flex flex-wrap gap-2">
+      <a href="/export/formats/json" class="btn" download>JSON (all recipes)</a>
+      <a href="/export/formats/md-zip" class="btn" download>Markdown zip (1 file / recipe)</a>
+      <a href="/export/formats/pdf" class="btn" download>PDF (like Print)</a>
+      <a href="/export/formats/json-ld-zip" class="btn" download>JSON-LD zip</a>
+    </div>
+  </div>
+
+  <div class="settings-card rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5 mb-5">
+    <h2 class="text-lg font-semibold text-[color:var(--color-text)] mb-1">Import</h2>
+    <p class="text-sm text-[color:var(--color-muted)] mb-3">Import from a JSON export, a RecipeSage export, a JSON-LD file/zip, or a Markdown zip.</p>
+    <form action="/settings/import/preview" method="post" enctype="multipart/form-data" class="import-form flex flex-wrap items-center gap-2">
+      <input type="file" name="file" accept=".json,.jsonld,.zip" required
+             class="text-sm text-[color:var(--color-text)]">
+      <button type="submit" class="btn btn--primary">Preview import</button>
+    </form>
+    <p class="hint text-xs text-[color:var(--color-muted)] mt-2">Max 50 MB. If you reload during preview, you'll need to re-upload the file.</p>
+  </div>
+
+  <div class="settings-card rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5">
+    <h2 class="text-lg font-semibold text-[color:var(--color-text)] mb-3">About</h2>
+    <div class="flex items-center gap-3">
+      <img src="/static/favicon.svg" alt="" class="w-10 h-10">
+      <div>
+        <div class="font-medium text-[color:var(--color-text)]">Recipe Manager</div>
+        <div class="text-sm text-[color:var(--color-muted)]">Version {{ app_version }}</div>
       </div>
     </div>
-
-    <div class="settings-col">
-      <h2>Import from file</h2>
-      <p>Upload a JSON-LD file (single or array), a RecipeSage export, a JSON-LD zip, or a Markdown zip.</p>
-      <form action="/settings/import/preview" method="post" enctype="multipart/form-data" class="import-form">
-        <input type="file" name="file" accept=".json,.jsonld,.zip" required>
-        <button type="submit">Preview import</button>
-      </form>
-      <p class="hint">Max 50 MB. RecipeSage JSON-LD exports supported. If you reload this page, you'll need to re-upload the file.</p>
-    </div>
+    <p class="text-sm text-[color:var(--color-muted)] mt-3">
+      A self-hosted recipe manager. Source code and issues:
+      <a href="{{ github_url }}" rel="noopener noreferrer" target="_blank" class="text-[color:var(--color-accent)] underline">GitHub ↗</a>
+    </p>
   </div>
 </section>
 {% endblock %}

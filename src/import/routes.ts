@@ -1,6 +1,6 @@
 import { type Context, Hono } from "hono";
 import type { Config } from "@/config";
-import type { Recipe, RecipeRepository } from "@/recipes/repository";
+import type { RecipeRepository } from "@/recipes/repository";
 import { render } from "@/ui/nunjucks";
 import { themeVars } from "@/ui/theme";
 import { extractRecipe, type PartialRecipe } from "./extractor";
@@ -22,10 +22,9 @@ export function importRoutes(config: Config, recipes: RecipeRepository): Hono {
 	async function runImport(c: Context, url: string): Promise<Response> {
 		if (!url) return c.redirect("/import");
 
-		const fetched = await fetchHtml(url);
+		const fetched = await fetchHtml(url, config.fetchProxy);
 		if (!fetched) {
-			const id = recipes.insert({ source_url: url });
-			return c.redirect(`/recipes/${id}/edit?mode=paste_html`);
+			return c.redirect(`/recipes/new?import=paste_html&url=${encodeURIComponent(url)}`);
 		}
 
 		const outcome = await extractRecipe(url, fetched.html);
@@ -37,8 +36,7 @@ export function importRoutes(config: Config, recipes: RecipeRepository): Hono {
 			return c.redirect(`/recipes/${id}/edit`);
 		}
 
-		const id = recipes.insert({ source_url: url });
-		return c.redirect(`/recipes/${id}/edit?mode=manual`);
+		return c.redirect(`/recipes/new?import=manual&url=${encodeURIComponent(url)}`);
 	}
 
 	app.post("/recipes/import", async (c) => {
@@ -55,28 +53,37 @@ export function importRoutes(config: Config, recipes: RecipeRepository): Hono {
 
 	app.post("/recipes/import/html", async (c) => {
 		const body = await c.req.parseBody();
-		const recipeId = Number(body.recipe_id);
-		if (!Number.isFinite(recipeId) || recipeId <= 0) {
-			return c.body("Missing or invalid recipe_id", 400);
-		}
-		const existing: Recipe | null = recipes.getById(recipeId);
-		if (!existing) return c.body("Recipe not found", 404);
 		const html = String(body.html ?? "");
+		const recipeId = Number(body.recipe_id);
+		const existing =
+			Number.isFinite(recipeId) && recipeId > 0 ? recipes.getById(recipeId) : null;
+		const hasExisting = existing != null;
+		const url = existing?.source_url || String(body.url ?? "");
+		const backToPaste = `/recipes/new?import=paste_html&url=${encodeURIComponent(url)}`;
 		if (!html) {
-			return c.redirect(`/recipes/${recipeId}/edit?mode=paste_html&error=empty_html`);
+			return c.redirect(`${backToPaste}&error=empty_html`);
 		}
 
-		const url = existing.source_url || String(body.url ?? "");
 		const outcome = await extractRecipe(url, html);
 
 		if (outcome.kind === "structured" || outcome.kind === "readability") {
-			recipes.update(recipeId, toInput(outcome.recipe, url));
-			if (outcome.recipe.image) {
-				await downloadImageIfNeeded(recipeId, outcome.recipe.image);
+			if (hasExisting) {
+				recipes.update(recipeId, toInput(outcome.recipe, url));
+				if (outcome.recipe.image) {
+					await downloadImageIfNeeded(recipeId, outcome.recipe.image);
+				}
+				return c.redirect(`/recipes/${recipeId}/edit`);
 			}
-			return c.redirect(`/recipes/${recipeId}/edit`);
+			const id = recipes.insert(toInput(outcome.recipe, url));
+			if (outcome.recipe.image) {
+				await downloadImageIfNeeded(id, outcome.recipe.image);
+			}
+			return c.redirect(`/recipes/${id}/edit`);
 		}
-		return c.redirect(`/recipes/${recipeId}/edit?mode=paste_html&error=extract_failed`);
+		if (hasExisting) {
+			return c.redirect(`/recipes/${recipeId}/edit?mode=paste_html&error=extract_failed`);
+		}
+		return c.redirect(`${backToPaste}&error=extract_failed`);
 	});
 
 	return app;

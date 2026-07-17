@@ -42,8 +42,21 @@ export function authRoutes(config: Config): Hono {
 	app.post("/theme", async (c) => {
 		const body = await c.req.parseBody();
 		const theme = String(body.theme ?? "");
-		if (theme !== "light" && theme !== "dark" && theme !== "auto") return c.body("Bad theme", 400);
+		if (theme !== "light" && theme !== "dark") return c.body("Bad theme", 400);
 		setCookie(c, "theme", theme, {
+			httpOnly: false,
+			sameSite: "Lax",
+			path: "/",
+			maxAge: 60 * 60 * 24 * 365,
+		});
+		return c.redirect(c.req.header("Referer") ?? "/recipes");
+	});
+
+	app.post("/view", async (c) => {
+		const body = await c.req.parseBody();
+		const view = String(body.view ?? "");
+		if (view !== "cards" && view !== "list") return c.body("Bad view", 400);
+		setCookie(c, "view", view, {
 			httpOnly: false,
 			sameSite: "Lax",
 			path: "/",

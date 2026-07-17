@@ -2,32 +2,39 @@
 
 {% block content %}
 <article class="recipe-view max-w-5xl mx-auto px-4">
-  <header class="recipe-header text-center mb-8">
+  <header class="recipe-header flex gap-6 mb-8">
     {% if r.image_filename %}
-      <img src="/static/images/{{ r.image_filename }}" alt="{{ r.title }}" class="block mx-auto mb-4 rounded max-w-[600px] w-full h-auto">
+      <img src="/static/images/{{ r.image_filename }}" alt="{{ r.title }}" class="recipe-header__img shrink-0 w-40 h-40 object-cover rounded" onerror="this.onerror=null;this.src='/static/placeholder.svg';this.style.objectFit='contain';this.style.padding='1rem'">
     {% endif %}
-    <h1 class="text-3xl font-bold text-[color:var(--color-text)]">{{ r.title }}</h1>
-    {% if r.rating %}
-      <div class="stars text-2xl text-[color:var(--color-accent)] mt-2 tracking-widest">{{ stars(r.rating) | safe }}</div>
-    {% endif %}
-    {% if r.description %}
-      <p class="description mt-3 text-[color:var(--color-text)] max-w-2xl mx-auto">{{ r.description }}</p>
-    {% endif %}
-    {% if tags.length %}
-      <div class="tags flex flex-wrap justify-center gap-2 mt-3">
-        {% for t in tags %}
-          <span class="chip inline-block px-3 py-1 rounded-full border border-[color:var(--color-border)] text-sm text-[color:var(--color-text)]">{{ t }}</span>
-        {% endfor %}
-      </div>
-    {% endif %}
+    <div class="recipe-header__info flex-1 min-w-0">
+      <h1 class="text-3xl font-bold text-[color:var(--color-text)]">{{ r.title }}</h1>
+      {% include "partials/rating.html" %}
+      {% if r.description %}
+        <p class="description mt-3 text-[color:var(--color-text)]">{{ r.description }}</p>
+      {% endif %}
+      {% if tags.length %}
+        <div class="tags flex flex-wrap gap-2 mt-3">
+          {% for t in tags %}
+            <span class="tag inline-block px-3 py-1 rounded-full border text-sm" style="--tag-color: {{ tagColor(t) }}">{{ t }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
   </header>
 
-  <div class="recipe-body grid gap-8 md:grid-cols-2">
+  {% if r.notes %}
+    <section class="notes mb-8">
+      <h2 class="text-xl font-semibold text-[color:var(--color-text)] mb-3">Notes</h2>
+      <p class="whitespace-pre-wrap text-[color:var(--color-text)]">{{ r.notes }}</p>
+    </section>
+  {% endif %}
+
+  <div class="recipe-body grid gap-8 md:grid-cols-[1fr_3fr]">
     <section class="ingredients">
       <h2 class="text-xl font-semibold text-[color:var(--color-text)] mb-3">Ingredients</h2>
       <ul class="list-none space-y-1">
         {% for ing in r.ingredients %}
-          <li><label class="flex items-start gap-2 cursor-pointer text-[color:var(--color-text)]"><input type="checkbox" class="mt-1"> <span>{{ ing }}</span></label></li>
+          <li><label class="flex items-start gap-2 cursor-pointer text-[color:var(--color-text)]"><input type="checkbox" class="mt-1"> <span>{{ ing | fractions }}</span></label></li>
         {% else %}
           <li class="text-[color:var(--color-muted)]">No ingredients listed.</li>
         {% endfor %}
@@ -45,22 +52,38 @@
     </section>
   </div>
 
-  {% if r.notes %}
-    <section class="notes mt-8">
-      <h2 class="text-xl font-semibold text-[color:var(--color-text)] mb-3">Notes</h2>
-      <p class="whitespace-pre-wrap text-[color:var(--color-text)]">{{ r.notes }}</p>
-    </section>
-  {% endif %}
-
   <footer class="recipe-footer mt-8 pt-6 border-t border-[color:var(--color-border)] flex flex-wrap items-center gap-4">
     {% if r.source_url %}
       <a href="{{ r.source_url }}" rel="noopener noreferrer" target="_blank" class="text-[color:var(--color-accent)] underline">Original ↗</a>
     {% endif %}
-    <a href="/recipes/{{ r.id }}/edit" class="btn px-3 py-1.5 rounded border border-[color:var(--color-border)] no-underline text-[color:var(--color-text)] hover:border-[color:var(--color-accent)]">Edit</a>
-    <form action="/recipes/{{ r.id }}/delete" method="post" class="inline">
-      <button type="submit" class="btn px-3 py-1.5 rounded border border-[color:var(--color-border)] text-[color:var(--color-text)] hover:border-red-500">Delete</button>
+    <a href="/recipes/{{ r.id }}/edit" class="btn">Edit</a>
+    <form action="/recipes/{{ r.id }}/delete" method="post" class="inline" onsubmit="return confirm('Delete this recipe? You can undo it right after.')">
+      <button type="submit" class="btn btn--danger">Delete</button>
     </form>
-    <button type="button" onclick="window.print()" class="btn px-3 py-1.5 rounded border border-[color:var(--color-border)] text-[color:var(--color-text)] hover:border-[color:var(--color-accent)]">Print</button>
+    <button type="button" onclick="window.print()" class="btn">Print</button>
   </footer>
 </article>
+
+<script>
+  function paintRating(c, val) {
+    c.querySelectorAll('.star').forEach(s => {
+      s.textContent = Number(s.dataset.val) <= val ? '★' : '☆';
+    });
+  }
+  document.addEventListener('mouseover', (e) => {
+    const s = e.target.closest && e.target.closest('.star');
+    if (!s) return;
+    const c = s.closest('#rating');
+    if (!c) return;
+    paintRating(c, Number(s.dataset.val));
+  });
+  document.addEventListener('mouseout', (e) => {
+    const s = e.target.closest && e.target.closest('.star');
+    if (!s) return;
+    const c = s.closest('#rating');
+    if (!c) return;
+    if (e.relatedTarget && c.contains(e.relatedTarget)) return;
+    paintRating(c, Number(c.dataset.rating));
+  });
+</script>
 {% endblock %}

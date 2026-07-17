@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Hono } from "hono";
-import type { Config } from "@/config";
+import { APP_VERSION, type Config, GITHUB_URL } from "@/config";
 import { detectDuplicates } from "@/import/duplicate-detector";
 import type { PartialRecipe } from "@/import/extractor";
 import { pickAdapter } from "@/import/file-importers";
@@ -23,6 +23,8 @@ export function settingsRoutes(db: Database, config: Config, recipes: RecipeRepo
 			render("settings.html", {
 				...themeVars(c),
 				title: "Settings",
+				app_version: APP_VERSION,
+				github_url: GITHUB_URL,
 			}),
 		);
 	});

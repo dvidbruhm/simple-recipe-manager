@@ -1,7 +1,17 @@
-<div id="grid" class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
 {% for r in recipes %}
-  {% include "partials/recipe-card.html" %}
+  {% if view == "list" %}{% include "partials/recipe-list.html" %}{% else %}{% include "partials/recipe-card.html" %}{% endif %}
 {% else %}
-  <p class="empty text-[color:var(--color-muted)] col-span-full">No recipes found.</p>
+  <div class="empty-state col-span-full text-center py-16">
+    {% if has_any %}
+      <p class="text-[color:var(--color-muted)]">No recipes match your search or filters.</p>
+    {% else %}
+      <img src="/static/placeholder.svg" alt="" class="h-24 w-auto mx-auto mb-4 opacity-60">
+      <h2 class="text-xl font-semibold text-[color:var(--color-text)] mb-1">Your recipe book is empty</h2>
+      <p class="text-[color:var(--color-muted)] mb-4">Add your first recipe or import one from a URL.</p>
+      <div class="flex justify-center gap-2">
+        <a href="/recipes/new" class="btn btn--primary">New recipe</a>
+        <a href="/import" class="btn">Import from URL</a>
+      </div>
+    {% endif %}
+  </div>
 {% endfor %}
-</div>

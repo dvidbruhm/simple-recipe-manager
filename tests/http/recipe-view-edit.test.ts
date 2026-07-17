@@ -119,7 +119,7 @@ describe("recipe view & edit pages", () => {
 		expect(body).toContain("cook on skillet");
 		expect(body).toContain("best served warm");
 		expect(body).toContain("https://example.com/pancakes");
-		expect(body).toContain("★★★★");
+		expect(body).toContain('data-rating="4"');
 		expect(body).not.toContain("dessert");
 		expect(body).not.toContain("italian");
 	});
@@ -204,5 +204,90 @@ describe("recipe view & edit pages", () => {
 		const lib = await app.request("/recipes", auth(cookie));
 		const body = await lib.text();
 		expect(body).toContain("Tiramisu");
+	});
+
+	it("POST /recipes/:id/rating updates the rating and returns the rating partial", async () => {
+		const { app, cookie, id1 } = await setupApp();
+		const fd = new FormData();
+		fd.set("rating", "5");
+		const res = await app.request(`/recipes/${id1}/rating`, {
+			method: "POST",
+			body: fd,
+			headers: { Cookie: `session=${cookie}` },
+		});
+		expect(res.status).toBe(200);
+		const out = await res.text();
+		expect(out).toContain('data-rating="5"');
+	});
+
+	it("GET /recipes/new renders a blank form without persisting a recipe", async () => {
+		const { app, cookie } = await setupApp();
+		const before = (await app.request("/recipes", auth(cookie))).status;
+		expect(before).toBe(200);
+		const res = await app.request("/recipes/new", auth(cookie));
+		expect(res.status).toBe(200);
+		const body = await res.text();
+		expect(body).toContain("New Recipe");
+		expect(body).toContain('action="/recipes"');
+		expect(body).toContain('href="/recipes"');
+		// visiting the new form must not create a recipe
+		const lib = await app.request("/recipes", auth(cookie));
+		const libBody = await lib.text();
+		const matches = libBody.match(/href="\/recipes\/\d+"/g) ?? [];
+		expect(matches.length).toBe(2);
+	});
+
+	it("POST /recipes creates a recipe and redirects to its view", async () => {
+		const { app, cookie } = await setupApp();
+		const fd = new FormData();
+		fd.set("title", "Ratatouille");
+		fd.set("ingredients", "aubergine\ncike");
+		fd.set("steps", "chop\nsimmer");
+		fd.set("rating", "4");
+		fd.set("tags", "");
+		const res = await app.request("/recipes", {
+			method: "POST",
+			body: fd,
+			headers: { Cookie: `session=${cookie}` },
+		});
+		expect(res.status).toBe(302);
+		const loc = res.headers.get("location") ?? "";
+		expect(loc).toMatch(/^\/recipes\/\d+$/);
+		const view = await app.request(loc, auth(cookie));
+		const body = await view.text();
+		expect(body).toContain("Ratatouille");
+	});
+
+	it("POST /recipes/:id/favorite toggles the favorite flag and returns the heart button", async () => {
+		const { app, cookie, id1 } = await setupApp();
+		const res = await app.request(`/recipes/${id1}/favorite`, {
+			method: "POST",
+			headers: { Cookie: `session=${cookie}` },
+		});
+		expect(res.status).toBe(200);
+		const out = await res.text();
+		expect(out).toContain("is-fav");
+		expect(out).toContain("♥");
+		// toggle back
+		const res2 = await app.request(`/recipes/${id1}/favorite`, {
+			method: "POST",
+			headers: { Cookie: `session=${cookie}` },
+		});
+		const out2 = await res2.text();
+		expect(out2).toContain("♡");
+		expect(out2).not.toContain("is-fav");
+	});
+
+	it("GET /recipes?tag=favorites lists only favorited recipes", async () => {
+		const { app, cookie, id1, id2 } = await setupApp();
+		// favorite id1 only
+		await app.request(`/recipes/${id1}/favorite`, {
+			method: "POST",
+			headers: { Cookie: `session=${cookie}` },
+		});
+		const res = await app.request("/recipes?tag=favorites", auth(cookie));
+		const body = await res.text();
+		expect(body).toContain("Tiramisu");
+		expect(body).not.toContain("Bolognese");
 	});
 });

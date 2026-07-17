@@ -3,7 +3,13 @@ export interface Config {
 	sessionSecret: string;
 	port: number;
 	dataDir: string;
+	fetchProxy: string;
 }
+
+const DEFAULT_FETCH_PROXY = "https://r.jina.ai/{url}";
+
+export const APP_VERSION = "1.0.0";
+export const GITHUB_URL = "https://github.com/dvidbruhm/simple-recipe-manager";
 
 export function loadConfig(): Config {
 	const appPassword = process.env.APP_PASSWORD ?? "";
@@ -15,5 +21,6 @@ export function loadConfig(): Config {
 		sessionSecret: process.env.SESSION_SECRET || appPassword,
 		port: Number(process.env.PORT ?? 3000),
 		dataDir: process.env.DATA_DIR ?? "/data",
+		fetchProxy: process.env.FETCH_PROXY ?? DEFAULT_FETCH_PROXY,
 	};
 }

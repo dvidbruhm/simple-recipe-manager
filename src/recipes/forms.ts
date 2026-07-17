@@ -7,6 +7,7 @@ export interface RecipeInput {
 	source_url?: string;
 	image_filename?: string | null;
 	rating?: number;
+	favorite?: boolean;
 }
 
 export type ValidationResult =

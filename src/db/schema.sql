@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS recipes (
   source_url      TEXT NOT NULL DEFAULT '',
   image_filename  TEXT,
   rating          INTEGER NOT NULL DEFAULT 0,
+  favorite        INTEGER NOT NULL DEFAULT 0,
   created_at      TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
   deleted_at      TEXT

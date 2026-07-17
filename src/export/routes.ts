@@ -32,6 +32,22 @@ export function exportRoutes(db: Database, config: Config): Hono {
 			return c.body(arrayBuf);
 		}
 
+		if (fmt === "json") {
+			const withTags: RecipeWithTags[] = list.map((r) => ({
+				...r,
+				tags: tagRepo.listForRecipe(r.id).map((t) => t.name),
+			}));
+			const json = JSON.stringify(
+				withTags.map((r) => recipeToJsonLd(r)),
+				null,
+				2,
+			);
+			const today = new Date().toISOString().slice(0, 10);
+			c.header("Content-Type", "application/json");
+			c.header("Content-Disposition", `attachment; filename="recipes-${today}.json"`);
+			return c.body(json);
+		}
+
 		if (fmt === "json-ld-zip") {
 			const withTags: RecipeWithTags[] = list.map((r) => ({
 				...r,

@@ -111,7 +111,7 @@ describe("import routes", () => {
 		expect(res.status).toBe(400);
 	});
 
-	it("POST /recipes/import when the fetcher is blocked falls through to paste mode", async () => {
+	it("POST /recipes/import when the fetcher is blocked goes to the new-recipe paste form without creating a recipe", async () => {
 		const { app, cookie, restore } = await setupApp(null);
 		restoreFetch = restore;
 		const res = await app.request("/recipes/import", {
@@ -121,23 +121,43 @@ describe("import routes", () => {
 		});
 		expect(res.status).toBe(302);
 		const loc = res.headers.get("Location") ?? "";
-		expect(loc).toMatch(/^\/recipes\/\d+\/edit\?mode=paste_html/);
+		expect(loc).toMatch(/^\/recipes\/new\?import=paste_html/);
+		expect(loc).toContain("url=");
+		// no recipe was created
+		const lib = await app.request("/recipes", auth(cookie));
+		const body = await lib.text();
+		expect(body).toContain("Your recipe book is empty");
 	});
 
-	it("POST /recipes/import/html extracts from pasted HTML and updates the existing recipe", async () => {
+	it("POST /recipes/import/html with no existing recipe creates one from pasted HTML", async () => {
 		const { app, cookie, restore } = await setupApp(null);
 		restoreFetch = restore;
 
+		const html = readFileSync(join(FIXTURES, "marmiton.html"), "utf-8");
+		const res = await app.request("/recipes/import/html", {
+			method: "POST",
+			headers: { ...auth(cookie).headers, "Content-Type": "application/x-www-form-urlencoded" },
+			body: new URLSearchParams({ url: MARMITON_URL, html }).toString(),
+		});
+		expect(res.status).toBe(302);
+		const loc = res.headers.get("Location") ?? "";
+		expect(loc).toMatch(/^\/recipes\/\d+\/edit$/);
+
+		const after = await app.request(loc, auth(cookie));
+		expect(await after.text()).toContain("Tarte aux amaretti");
+	});
+
+	it("POST /recipes/import/html updates an existing recipe when recipe_id is provided", async () => {
+		const { app, cookie, restore } = await setupApp("marmiton.html");
+		restoreFetch = restore;
+
+		// create a real recipe via a successful import
 		const importRes = await app.request("/recipes/import", {
 			method: "POST",
 			headers: { ...auth(cookie).headers, "Content-Type": "application/x-www-form-urlencoded" },
-			body: "url=https://blocked.example.com/recipe",
+			body: `url=${encodeURIComponent(MARMITON_URL)}`,
 		});
-		const draftLoc = importRes.headers.get("Location") ?? "";
-		const recipeId = draftLoc.match(/^\/recipes\/(\d+)\/edit/)?.[1] ?? "0";
-
-		const before = await app.request(`/recipes/${recipeId}/edit`, auth(cookie));
-		expect(await before.text()).not.toContain("Tarte aux amaretti");
+		const recipeId = (importRes.headers.get("Location") ?? "").match(/^\/recipes\/(\d+)\/edit/)?.[1] ?? "0";
 
 		const html = readFileSync(join(FIXTURES, "marmiton.html"), "utf-8");
 		const res = await app.request("/recipes/import/html", {

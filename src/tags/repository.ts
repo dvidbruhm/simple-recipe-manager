@@ -44,6 +44,25 @@ export class TagRepository {
 		return rows;
 	}
 
+	listForRecipes(recipeIds: number[]): Map<number, string[]> {
+		const map = new Map<number, string[]>();
+		if (recipeIds.length === 0) return map;
+		const placeholders = recipeIds.map(() => "?").join(",");
+		const rows = this.db
+			.query(
+				`SELECT rt.recipe_id AS rid, t.name AS name FROM recipe_tags rt
+				 JOIN tags t ON t.id = rt.tag_id
+				 WHERE rt.recipe_id IN (${placeholders})
+				 ORDER BY t.name COLLATE NOCASE`,
+			)
+			.all(...recipeIds) as { rid: number; name: string }[];
+		for (const row of rows) {
+			if (!map.has(row.rid)) map.set(row.rid, []);
+			map.get(row.rid)?.push(row.name);
+		}
+		return map;
+	}
+
 	listAllWithCounts(): TagWithCount[] {
 		const rows = this.db
 			.query(
