@@ -20,6 +20,7 @@
       this._suppressClick = false;
       this._flipFirst = null;
       this._deleting = false;
+      this._flippedAt = 0;
 
       this.bindCards();
       this.bindControls();
@@ -36,6 +37,8 @@
     }
 
     bindCard(card) {
+      if (card.dataset.bulkBound) return;
+      card.dataset.bulkBound = "true";
       const id = Number(card.getAttribute("data-recipe-id"));
       card.addEventListener("click", (e) => this.onCardClick(e, id));
       card.addEventListener("pointerdown", (e) => this.onPointerDown(e, id));
@@ -82,7 +85,7 @@
           } else {
             this.bindCards();
             this.applySelection();
-            this.gridFade();
+            if (Date.now() - this._flippedAt > 400) this.gridFade();
           }
         }
         this.wireToasts();
@@ -230,6 +233,7 @@
           });
         });
       });
+      this._flippedAt = Date.now();
       setTimeout(() => {
         movers.forEach((card) => {
           card.style.transition = "";
