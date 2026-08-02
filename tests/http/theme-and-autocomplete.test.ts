@@ -78,7 +78,7 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 	});
 
 	describe("POST /theme", () => {
-		it("sets the theme cookie and redirects to the Referer", async () => {
+		it("sets theme + mode cookies and redirects to the Referer", async () => {
 			const { app, cookie } = await setupApp();
 			const res = await app.request("/theme", {
 				method: "POST",
@@ -87,11 +87,13 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 					Referer: "/recipes",
 					Cookie: `session=${cookie}`,
 				},
-				body: "theme=dark",
+				body: "theme=hearth&mode=dark",
 			});
 			expect(res.status).toBe(302);
 			expect(res.headers.get("location")).toBe("/recipes");
-			expect(res.headers.get("Set-Cookie") ?? "").toContain("theme=dark");
+			const setCookie = res.headers.get("Set-Cookie") ?? "";
+			expect(setCookie).toMatch(/theme=hearth/);
+			expect(setCookie).toMatch(/mode=dark/);
 		});
 
 		it("rejects an unknown theme value with 400", async () => {
@@ -102,7 +104,20 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 					"Content-Type": "application/x-www-form-urlencoded",
 					Cookie: `session=${cookie}`,
 				},
-				body: "theme=neon",
+				body: "theme=neon&mode=dark",
+			});
+			expect(res.status).toBe(400);
+		});
+
+		it("rejects an invalid mode with 400", async () => {
+			const { app, cookie } = await setupApp();
+			const res = await app.request("/theme", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Cookie: `session=${cookie}`,
+				},
+				body: "theme=aurora&mode=sepia",
 			});
 			expect(res.status).toBe(400);
 		});
@@ -112,30 +127,10 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 			const res = await app.request("/theme", {
 				method: "POST",
 				headers: { "Content-Type": "application/x-www-form-urlencoded" },
-				body: "theme=dark",
+				body: "theme=aurora&mode=dark",
 			});
 			expect(res.status).toBe(302);
 			expect(res.headers.get("location") ?? "").toContain("/login");
-		});
-	});
-
-	describe("header theme cycle button", () => {
-		it("renders the cycle form targeting the next theme (auto -> light)", async () => {
-			const { app } = await setupApp();
-			const res = await app.request("/login");
-			const body = await res.text();
-			expect(body).toContain('action="/theme"');
-			expect(body).toContain('name="theme"');
-			expect(body).toContain('value="light"');
-			expect(body).toContain("☀");
-		});
-
-		it("advances to dark with moon icon when current theme is light", async () => {
-			const { app } = await setupApp();
-			const res = await app.request("/login", { headers: { Cookie: "theme=light" } });
-			const body = await res.text();
-			expect(body).toContain('value="dark"');
-			expect(body).toContain("🌙");
 		});
 	});
 

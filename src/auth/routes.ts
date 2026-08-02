@@ -5,7 +5,7 @@ import { z } from "zod";
 import type { App, Ctx } from "@/app";
 import type { Config } from "@/config";
 import { render } from "@/ui/nunjucks";
-import { themeVars } from "@/ui/theme";
+import { THEMES, themeVars } from "@/ui/theme";
 import type { Mailer } from "./email";
 import { verifyPassword } from "./password";
 import { clientIp, type RateLimiter } from "./rate-limit";
@@ -307,8 +307,17 @@ export function authRoutes(deps: AuthDeps): App {
 	app.post("/theme", async (c) => {
 		const body = await c.req.parseBody();
 		const theme = String(body.theme ?? "");
-		if (theme !== "light" && theme !== "dark") return c.body("Bad theme", 400);
+		const mode = String(body.mode ?? "");
+		const validTheme = (THEMES as readonly string[]).includes(theme);
+		const validMode = mode === "light" || mode === "dark";
+		if (!validTheme || !validMode) return c.body("Bad theme", 400);
 		setCookie(c, "theme", theme, {
+			httpOnly: false,
+			sameSite: "Lax",
+			path: "/",
+			maxAge: 60 * 60 * 24 * 365,
+		});
+		setCookie(c, "mode", mode, {
 			httpOnly: false,
 			sameSite: "Lax",
 			path: "/",
