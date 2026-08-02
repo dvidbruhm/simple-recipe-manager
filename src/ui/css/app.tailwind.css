@@ -1217,6 +1217,21 @@ body.is-cooking .cook-step.is-current {
 	font-style: italic;
 }
 
+/* inkwell is monochrome: accent & danger are #fff in dark / #000 in light, so the hardcoded
+   #fff text/glyphs on those backgrounds would vanish. Flip to --color-bg (the inverse) for
+   readable contrast in both modes. */
+[data-theme="inkwell"] .btn--primary,
+[data-theme="inkwell"] .auth-form button,
+[data-theme="inkwell"] .cook-toggle[aria-pressed="true"],
+[data-theme="inkwell"] .btn--danger:hover,
+[data-theme="inkwell"] .check.on {
+	color: var(--color-bg);
+}
+
+[data-theme="inkwell"] .ingredients input[type="checkbox"]:checked::before {
+	box-shadow: inset 1em 1em var(--color-bg);
+}
+
 .theme-swatch[aria-current="true"] {
 	border-color: var(--color-accent) !important;
 	box-shadow: var(--ring);

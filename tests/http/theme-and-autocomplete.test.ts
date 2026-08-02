@@ -187,6 +187,17 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 			const body = await res.text();
 			expect(body).toContain('rel="stylesheet" href="/static/fonts/hearth.css"');
 		});
+
+		it("normalizes a legacy theme=light cookie to neutral+light in the rendered <html>", async () => {
+			const { app, cookie } = await setupApp();
+			const res = await app.request(
+				"/settings",
+				auth(cookie, { Cookie: `theme=light; session=${cookie}` }),
+			);
+			const body = await res.text();
+			expect(body).toContain('data-theme="neutral"');
+			expect(body).toContain('data-mode="light"');
+		});
 	});
 
 	describe("Settings appearance gallery", () => {
