@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipe Library — Neutral Minimalist</title>
+<style>
+:root {
+  --bg: #f8f8f7;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --muted: #888;
+  --accent: #5a7a4f;
+  --accent-soft: #e8efe4;
+  --border: #e0e0de;
+  --radius: 4px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+header {
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: var(--surface);
+}
+.logo {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.search {
+  flex: 1;
+  max-width: 480px;
+}
+.search input {
+  width: 100%;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  font: inherit;
+}
+.search input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+.import-btn {
+  padding: 8px 16px;
+  background: var(--text);
+  color: var(--surface);
+  border: none;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 32px;
+  padding: 28px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.sidebar h3 {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+.chip {
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text);
+  transition: all 0.12s;
+}
+.chip:hover { border-color: var(--accent); }
+.chip.active { background: var(--text); color: var(--surface); border-color: var(--text); }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+.card:hover { border-color: var(--muted); }
+.card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+  background: var(--border);
+}
+.card-body { padding: 12px 14px 14px; }
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.stars { color: var(--accent); letter-spacing: 1px; }
+.stars .empty { color: var(--border); }
+.tag-row { display: flex; gap: 4px; margin-top: 6px; }
+.tag-row .chip { font-size: 11px; padding: 2px 8px; }
+.no-image { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">recipes</div>
+  <div class="search">
+    <input type="text" placeholder="Search recipes, ingredients...">
+  </div>
+  <button class="import-btn">+ Import</button>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <h3>Tags</h3>
+    <div class="tag-chips">
+      <span class="chip active">all</span>
+      <span class="chip">dessert</span>
+      <span class="chip">italian</span>
+      <span class="chip">quick</span>
+      <span class="chip">vegetarian</span>
+      <span class="chip">soup</span>
+      <span class="chip">chocolate</span>
+      <span class="chip">french</span>
+      <span class="chip">dinner</span>
+      <span class="chip">baking</span>
+    </div>
+    <h3>Source</h3>
+    <div class="tag-chips">
+      <span class="chip">marmiton</span>
+      <span class="chip">750g</span>
+      <span class="chip">allrecipes</span>
+      <span class="chip">bbc good food</span>
+    </div>
+  </aside>
+
+  <main class="grid">
+    <div class="card">
+      <img src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=400" alt="Tiramisu">
+      <div class="card-body">
+        <div class="card-title">Classic Tiramisu</div>
+        <div class="card-meta"><span>marmiton.org</span><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+        <div class="tag-row"><span class="chip">dessert</span><span class="chip">italian</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400" alt="Bolognese">
+      <div class="card-body">
+        <div class="card-title">Spaghetti Bolognese</div>
+        <div class="card-meta"><span>bbcgoodfood.com</span><span class="stars">&#9733;&#9733;&#9733;&#9733;<span class="empty">&#9733;</span></span></div>
+        <div class="tag-row"><span class="chip">italian</span><span class="chip">dinner</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://images.unsplash.com/photo-1528908510736-5258199bc7dd?w=400" alt="Turkey burgers">
+      <div class="card-body">
+        <div class="card-title">Spinach and Feta Turkey Burgers</div>
+        <div class="card-meta"><span>allrecipes.com</span><span class="stars">&#9733;&#9733;&#9733;<span class="empty">&#9733;&#9733;</span></span></div>
+        <div class="tag-row"><span class="chip">dinner</span><span class="chip">quick</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=400" alt="Chocolate cake">
+      <div class="card-body">
+        <div class="card-title">Molten Chocolate Lava Cake</div>
+        <div class="card-meta"><span>allrecipes.com</span><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+        <div class="tag-row"><span class="chip">dessert</span><span class="chip">chocolate</span><span class="chip">baking</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://images.unsplash.com/photo-1547592166-23ac45744ffd?w=400" alt="French onion soup">
+      <div class="card-body">
+        <div class="card-title">Soupe à l'Oignon</div>
+        <div class="card-meta"><span>750g.com</span><span class="stars">&#9733;&#9733;&#9733;&#9733;<span class="empty">&#9733;</span></span></div>
+        <div class="tag-row"><span class="chip">soup</span><span class="chip">french</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400" alt="Ratatouille">
+      <div class="card-body">
+        <div class="card-title">Ratatouille Provençale</div>
+        <div class="card-meta"><span>marmiton.org</span><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+        <div class="tag-row"><span class="chip">french</span><span class="chip">vegetarian</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://images.unsplash.com/photo-1473093295043-cdd2671d276a?w=400" alt="Pasta">
+      <div class="card-body">
+        <div class="card-title">Pasta al Pomodoro</div>
+        <div class="card-meta"><span>bbcgoodfood.com</span><span class="stars"><span class="empty">&#9733;&#9733;&#9733;&#9733;&#9733;</span></span></div>
+        <div class="tag-row"><span class="chip">italian</span><span class="chip">vegetarian</span><span class="chip">quick</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="no-image" style="height:160px;background:var(--border);">no image</div>
+      <div class="card-body">
+        <div class="card-title">Grandma's Apple Tart</div>
+        <div class="card-meta"><span>manual</span><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+        <div class="tag-row"><span class="chip">dessert</span><span class="chip">baking</span></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

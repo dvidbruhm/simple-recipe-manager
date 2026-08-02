@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipe Manager — Aurora: Mint · fresh growth SaaS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ AURORA : MINT — Recipe Manager style showcase ============ */
+/* A fresh, growth-minded variation of Aurora: emerald accent on a cool
+   green-tinted near-black canvas. Same glassy 1px-bordered surfaces,
+   inner top highlight, single-accent focus glow-ring, Inter type,
+   10/12px radii, soft shadows, smooth transitions. */
+:root{
+  --bg:#0a0f0d; --surface:#111815; --surface-2:#161f1b;
+  --text:#e8ece9; --muted:#7d8b85; --ph:#4a5651;
+  --accent:#10b981; --accent-2:#059669; --accent-soft:rgba(16,185,129,.12);
+  --accent-tint:#6ee7b7; /* emerald-300 — soft accent text */
+  --accent-bright:#34d399; /* emerald-400 — brighter accent text */
+  --danger:#f87171; --danger-soft:rgba(248,113,113,.12);
+  --star:#fbbf24; --star-e:#2a3530;
+  --border:rgba(255,255,255,.08); --border-strong:rgba(255,255,255,.14);
+  --r-ctrl:10px; --r-card:12px;
+  --sh-sm:0 1px 2px rgba(0,0,0,.4); --sh-lg:0 8px 24px rgba(0,0,0,.25);
+  --glow:0 0 0 1px rgba(16,185,129,.4),0 0 20px rgba(16,185,129,.25);
+  --grad:linear-gradient(180deg,#10b981,#059669);
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh;position:relative;overflow-x:hidden}
+/* signature aurora glow blob, recolored emerald + a breath of teal */
+body::before{content:"";position:absolute;top:-280px;left:50%;width:1280px;height:720px;transform:translateX(-50%);background:radial-gradient(ellipse 55% 50% at 32% 50%,rgba(16,185,129,.30),transparent 70%),radial-gradient(ellipse 50% 50% at 70% 55%,rgba(5,150,105,.22),transparent 70%),radial-gradient(ellipse 38% 40% at 50% 38%,rgba(20,184,166,.12),transparent 70%);filter:blur(50px);z-index:0;pointer-events:none}
+/* dotted dashboard backdrop (fintech/growth feel) instead of Aurora's grid */
+body::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;-webkit-mask-image:linear-gradient(180deg,#000,transparent 640px);mask-image:linear-gradient(180deg,#000,transparent 640px)}
+.wrap{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:64px 32px 96px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--sh-sm);background-image:linear-gradient(180deg,rgba(255,255,255,.022),transparent 120px);position:relative}
+.panel::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.pad{padding:22px}
+.panel-title{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.panel-title::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(16,185,129,.6)}
+
+/* preamble */
+.intro{margin-bottom:72px}
+.badge{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-tint);padding:6px 12px;border-radius:999px;background:var(--accent-soft);border:1px solid rgba(16,185,129,.35);margin-bottom:22px}
+.badge .pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.intro h1{font-size:64px;font-weight:700;letter-spacing:-.04em;line-height:1;margin-bottom:10px;background:linear-gradient(180deg,#fff,#c3ccc7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.intro h1 .accent{background:linear-gradient(180deg,#6ee7b7,#10b981);-webkit-background-clip:text;background-clip:text;color:transparent}
+.intro .sub{color:var(--muted);font-size:14px;letter-spacing:.02em;margin-bottom:16px;font-family:var(--mono)}
+.intro .concept{color:var(--muted);font-size:17px;max-width:700px;line-height:1.55}
+.meta-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;margin-top:34px}
+@media(max-width:860px){.meta-grid{grid-template-columns:1fr}.intro h1{font-size:48px}}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px}
+.sw .chip{height:64px;border-radius:10px 10px 4px 4px;border:1px solid var(--border);margin-bottom:7px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.sw .name{font-size:11px;font-weight:600}.sw .hex{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.spec .row{display:flex;align-items:baseline;gap:14px;padding:10px 0;border-top:1px solid var(--border)}
+.spec .row:first-child{border-top:none}
+.spec .lbl{font-size:10px;color:var(--muted);width:96px;text-transform:uppercase;letter-spacing:.12em;font-family:var(--mono)}
+.spec .t-display{font-size:30px;font-weight:700;letter-spacing:-.035em}
+.spec .t-h{font-size:18px;font-weight:600;letter-spacing:-.02em}
+.spec .t-mono{font-size:12px;color:var(--accent);font-family:var(--mono)}
+
+/* sections */
+section{margin-bottom:68px;scroll-margin-top:24px}
+.sec-head{position:relative;padding-left:16px;margin-bottom:22px}
+.sec-head::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:3px;background:linear-gradient(180deg,var(--accent),transparent);box-shadow:0 0 12px rgba(16,185,129,.5)}
+.sec-head .num{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.sec-head h2{font-size:24px;font-weight:600;letter-spacing:-.025em;margin-top:3px}
+.sec-head .note{color:var(--muted);font-size:13px;margin-top:3px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;font-size:13px;font-weight:500;line-height:1;padding:9px 14px;border-radius:var(--r-ctrl);border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;transition:all .16s ease;white-space:nowrap;box-shadow:var(--sh-sm)}
+.btn:hover{border-color:var(--border-strong);transform:translateY(-1px)}
+.btn-sm{padding:7px 11px;font-size:12px}
+.btn-primary{background:var(--grad);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.18)}
+.btn-primary:hover{box-shadow:0 4px 14px rgba(5,150,105,.45),inset 0 1px 0 rgba(255,255,255,.18)}
+.btn-danger{background:var(--danger-soft);border-color:rgba(248,113,113,.3);color:#fca5a5}
+.btn-danger:hover{background:rgba(248,113,113,.2)}
+.btn-ghost{background:transparent;border-color:transparent;box-shadow:none;color:var(--muted);width:38px;padding:9px}
+.btn-ghost:hover{background:rgba(255,255,255,.05);color:var(--text);box-shadow:none}
+.btn-link{background:transparent;border:none;box-shadow:none;color:var(--accent);padding:0;height:auto;display:inline-flex;align-items:center;gap:3px}
+.btn-link:hover{text-decoration:underline;transform:none}
+.step-btn{width:30px;height:30px;padding:0;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s}
+.step-btn:hover{border-color:var(--accent);color:var(--accent)}
+.fav{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);display:inline-flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:all .16s}
+.fav:hover{color:var(--text);border-color:var(--border-strong)}
+.fav.on{color:#fb7185;border-color:rgba(251,113,133,.35);background:rgba(251,113,133,.1)}
+.btn-row{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.callout{font-size:12px;color:var(--muted);border-left:2px solid var(--accent);padding:4px 0 4px 12px;margin-top:18px;max-width:580px;line-height:1.6}
+.callout b{color:var(--text);font-weight:600}.callout code{color:var(--accent);font-family:var(--mono)}
+.focus-demo{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:var(--r-ctrl);border:1px solid rgba(16,185,129,.4);background:var(--surface-2);font-size:13px;box-shadow:var(--glow)}
+
+/* form */
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:7px}
+.in{width:100%;font:inherit;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:var(--r-ctrl);padding:10px 12px;transition:border-color .15s,box-shadow .15s,background .15s}
+.in::placeholder{color:var(--ph)}
+.in:hover{border-color:var(--border-strong)}
+.in:focus{outline:none;border-color:rgba(16,185,129,.55);box-shadow:var(--glow);background:var(--surface)}
+textarea.in{resize:vertical;min-height:84px;line-height:1.5}
+.select-wrap{position:relative}
+.select-wrap select.in{appearance:none;cursor:pointer;padding-right:34px}
+.select-wrap .chev{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;display:flex}
+.input-ic{position:relative}
+.input-ic .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex;pointer-events:none}
+.input-ic .in{padding-left:36px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.form-grid,.pair{grid-template-columns:1fr}}
+.check{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px}
+.check input{display:none}
+.check .box{width:18px;height:18px;border-radius:5px;border:1px solid var(--border-strong);background:var(--bg);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.check input:checked+.box{background:var(--grad);border-color:transparent}
+.check input:checked+.box svg{opacity:1}
+.check .box svg{opacity:0;color:#fff;transition:opacity .12s}
+.check.done .txt{color:var(--muted);text-decoration:line-through}
+
+/* chips */
+.chips-wrap{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border-radius:var(--r-ctrl);border:1px solid var(--border);background:var(--bg);transition:all .15s}
+.chips-wrap:focus-within{border-color:rgba(16,185,129,.55);box-shadow:var(--glow)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 6px 5px 10px;border-radius:7px;color:var(--accent-tint);background:var(--accent-soft);border:1px solid rgba(16,185,129,.28)}
+.chip .x{width:16px;height:16px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;color:#9aa8a2;background:rgba(255,255,255,.04);transition:all .12s;cursor:pointer;border:none}
+.chip .x:hover{background:rgba(248,113,113,.2);color:#fca5a5}
+.chip-input{flex:1;min-width:90px;border:none;background:transparent;color:var(--text);font:inherit;font-size:13px;padding:4px;outline:none}
+.suggest{margin-top:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-ctrl);box-shadow:var(--sh-lg);padding:6px;max-width:240px}
+.suggest .s-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:7px;font-size:13px;cursor:pointer}
+.suggest .s-item.hl{background:var(--accent-soft);color:var(--accent-tint)}
+.suggest .mark{color:var(--accent);font-weight:600}
+.fgroup-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.frow{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{font-size:12px;font-weight:500;padding:6px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s}
+.fchip:hover{color:var(--text);border-color:var(--border-strong)}
+.fchip.active{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 2px 8px rgba(5,150,105,.4)}
+.fgroup{margin-bottom:18px}.fgroup:last-child{margin-bottom:0}
+
+/* header bar */
+.appbar{display:flex;align-items:center;gap:14px;padding:12px 18px;background:rgba(17,24,21,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--sh-sm),inset 0 1px 0 rgba(255,255,255,.04);position:relative;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;padding-right:14px;border-right:1px solid var(--border)}
+.logo .mark{width:32px;height:32px;border-radius:9px;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 2px 10px rgba(5,150,105,.5)}
+.logo .word{font-weight:600;font-size:14px;letter-spacing:-.01em}
+.logo .word span{color:var(--muted);font-weight:400}
+.search{flex:1;position:relative;min-width:180px}
+.search .in{padding-left:36px;background:rgba(10,15,13,.6)}
+.search .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex}
+.search kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border);background:var(--surface-2);padding:2px 6px;border-radius:5px}
+.iconbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0}
+.iconbtn:hover{color:var(--text);border-color:var(--border-strong)}
+.viewseg{display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface-2)}
+.viewseg button{width:38px;height:38px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.viewseg button.on{background:var(--accent-soft);color:var(--accent-bright)}
+.dd{position:relative;flex-shrink:0}
+.menu{position:absolute;top:calc(100% + 8px);left:0;min-width:220px;z-index:30;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-ctrl);box-shadow:var(--sh-lg),inset 0 1px 0 rgba(255,255,255,.05);padding:6px}
+.menu .mi{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border-radius:7px;background:transparent;border:none;color:var(--text);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.menu .mi:hover{background:rgba(255,255,255,.05)}
+.menu .mi.active{background:var(--accent-soft);color:var(--accent-tint)}
+.menu .mi .ck{color:var(--accent);opacity:0}
+.menu .mi.active .ck{opacity:1}
+.menu .sep{height:1px;background:var(--border);margin:5px 4px}
+.menu .mi .glyph{color:var(--muted);display:flex}
+
+/* stars */
+.stars{color:var(--star);letter-spacing:1px;font-size:12px;line-height:1;white-space:nowrap}
+.stars .e{color:var(--star-e)}
+.stars-lg{color:var(--star);letter-spacing:2px;font-size:20px;line-height:1}
+.stars-lg .e{color:var(--star-e)}
+.stars-xl{color:var(--star);letter-spacing:3px;font-size:30px;line-height:1}
+.stars-xl span{text-shadow:0 0 8px rgba(251,191,36,.45)}
+.stars-xl .e{text-shadow:none;color:var(--star-e)}
+
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden;box-shadow:var(--sh-sm);transition:all .2s ease;position:relative;background-image:linear-gradient(180deg,rgba(255,255,255,.02),transparent 80px)}
+.card:hover{transform:translateY(-3px);border-color:var(--border-strong);box-shadow:var(--sh-lg)}
+.card.selected{border-color:rgba(16,185,129,.55);box-shadow:var(--glow),var(--sh-sm)}
+.card .img{position:relative;aspect-ratio:16/10;overflow:hidden;background:var(--surface-2)}
+.card .img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.card:hover .img img{transform:scale(1.05)}
+.card .noimg{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--ph);background:repeating-linear-gradient(45deg,rgba(16,185,129,.03) 0 10px,transparent 10px 20px),var(--surface-2);border-bottom:1px solid var(--border)}
+.card .noimg .em{font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.card .selcorner{position:absolute;top:10px;left:10px;width:22px;height:22px;border-radius:7px;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 2px 8px rgba(5,150,105,.55)}
+.card .body{padding:14px 15px 16px}
+.card .title{font-size:15px;font-weight:600;letter-spacing:-.01em;margin-bottom:4px}
+.card .meta{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;margin-bottom:10px}
+.card .meta .dot{width:3px;height:3px;border-radius:50%;background:var(--muted)}
+.card .tags{display:flex;flex-wrap:wrap;gap:6px}
+.mini-tag{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface-2);color:var(--muted);border:1px solid var(--border)}
+
+/* list */
+.list{border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden;background:var(--surface)}
+.row{display:grid;grid-template-columns:18px 64px 1fr auto auto auto;align-items:center;gap:16px;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s}
+.row:last-child{border-bottom:none}
+.row:hover{background:rgba(255,255,255,.02)}
+.row .thumb{width:64px;height:48px;border-radius:8px;object-fit:cover;background:var(--surface-2);display:block}
+.row .tnoimg{width:64px;height:48px;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--ph);border:1px solid var(--border)}
+.row .rtitle{font-weight:600;font-size:14px}
+.row .rsrc{font-size:12px;color:var(--muted)}
+.row .rtags{display:flex;gap:6px}
+.row .rstars{font-size:13px}
+.row .cb{width:18px;height:18px;border-radius:5px;border:1px solid var(--border-strong);background:var(--bg)}
+.row .cb.on{background:var(--grad);border-color:transparent;display:flex;align-items:center;justify-content:center;color:#fff}
+
+/* cook view */
+.cook .back{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;margin-bottom:16px;text-decoration:none}
+.cook .back:hover{color:var(--text)}
+.cook-hero{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start}
+@media(max-width:780px){.cook-hero{grid-template-columns:1fr}}
+.cook-hero .hero-img{width:100%;aspect-ratio:4/3;border-radius:var(--r-card);object-fit:cover;border:1px solid var(--border);box-shadow:var(--sh-lg)}
+.cook-hero h3{font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-bottom:10px}
+.cook-hero .desc{color:var(--muted);font-size:14px;margin-bottom:14px;max-width:560px}
+.rating-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.cook-hero .tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag-pill{font-size:12px;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-tint);border:1px solid rgba(16,185,129,.25)}
+.cook-body{display:grid;grid-template-columns:1fr 1.15fr;gap:22px;margin-top:26px}
+@media(max-width:860px){.cook-body{grid-template-columns:1fr}}
+.col-h{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.servings{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.servings .lbl{font-size:12px;color:var(--muted);margin-right:4px}
+.servings .num{width:48px;text-align:center;font-weight:600;font-size:15px;padding:7px 0;background:var(--bg);border:1px solid var(--border);border-radius:8px}
+.servings .reset{margin-left:auto}
+.ing{display:flex;align-items:center;gap:11px;padding:9px 4px;border-bottom:1px solid var(--border);font-size:14px}
+.ing:last-child{border-bottom:none}
+.ing.done .txt{color:var(--muted);text-decoration:line-through}
+.ing .cbox{width:18px;height:18px;border-radius:5px;border:1px solid var(--border-strong);background:var(--bg);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+.ing.done .cbox{background:var(--grad);border-color:transparent}
+.progress{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-ctrl);padding:14px 16px;margin-bottom:16px;background-image:linear-gradient(180deg,rgba(16,185,129,.04),transparent 80px)}
+.progress .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.progress .ptxt{font-size:12px;color:var(--muted)}
+.progress .ptxt b{color:var(--text);font-weight:600}
+.progress .nav{display:flex;gap:6px}
+.bar{height:6px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
+.bar .fill{height:100%;width:33%;background:var(--grad);border-radius:99px;box-shadow:0 0 12px rgba(16,185,129,.55)}
+.steps{list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:12px;padding:11px 12px;border-radius:var(--r-ctrl);font-size:14px;color:var(--text);position:relative;border:1px solid transparent}
+.steps li::before{content:counter(s);flex-shrink:0;width:26px;height:26px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono)}
+.steps li.cur{background:var(--accent-soft);border-color:rgba(16,185,129,.3);box-shadow:var(--glow)}
+.steps li.cur::before{background:var(--grad);color:#fff;border-color:transparent}
+.steps li.done{color:var(--muted)}
+.steps li.done::before{background:rgba(16,185,129,.15);color:var(--accent-bright);border-color:rgba(16,185,129,.25)}
+.notes{margin-top:22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:16px 18px}
+.notes .col-h{margin-bottom:8px}
+.cook-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:22px;padding-top:20px;border-top:1px solid var(--border)}
+.cook-foot .spacer{flex:1}
+
+/* settings */
+.settings{display:grid;gap:14px}
+.scard{display:flex;align-items:center;gap:18px;padding:18px 20px;flex-wrap:wrap}
+.scard .info{flex:1;min-width:180px}
+.scard .info h4{font-size:15px;font-weight:600;margin-bottom:3px}
+.scard .info p{font-size:12px;color:var(--muted)}
+.scard .info .hint{font-size:11px;color:var(--muted);margin-top:6px}
+.scard .actions{display:flex;flex-wrap:wrap;gap:8px}
+.about-logo{display:flex;align-items:center;gap:14px}
+.about-logo .mark{width:40px;height:40px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 2px 10px rgba(5,150,105,.45)}
+.version{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--border);padding:3px 8px;border-radius:6px}
+
+/* auth */
+.auth-wrap{display:flex;justify-content:center}
+.auth{width:100%;max-width:400px;padding:30px}
+.auth h3{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px}
+.auth .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+.error-note{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:var(--r-ctrl);background:var(--danger-soft);border:1px solid rgba(248,113,113,.3);color:#fca5a5;font-size:13px;margin-bottom:18px}
+.auth-links{display:flex;justify-content:space-between;margin-top:18px;font-size:12px}
+.auth-links a{color:var(--accent);text-decoration:none}
+.auth-links a:hover{text-decoration:underline}
+
+/* feedback */
+.fb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(max-width:760px){.fb-grid{grid-template-columns:1fr}}
+.fb{padding:18px;display:flex;flex-direction:column;gap:12px}
+.fb .cap{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.toast{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-ctrl);box-shadow:var(--sh-lg)}
+.toast .tic{width:28px;height:28px;border-radius:8px;background:rgba(16,185,129,.15);color:var(--accent-bright);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toast .tmsg{flex:1;font-size:13px}
+.toast .tclose{width:24px;height:24px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.toast .tclose:hover{color:var(--text)}
+.bulkbar{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--surface-2);border:1px solid rgba(16,185,129,.3);border-radius:var(--r-ctrl);box-shadow:var(--sh-lg);flex-wrap:wrap}
+.bulkbar .count{font-size:13px;font-weight:500;color:var(--accent-tint)}
+.bulkbar .count b{color:#fff}
+.bulkbar .grow{flex:1}
+.skeleton .sk{border-radius:7px;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.09) 37%,rgba(255,255,255,.04) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.skeleton .img{aspect-ratio:16/9;border-radius:var(--r-ctrl);margin-bottom:12px}
+.skeleton .l1{height:14px;width:70%;margin-bottom:8px}
+.skeleton .l2{height:10px;width:45%}
+.spin{width:26px;height:26px;border-radius:50%;border:2.5px solid rgba(16,185,129,.2);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin-wrap{display:flex;align-items:center;justify-content:center;padding:24px}
+.empty{text-align:center;padding:14px 0}
+.empty .glyph{width:48px;height:48px;border-radius:14px;background:var(--accent-soft);border:1px solid rgba(16,185,129,.25);color:var(--accent-bright);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px}
+.empty .et{font-weight:600;font-size:14px;margin-bottom:4px}
+.empty .es{color:var(--muted);font-size:12px;margin-bottom:14px}
+.banner{display:flex;gap:11px;padding:12px 14px;background:var(--danger-soft);border:1px solid rgba(248,113,113,.3);border-radius:var(--r-ctrl);color:#fca5a5;font-size:13px;align-items:flex-start}
+.banner .bicon{flex-shrink:0;display:flex}
+
+/* star demo */
+.stars-demo{display:flex;flex-wrap:wrap;gap:28px;align-items:center}
+.stars-demo .block{display:flex;flex-direction:column;align-items:center;gap:8px}
+.stars-demo .lbl{font-size:11px;color:var(--muted);font-family:var(--mono)}
+
+/* tokens */
+.tokens{width:100%;border-collapse:collapse;font-size:13px}
+.tokens th,.tokens td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border)}
+.tokens th{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tokens td.tname{font-weight:500}
+.tokens td.tval{font-family:var(--mono);color:var(--accent);font-size:12px}
+.tokens td.tsw{width:54px}
+.tsw-box{width:30px;height:18px;border-radius:5px;border:1px solid var(--border)}
+.foot-top{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.foot-top .mark{width:34px;height:34px;border-radius:9px;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff}
+.foot-top .ft-title{font-weight:600}
+.foot-top .ft-sub{font-size:12px;color:var(--muted)}
+.endline{margin-top:40px;text-align:center;font-size:11px;color:var(--ph);letter-spacing:.14em;text-transform:uppercase}
+.muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===================== PREAMBLE ===================== -->
+  <header class="intro">
+    <span class="badge"><span class="pulse"></span> Mint edition · Style tile</span>
+    <h1>Aurora: <span class="accent">Mint</span></h1>
+    <p class="sub">Recipe Manager — a fresh, growth-minded variation of Aurora</p>
+    <p class="concept">A calm, fresh take on Aurora — emerald light pooling over a cool green-tinted near-black canvas. The same glassy 1px-bordered surfaces, inner top highlights and quiet glow-ring, retuned for a growth / health / fintech mood: verdant, professional, quietly confident.</p>
+
+    <div class="meta-grid">
+      <div class="panel pad">
+        <div class="panel-title">Palette · every token</div>
+        <div class="swatches">
+          <div class="sw"><div class="chip" style="background:#0a0f0d"></div><div class="name">bg</div><div class="hex">#0a0f0d</div></div>
+          <div class="sw"><div class="chip" style="background:#111815"></div><div class="name">surface</div><div class="hex">#111815</div></div>
+          <div class="sw"><div class="chip" style="background:#161f1b"></div><div class="name">elevated</div><div class="hex">#161f1b</div></div>
+          <div class="sw"><div class="chip" style="background:#e8ece9"></div><div class="name">text</div><div class="hex">#e8ece9</div></div>
+          <div class="sw"><div class="chip" style="background:#7d8b85"></div><div class="name">muted</div><div class="hex">#7d8b85</div></div>
+          <div class="sw"><div class="chip" style="background:linear-gradient(180deg,#10b981,#059669)"></div><div class="name">accent</div><div class="hex">#10b981</div></div>
+          <div class="sw"><div class="chip" style="background:rgba(16,185,129,.12)"></div><div class="name">accent-soft</div><div class="hex">rgba(…12%)</div></div>
+          <div class="sw"><div class="chip" style="background:#f87171"></div><div class="name">danger</div><div class="hex">#f87171</div></div>
+          <div class="sw"><div class="chip" style="background:#fbbf24"></div><div class="name">star</div><div class="hex">#fbbf24</div></div>
+          <div class="sw"><div class="chip" style="background:rgba(255,255,255,.08)"></div><div class="name">border</div><div class="hex">rgba(…8%)</div></div>
+        </div>
+      </div>
+      <div class="panel pad">
+        <div class="panel-title">Type · Inter</div>
+        <div class="spec">
+          <div class="row"><div class="lbl">Display</div><div class="t-display">Garden Mint</div></div>
+          <div class="row"><div class="lbl">Heading</div><div class="t-h">Layered with mascarpone, dusted with cocoa</div></div>
+          <div class="row"><div class="lbl">Body</div><div style="font-size:14px">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream.</div></div>
+          <div class="row"><div class="lbl">Mono</div><div class="t-mono">--accent: #10b981;</div></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== 01 HEADER ===================== -->
+  <section id="s01">
+    <div class="sec-head"><div class="num">01 · Header</div><h2>Top app bar</h2>
+      <div class="note">Glassy blurred bar with a leaf wordmark, search, add + sort menus (shown open), view segment, theme &amp; settings.</div></div>
+
+    <div class="appbar">
+      <div class="logo">
+        <div class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></div>
+        <div class="word">Recipe<span>Manager</span></div>
+      </div>
+
+      <div class="search">
+        <span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+        <input class="in" type="search" placeholder="Search recipes, ingredients, steps…"><kbd>⌘K</kbd>
+      </div>
+
+      <div class="dd">
+        <button class="btn btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Add recipe
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.8"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="menu" role="menu" style="min-width:190px">
+          <button class="mi"><span>New recipe</span><span class="glyph"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span></button>
+          <button class="mi"><span>Import from URL</span><span class="glyph"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.5-1.5"/></svg></span></button>
+        </div>
+      </div>
+
+      <div class="dd">
+        <button class="btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+          Sort
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.6"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="menu" role="menu">
+          <button class="mi"><span>Name A → Z</span><span class="ck">✓</span></button>
+          <button class="mi"><span>Name Z → A</span><span class="ck">✓</span></button>
+          <button class="mi active"><span>Date added (New → Old)</span><span class="ck">✓</span></button>
+          <button class="mi"><span>Date added (Old → New)</span><span class="ck">✓</span></button>
+          <div class="sep"></div>
+          <button class="mi"><span>Stars 0 → 5</span><span class="ck">✓</span></button>
+          <button class="mi"><span>Stars 5 → 0</span><span class="ck">✓</span></button>
+        </div>
+      </div>
+
+      <div class="viewseg" role="group" aria-label="View mode">
+        <button class="on" aria-label="Card view"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+        <button aria-label="List view"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+      </div>
+
+      <button class="iconbtn" aria-label="Theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
+      <button class="iconbtn" aria-label="Settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ===================== 02 BUTTONS ===================== -->
+  <section id="s02">
+    <div class="sec-head"><div class="num">02 · Buttons</div><h2>Button family</h2>
+      <div class="note">Primary rides the emerald vertical gradient; danger is a soft tint; ghost &amp; icon variants brighten on hover.</div></div>
+
+    <div class="panel pad">
+      <div class="btn-row">
+        <button class="btn btn-primary">Save</button>
+        <button class="btn">Edit</button>
+        <button class="btn btn-danger"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>Delete</button>
+        <button class="btn btn-ghost" aria-label="Settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+
+        <span style="display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:10px;padding:4px;background:var(--surface-2)">
+          <button class="step-btn" aria-label="Decrease">−</button>
+          <span style="min-width:24px;text-align:center;font-weight:600">4</span>
+          <button class="step-btn" aria-label="Increase">+</button>
+        </span>
+
+        <button class="fav" aria-label="Favorite"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg></button>
+        <button class="fav on" aria-label="Favorited"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg></button>
+
+        <button class="btn-link">Original<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></button>
+      </div>
+
+      <div class="btn-row" style="margin-top:18px">
+        <span class="muted" style="font-size:12px">Focus / active glow ring:</span>
+        <span class="focus-demo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add recipe</span>
+      </div>
+
+      <p class="callout"><b>Hover/focus:</b> all controls lift <code>-1px</code>, borders brighten to <code>--border-strong</code>, and focus draws the signature <b>emerald glow ring</b> (<code>0 0 0 1px</code> + <code>20px halo</code>). Primary casts an emerald bloom on hover.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 03 FORM CONTROLS ===================== -->
+  <section id="s03">
+    <div class="sec-head"><div class="num">03 · Form controls</div><h2>Inputs, selects, checkboxes</h2>
+      <div class="note">Inputs rest on the deep canvas with a 10px radius; focus snaps to the emerald glow ring.</div></div>
+
+    <div class="panel pad">
+      <div class="form-grid">
+        <div class="field"><label for="f-title">Title</label><input class="in" id="f-title" type="text" value="Classic Tiramisu"></div>
+        <div class="field"><label for="f-search">Search</label>
+          <div class="input-ic"><span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+          <input class="in" id="f-search" type="search" placeholder="Find an ingredient…"></div>
+        </div>
+        <div class="pair" style="grid-column:1/-1">
+          <div class="field"><label for="f-email">Email</label><input class="in" id="f-email" type="email" value="chef@kitchen.io"></div>
+          <div class="field"><label for="f-pass">Password</label><input class="in" id="f-pass" type="password" value="••••••••"></div>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label for="f-desc">Description</label><textarea class="in" id="f-desc" rows="3">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea></div>
+        <div class="field"><label for="f-serv">Servings</label><input class="in" id="f-serv" type="number" value="4"></div>
+        <div class="field"><label for="f-rate">Rating</label>
+          <div class="select-wrap">
+            <select class="in" id="f-rate"><option>0 stars</option><option>1 star</option><option>2 stars</option><option>3 stars</option><option selected>4 stars</option><option>5 stars</option></select>
+            <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
+          </div>
+        </div>
+        <div class="field"><label for="f-file">Image</label><input class="in" id="f-file" type="file"></div>
+        <div class="field"><label>Shopping list</label>
+          <label class="check done" style="margin-bottom:9px"><input type="checkbox" checked><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span><span class="txt">¾ cup white sugar <span class="muted">(bought)</span></span></label>
+          <label class="check"><input type="checkbox"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span><span class="txt">1 package ladyfingers</span></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 04 TAGS EDITOR ===================== -->
+  <section id="s04">
+    <div class="sec-head"><div class="num">04 · Tags chips input</div><h2>Tag editor</h2>
+      <div class="note">Removable emerald chips with a live suggestions dropdown for the partial "qui".</div></div>
+    <div class="panel pad" style="max-width:560px">
+      <div class="chips-wrap">
+        <span class="chip">dessert<button class="x" aria-label="Remove">✕</button></span>
+        <span class="chip">italian<button class="x" aria-label="Remove">✕</button></span>
+        <span class="chip">chocolate<button class="x" aria-label="Remove">✕</button></span>
+        <input class="chip-input" type="text" value="qui" aria-label="Add tag">
+      </div>
+      <div class="suggest" role="listbox">
+        <div class="s-item hl"><span><span class="mark">qui</span>ck</span><span class="muted" style="font-size:11px">↵</span></div>
+        <div class="s-item"><span><span class="mark">qui</span>che</span></div>
+        <div class="s-item"><span><span class="mark">qui</span>ninoa</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 05 FILTER CHIPS ===================== -->
+  <section id="s05">
+    <div class="sec-head"><div class="num">05 · Filter chips</div><h2>Tags &amp; sources</h2>
+      <div class="note">Pill filters; active is a solid emerald gradient, inactive are quiet surface chips.</div></div>
+    <div class="panel pad">
+      <div class="fgroup"><div class="fgroup-label">Tags</div>
+        <div class="frow">
+          <button class="fchip active">all</button><button class="fchip">dessert</button><button class="fchip">italian</button><button class="fchip">quick</button><button class="fchip">vegetarian</button><button class="fchip">soup</button><button class="fchip">chocolate</button><button class="fchip">french</button><button class="fchip">dinner</button><button class="fchip">baking</button>
+        </div>
+      </div>
+      <div class="fgroup"><div class="fgroup-label">Source</div>
+        <div class="frow"><button class="fchip">marmiton</button><button class="fchip">750g</button><button class="fchip">allrecipes</button><button class="fchip">bbc good food</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 06 RECIPE GRID ===================== -->
+  <section id="s06">
+    <div class="sec-head"><div class="num">06 · Recipe grid</div><h2>Cards</h2>
+      <div class="note">Six recipes; one selected with a corner check + emerald glow ring; one imageless placeholder.</div></div>
+    <div class="grid">
+      <article class="card"><div class="img"><img src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu"></div>
+        <div class="body"><div class="title">Classic Tiramisu</div>
+          <div class="meta"><span>marmiton.org</span><span class="dot"></span><span class="stars">★★★★★</span></div>
+          <div class="tags"><span class="mini-tag">dessert</span><span class="mini-tag">italian</span></div></div></article>
+
+      <article class="card"><div class="img"><img src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600" alt="Spaghetti Bolognese"></div>
+        <div class="body"><div class="title">Spaghetti Bolognese</div>
+          <div class="meta"><span>bbcgoodfood.com</span><span class="dot"></span><span class="stars">★★★★<span class="e">★</span></span></div>
+          <div class="tags"><span class="mini-tag">italian</span><span class="mini-tag">dinner</span></div></div></article>
+
+      <article class="card"><div class="img"><img src="https://images.unsplash.com/photo-1528908510736-5258199bc7dd?w=600" alt="Spinach and Feta Turkey Burgers"></div>
+        <div class="body"><div class="title">Spinach &amp; Feta Turkey Burgers</div>
+          <div class="meta"><span>allrecipes.com</span><span class="dot"></span><span class="stars">★★★<span class="e">★★</span></span></div>
+          <div class="tags"><span class="mini-tag">dinner</span><span class="mini-tag">quick</span></div></div></article>
+
+      <article class="card selected">
+        <div class="img"><img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Molten Chocolate Lava Cake"></div>
+        <span class="selcorner"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span>
+        <div class="body"><div class="title">Molten Chocolate Lava Cake</div>
+          <div class="meta"><span>allrecipes.com</span><span class="dot"></span><span class="stars">★★★★★</span></div>
+          <div class="tags"><span class="mini-tag">dessert</span><span class="mini-tag">chocolate</span><span class="mini-tag">baking</span></div></div></article>
+
+      <article class="card"><div class="img"><img src="https://images.unsplash.com/photo-1547592166-23ac45744ffd?w=600" alt="Soupe à l'Oignon"></div>
+        <div class="body"><div class="title">Soupe à l'Oignon</div>
+          <div class="meta"><span>750g.com</span><span class="dot"></span><span class="stars">★★★★<span class="e">★</span></span></div>
+          <div class="tags"><span class="mini-tag">soup</span><span class="mini-tag">french</span></div></div></article>
+
+      <article class="card"><div class="img"><div class="noimg"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg><span class="em">No image</span></div></div>
+        <div class="body"><div class="title">Grandma's Apple Tart</div>
+          <div class="meta"><span>manual</span><span class="dot"></span><span class="stars">★★★★★</span></div>
+          <div class="tags"><span class="mini-tag">dessert</span><span class="mini-tag">baking</span></div></div></article>
+    </div>
+  </section>
+
+  <!-- ===================== 07 LIST ===================== -->
+  <section id="s07">
+    <div class="sec-head"><div class="num">07 · Recipe list</div><h2>Compact rows</h2>
+      <div class="note">Dense list view with thumbnail, inline rating &amp; tags, and a trailing select checkbox.</div></div>
+    <div class="list">
+      <div class="row">
+        <span class="cb"></span>
+        <img class="thumb" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu">
+        <div><div class="rtitle">Classic Tiramisu</div><div class="rsrc">marmiton.org</div></div>
+        <span class="rtags"><span class="mini-tag">dessert</span><span class="mini-tag">italian</span></span>
+        <span class="rstars stars">★★★★★</span>
+        <span class="cb on"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span>
+      </div>
+      <div class="row">
+        <span class="cb"></span>
+        <img class="thumb" src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Molten Chocolate Lava Cake">
+        <div><div class="rtitle">Molten Chocolate Lava Cake</div><div class="rsrc">allrecipes.com</div></div>
+        <span class="rtags"><span class="mini-tag">dessert</span><span class="mini-tag">chocolate</span></span>
+        <span class="rstars stars">★★★★★</span>
+        <span class="cb"></span>
+      </div>
+      <div class="row">
+        <span class="cb"></span>
+        <span class="tnoimg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></span>
+        <div><div class="rtitle">Grandma's Apple Tart</div><div class="rsrc">manual</div></div>
+        <span class="rtags"><span class="mini-tag">dessert</span><span class="mini-tag">baking</span></span>
+        <span class="rstars stars">★★★★★</span>
+        <span class="cb"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 08 COOK VIEW ===================== -->
+  <section id="s08">
+    <div class="sec-head"><div class="num">08 · Recipe cook view</div><h2>Classic Tiramisu</h2>
+      <div class="note">Single-recipe screen: hero, two-column ingredients &amp; steps with cook-mode progress, notes &amp; actions.</div></div>
+
+    <div class="panel pad cook">
+      <a class="back" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Recipes</a>
+
+      <div class="cook-hero">
+        <img class="hero-img" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu">
+        <div>
+          <h3>Classic Tiramisu</h3>
+          <div class="rating-row"><span class="stars-lg" aria-label="4 of 5 stars">★★★★<span class="e">★</span></span><span class="muted" style="font-size:12px">marmiton.org</span></div>
+          <p class="desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</p>
+          <div class="tags"><span class="tag-pill">dessert</span><span class="tag-pill">italian</span><span class="tag-pill">no-bake</span></div>
+        </div>
+      </div>
+
+      <div class="cook-body">
+        <div>
+          <div class="col-h">Ingredients</div>
+          <div class="servings">
+            <span class="lbl">Servings</span>
+            <button class="step-btn" aria-label="Decrease">−</button>
+            <span class="num">4</span>
+            <button class="step-btn" aria-label="Increase">+</button>
+            <button class="btn btn-sm reset">Reset</button>
+          </div>
+          <div class="ing"><span class="cbox"></span><span class="txt">6 egg yolks</span></div>
+          <div class="ing done"><span class="cbox"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span><span class="txt">¾ cup white sugar</span></div>
+          <div class="ing done"><span class="cbox"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span><span class="txt">1⅔ cups heavy cream</span></div>
+          <div class="ing"><span class="cbox"></span><span class="txt">1 package (around 30) ladyfingers</span></div>
+          <div class="ing done"><span class="cbox"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span><span class="txt">1¾ cups strong brewed espresso, cooled</span></div>
+          <div class="ing"><span class="cbox"></span><span class="txt">2 tbsp unsweetened cocoa powder</span></div>
+        </div>
+
+        <div>
+          <div class="col-h">Steps</div>
+          <div class="progress">
+            <div class="top"><span class="ptxt"><b>Step 2 of 6</b> · cook mode</span><span class="nav"><button class="btn btn-sm">Prev</button><button class="btn btn-sm">Next</button></span></div>
+            <div class="bar"><div class="fill"></div></div>
+          </div>
+          <ol class="steps">
+            <li class="done">Whisk egg yolks and sugar until thick and pale.</li>
+            <li class="cur">Fold in mascarpone until smooth.</li>
+            <li>Whip cream to soft peaks and fold in.</li>
+            <li>Combine espresso and a splash of liqueur in a shallow dish.</li>
+            <li>Dip each ladyfinger briefly and layer in a dish.</li>
+            <li>Spread cream, dust with cocoa, chill 4+ hours.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="notes"><div class="col-h">Notes</div><p>Best made a day ahead. Don't oversoak the ladyfingers or the layers turn to paste.</p></div>
+
+      <div class="cook-foot">
+        <button class="btn-link">Original<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></button>
+        <span class="spacer"></span>
+        <button class="btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>
+        <button class="btn btn-danger">Delete</button>
+        <button class="btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>Print</button>
+        <button class="fav on" aria-label="Favorited"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 09 EDIT FORM ===================== -->
+  <section id="s09">
+    <div class="sec-head"><div class="num">09 · Edit form excerpt</div><h2>Recipe editor</h2>
+      <div class="note">Condensed edit surface: title, description, rating, the tag chips input, image paste hint, source URL.</div></div>
+    <div class="panel pad">
+      <div class="form-grid">
+        <div class="field" style="grid-column:1/-1"><label for="e-title">Title</label><input class="in" id="e-title" type="text" value="Classic Tiramisu"></div>
+        <div class="field" style="grid-column:1/-1"><label for="e-desc">Description</label><textarea class="in" id="e-desc" rows="2">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea></div>
+        <div class="field"><label for="e-rate">Rating</label>
+          <div class="select-wrap"><select class="in" id="e-rate"><option>0 stars</option><option>1 star</option><option>2 stars</option><option>3 stars</option><option selected>4 stars</option><option>5 stars</option></select>
+          <span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span></div>
+        </div>
+        <div class="field"><label for="e-src">Source URL</label><input class="in" id="e-src" type="url" value="https://www.marmiton.org/..."></div>
+      </div>
+      <div class="field" style="grid-column:1/-1"><label>Tags</label>
+        <div class="chips-wrap">
+          <span class="chip">dessert<button class="x" aria-label="Remove">✕</button></span>
+          <span class="chip">italian<button class="x" aria-label="Remove">✕</button></span>
+          <span class="chip">no-bake<button class="x" aria-label="Remove">✕</button></span>
+          <input class="chip-input" type="text" placeholder="Add tag…" aria-label="Add tag">
+        </div>
+      </div>
+      <div class="field"><label for="e-file">Image</label>
+        <div style="border:1px dashed var(--border-strong);border-radius:var(--r-ctrl);padding:20px;text-align:center;color:var(--muted);font-size:13px;background:var(--bg)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-bottom:6px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+          <div>Drop an image or click to browse</div>
+          <div class="muted" style="font-size:11px;margin-top:4px">or paste an image here (Ctrl+V)</div>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:8px"><button class="btn btn-primary">Save</button><button class="btn">Cancel</button></div>
+    </div>
+  </section>
+
+  <!-- ===================== 10 SETTINGS ===================== -->
+  <section id="s10">
+    <div class="sec-head"><div class="num">10 · Settings cards</div><h2>Preferences</h2>
+      <div class="note">Export, import, about, and a danger sign-out — each a glassy panel.</div></div>
+    <div class="settings">
+      <div class="panel scard"><div class="info"><h4>Export</h4><p>Download your library</p></div>
+        <div class="actions"><button class="btn btn-sm">JSON</button><button class="btn btn-sm">Markdown zip</button><button class="btn btn-sm">PDF</button><button class="btn btn-sm">JSON-LD zip</button></div></div>
+
+      <div class="panel scard"><div class="info"><h4>Import</h4><p>Restore from a backup file</p><div class="hint">Max 50 MB · JSON, .mmrec, or zip accepted</div></div>
+        <div class="actions"><input class="in" type="file" style="width:auto"><button class="btn btn-primary btn-sm">Preview import</button></div></div>
+
+      <div class="panel scard"><div class="about-logo"><div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></div></div>
+        <div class="info"><h4>Recipe Manager</h4><p>Self-hosted recipe library</p></div>
+        <div class="actions"><span class="version">Version 2.3.0</span><button class="btn-link">GitHub<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></button></div></div>
+
+      <div class="panel scard"><div class="info"><h4 style="color:#fca5a5">Sign out</h4><p>End your session on this device</p></div>
+        <div class="actions"><button class="btn btn-danger">Log out</button></div></div>
+    </div>
+  </section>
+
+  <!-- ===================== 11 AUTH ===================== -->
+  <section id="s11">
+    <div class="sec-head"><div class="num">11 · Auth form</div><h2>Sign in</h2>
+      <div class="note">Centered card with an inline error note above the fields.</div></div>
+    <div class="auth-wrap"><div class="panel auth">
+      <h3>Sign in</h3><p class="sub">Welcome back to your kitchen.</p>
+      <div class="error-note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Invalid email or password.</div>
+      <div class="field"><label for="a-email">Email</label><input class="in" id="a-email" type="email" placeholder="you@kitchen.io"></div>
+      <div class="field"><label for="a-pass">Password</label><input class="in" id="a-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:6px">Sign in</button>
+      <div class="auth-links"><a href="#">Forgot your password?</a><a href="#">Create an account</a></div>
+    </div></div>
+  </section>
+
+  <!-- ===================== 12 FEEDBACK ===================== -->
+  <section id="s12">
+    <div class="sec-head"><div class="num">12 · Feedback components</div><h2>Toast, bulk bar, skeleton, spinner, empty &amp; banner</h2>
+      <div class="note">Quiet surface states that never break the mint calm.</div></div>
+    <div class="fb-grid">
+      <div class="panel fb"><div class="cap">Toast</div>
+        <div class="toast"><span class="tic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span><span class="tmsg">Recipe imported</span><button class="btn btn-sm">View</button><button class="tclose" aria-label="Close">✕</button></div>
+      </div>
+
+      <div class="panel fb"><div class="cap">Bulk-action bar</div>
+        <div class="bulkbar"><span class="count"><b>3</b> selected</span><span class="grow"></span><button class="btn btn-danger btn-sm">Delete</button><button class="btn btn-sm">Cancel</button></div>
+      </div>
+
+      <div class="panel fb skeleton"><div class="cap">Skeleton loader</div>
+        <div class="sk img"></div><div class="sk l1"></div><div class="sk l2"></div>
+      </div>
+
+      <div class="panel fb"><div class="cap">Spinner &amp; empty state</div>
+        <div class="spin-wrap"><div class="spin" aria-label="Loading"></div></div>
+        <div class="empty"><div class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.5-1.5"/></svg></div><div class="et">No recipes yet</div><div class="es">Import your first</div><button class="btn btn-primary btn-sm">Import from URL</button></div>
+      </div>
+
+      <div class="panel fb" style="grid-column:1/-1"><div class="cap">Error / draft banner</div>
+        <div class="banner"><span class="bicon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><span>We couldn't extract a recipe from that page. You can keep editing the draft below or try another URL.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 13 STARS ===================== -->
+  <section id="s13">
+    <div class="sec-head"><div class="num">13 · Star rating + micro-interactions</div><h2>Rating states</h2>
+      <div class="note">Large specimens at 0, 2, 4 and 5 stars — warm amber on the green canvas.</div></div>
+    <div class="panel pad">
+      <div class="stars-demo">
+        <div class="block"><span class="stars-xl"><span class="e">★★★★★</span></span><span class="lbl">0 / 5</span></div>
+        <div class="block"><span class="stars-xl">★★<span class="e">★★★</span></span><span class="lbl">2 / 5</span></div>
+        <div class="block"><span class="stars-xl">★★★★<span class="e">★</span></span><span class="lbl">4 / 5</span></div>
+        <div class="block"><span class="stars-xl">★★★★★</span><span class="lbl">5 / 5</span></div>
+      </div>
+      <p class="callout"><b>Signature micro-interaction:</b> hovering an empty star fills it left-to-right with a soft amber bloom (<code>text-shadow</code> glow), and the count snaps beneath. On click the chosen star pulses once with the emerald focus halo, tying the rating back to the accent language.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 14 FOOTER / TOKENS ===================== -->
+  <section id="s14">
+    <div class="sec-head"><div class="num">14 · Footer / token reference</div><h2>Design tokens</h2>
+      <div class="note">The CSS custom properties that define the Aurora: Mint language, reusable as-is.</div></div>
+    <div class="panel pad">
+      <div class="foot-top">
+        <div class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></div>
+        <div><div class="ft-title">Recipe Manager</div><div class="ft-sub">Aurora: Mint theme · dark</div></div>
+      </div>
+      <table class="tokens">
+        <thead><tr><th>Token</th><th>Value</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="tname">--bg</td><td class="tval">#0a0f0d</td><td class="tsw"><div class="tsw-box" style="background:#0a0f0d"></div></td></tr>
+          <tr><td class="tname">--surface</td><td class="tval">#111815</td><td class="tsw"><div class="tsw-box" style="background:#111815"></div></td></tr>
+          <tr><td class="tname">--surface-2</td><td class="tval">#161f1b</td><td class="tsw"><div class="tsw-box" style="background:#161f1b"></div></td></tr>
+          <tr><td class="tname">--text</td><td class="tval">#e8ece9</td><td class="tsw"><div class="tsw-box" style="background:#e8ece9"></div></td></tr>
+          <tr><td class="tname">--muted</td><td class="tval">#7d8b85</td><td class="tsw"><div class="tsw-box" style="background:#7d8b85"></div></td></tr>
+          <tr><td class="tname">--accent</td><td class="tval">#10b981</td><td class="tsw"><div class="tsw-box" style="background:linear-gradient(180deg,#10b981,#059669)"></div></td></tr>
+          <tr><td class="tname">--accent-soft</td><td class="tval">rgba(16,185,129,.12)</td><td class="tsw"><div class="tsw-box" style="background:rgba(16,185,129,.12)"></div></td></tr>
+          <tr><td class="tname">--danger</td><td class="tval">#f87171</td><td class="tsw"><div class="tsw-box" style="background:#f87171"></div></td></tr>
+          <tr><td class="tname">--border</td><td class="tval">rgba(255,255,255,.08)</td><td class="tsw"><div class="tsw-box" style="background:rgba(255,255,255,.08)"></div></td></tr>
+          <tr><td class="tname">--glow</td><td class="tval">0 0 0 1px / 0 0 20px emerald</td><td class="tsw"><div class="tsw-box" style="background:rgba(16,185,129,.4);box-shadow:0 0 8px rgba(16,185,129,.6)"></div></td></tr>
+          <tr><td class="tname">--r-ctrl / --r-card</td><td class="tval">10px / 12px</td><td class="tsw"><div class="tsw-box" style="border-radius:10px"></div></td></tr>
+        </tbody>
+      </table>
+      <div class="endline">Aurora : Mint · A Recipe Manager style tile · End of showcase</div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

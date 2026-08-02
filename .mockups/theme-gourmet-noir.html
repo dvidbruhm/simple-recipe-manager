@@ -1,0 +1,2244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gourmet Noir — Recipe Manager Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     GOURMET NOIR — design tokens
+     ============================================================ */
+  :root{
+    --bg:        #15120e;   /* warm charcoal */
+    --surface:   #1d1812;   /* card / panel  */
+    --elevated:  #241e16;   /* raised surface */
+    --border:    #3a3128;   /* warm hairline */
+    --text:      #ece4d3;   /* cream         */
+    --muted:     #8a7e63;   /* muted gold-brown */
+    --gold:      #d4b483;   /* accent gold   */
+    --deep-gold: #b8945a;
+    --danger:    #c97a4a;   /* terracotta    */
+    --shade:     rgba(0,0,0,.35);
+    --radius:    2px;
+    --serif: 'Playfair Display', 'Times New Roman', serif;
+    --sans:  'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 80% -10%, rgba(212,180,131,.05), transparent 60%),
+      radial-gradient(900px 500px at -10% 30%, rgba(184,148,90,.04), transparent 60%);
+  }
+
+  /* Subtle paper grain */
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:1;
+    opacity:.04;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(236,228,211,.4) 0 1px, transparent 1px 3px);
+    mix-blend-mode: overlay;
+  }
+
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 40px 120px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ---------- typography ---------- */
+  h1,h2,h3,h4,.serif{ font-family: var(--serif); font-weight:700; }
+  em, .italic{ font-family: var(--serif); font-style: italic; }
+
+  .eyebrow{
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .kicker{
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* ---------- rules / ornaments ---------- */
+  .rule{
+    display:flex; align-items:center; gap:18px;
+    margin: 0;
+    border: 0;
+    height: auto;
+  }
+  .rule::before, .rule::after{
+    content:""; flex:1; height:1px; background: var(--border);
+  }
+  .rule .orn{
+    color: var(--gold); font-size: 14px;
+    font-family: var(--serif);
+    opacity:.85;
+  }
+  .rule.left::before{ display:none; }
+
+  hr.thin{ border:0; border-top:1px solid var(--border); margin: 0; }
+
+  /* ---------- section scaffolding ---------- */
+  section.show{
+    margin-top: 84px;
+    scroll-margin-top: 30px;
+  }
+  .sec-head{ margin-bottom: 28px; }
+  .sec-head .eyebrow{ display:block; margin-bottom: 6px; }
+  .sec-head h2{
+    font-size: 40px;
+    line-height: 1.05;
+    margin: 0 0 8px 0;
+    letter-spacing: -.01em;
+  }
+  .sec-head .kicker{ display:block; }
+  .sec-head .note{
+    color: var(--muted);
+    font-size: 13.5px;
+    margin-top: 6px;
+    font-style: italic;
+    font-family: var(--serif);
+  }
+
+  /* ============================================================
+     PREAMBLE — style intro
+     ============================================================ */
+  .masthead{
+    padding: 64px 0 36px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .masthead .issue{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom: 26px;
+    color: var(--muted);
+    font-size: 11px; letter-spacing:.28em; text-transform:uppercase;
+  }
+  .masthead .issue span.r{ color: var(--gold); }
+  .masthead h1{
+    font-size: 92px;
+    line-height: .95;
+    margin: 0 0 18px 0;
+    letter-spacing: -.02em;
+    font-weight: 700;
+  }
+  .masthead h1 em{
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .masthead .lede{
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    color: var(--text);
+    max-width: 720px;
+    line-height: 1.45;
+    margin: 0 0 8px;
+  }
+  .masthead .lede::first-letter{ color: var(--gold); }
+
+  /* palette */
+  .palette{
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 14px;
+    margin-top: 40px;
+  }
+  .sw{
+    display:block;
+  }
+  .sw .chip{
+    width: 100%;
+    height: 54px;
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+  }
+  .sw .name{
+    margin-top: 8px;
+    font-size: 10px;
+    letter-spacing:.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sw .hex{
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--text);
+    letter-spacing:.04em;
+  }
+
+  /* specimen */
+  .specimen{
+    margin-top: 40px;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border);
+  }
+  .spec h4{
+    margin:0 0 6px;
+    font-size: 11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color: var(--gold);
+    font-family: var(--sans); font-weight:500;
+  }
+  .spec .display{
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 46px;
+    line-height: 1;
+    margin: 0;
+    letter-spacing:-.01em;
+  }
+  .spec .display em{ color: var(--gold); font-weight:600; }
+  .spec .meta{ color: var(--muted); font-size: 12px; margin-top: 8px; letter-spacing:.04em;}
+  .spec .body-sample{
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 420px;
+  }
+  .spec .body-sample strong{ color: var(--gold); font-weight:600; }
+
+  /* ============================================================
+     01 — HEADER BAR
+     ============================================================ */
+  .appbar{
+    display:flex; align-items:center; gap:14px;
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    box-shadow: 0 18px 40px -28px rgba(0,0,0,.8);
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    padding-right: 14px;
+    border-right: 1px solid var(--border);
+  }
+  .brand .mark{
+    width: 30px; height:30px;
+    display:grid; place-items:center;
+    color: var(--bg);
+    background: var(--gold);
+    font-family: var(--serif);
+    font-weight: 800;
+    font-style: italic;
+    font-size: 18px;
+    border-radius: var(--radius);
+  }
+  .brand .name{
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: -.01em;
+  }
+  .brand .name em{ color: var(--gold); font-weight:600; }
+
+  .search{
+    flex:1;
+    position: relative;
+    display:flex; align-items:center;
+    background: var(--bg);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 12px;
+    min-width: 0;
+  }
+  .search .gyl{
+    color: var(--muted);
+    font-size: 14px;
+    padding-right: 8px;
+  }
+  .search input{
+    flex:1; min-width:0;
+    background:transparent; border:0; outline:0;
+    color: var(--text);
+    font-family: var(--sans);
+    padding: 10px 0;
+    font-size: 13px;
+  }
+  .search input::placeholder{ color: var(--muted); font-style: italic; font-family: var(--serif);}
+
+  /* dropdowns */
+  .dropdown{ position: relative; }
+  .btn{
+    font-family: var(--sans);
+    font-size: 13px;
+    background: var(--elevated);
+    color: var(--text);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 14px;
+    cursor: pointer;
+    display:inline-flex; align-items:center; gap:8px;
+    letter-spacing:.02em;
+  }
+  .btn:hover, .btn:focus{
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .btn .chev{ color: var(--muted); font-size: 10px; margin-left:4px; }
+  .btn.primary{
+    background: var(--gold);
+    color: var(--bg);
+    border-color: var(--gold);
+    font-weight: 600;
+  }
+  .btn.primary:hover{ background: var(--deep-gold); border-color: var(--deep-gold); color: var(--bg);}
+  .btn.danger{
+    color: var(--danger);
+    border-color: rgba(201,122,74,.35);
+  }
+  .btn.danger:hover{ background: rgba(201,122,74,.12); border-color: var(--danger); color: var(--danger);}
+  .btn.ghost{
+    background: transparent;
+    border-color: transparent;
+    padding: 9px 10px;
+  }
+  .btn.ghost:hover{ color: var(--gold); border-color:transparent; background: var(--elevated);}
+  .btn.sm{ padding: 6px 10px; font-size: 12px; }
+  .btn.lg{ padding: 12px 22px; font-size: 14px; }
+
+  .menu{
+    position:absolute;
+    top: calc(100% + 8px);
+    min-width: 210px;
+    background: var(--elevated);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,.7);
+    padding: 8px;
+    z-index: 30;
+  }
+  .menu.left{ left: 0; }
+  .menu.right{ right: 0; }
+  .menu .item{
+    display:flex; align-items:center; justify-content:space-between; gap: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    border-radius: var(--radius);
+  }
+  .menu .item:hover{ background: var(--surface); color: var(--gold);}
+  .menu .item.active{ color: var(--gold); }
+  .menu .item .check{ color: var(--gold); font-size: 12px; }
+  .menu .sep{ height:1px; background: var(--border); margin: 6px 4px; }
+  .menu .head{
+    padding: 6px 12px 8px;
+    font-size: 10px; letter-spacing:.24em; text-transform:uppercase;
+    color: var(--muted);
+  }
+
+  .icon-btn{
+    width: 36px; height: 36px;
+    display:grid; place-items:center;
+    background: transparent;
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .icon-btn:hover{ border-color: var(--gold); color: var(--gold); }
+  .view-toggle{
+    display:flex;
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    overflow:hidden;
+  }
+  .view-toggle button{
+    background: transparent;
+    border:0;
+    color: var(--muted);
+    padding: 8px 11px;
+    cursor:pointer;
+    font-size: 13px;
+  }
+  .view-toggle button.on{
+    background: var(--elevated);
+    color: var(--gold);
+  }
+
+  /* dropdown demo arrows (decorative) */
+  .dd-demo{ position: relative; }
+
+  /* ============================================================
+     02 — BUTTONS
+     ============================================================ */
+  .btn-row{
+    display:flex; flex-wrap:wrap; align-items:center; gap: 16px;
+  }
+  .btn-row .lbl{
+    font-size: 10px; letter-spacing:.24em; text-transform:uppercase;
+    color: var(--muted);
+    margin-right: 6px;
+  }
+  .step-pair{
+    display:inline-flex; align-items:stretch;
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    overflow:hidden;
+  }
+  .step-pair button{
+    width: 32px; background: var(--elevated); border:0; color: var(--text);
+    cursor:pointer; font-size: 15px;
+  }
+  .step-pair button:hover{ color: var(--gold); background: var(--surface);}
+  .step-pair .val{
+    width: 38px; text-align:center; display:grid; place-items:center;
+    border-left:1px solid var(--border);
+    border-right:1px solid var(--border);
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .fav-btn{
+    background: transparent;
+    border:1px solid var(--border);
+    color: var(--muted);
+    width: 36px; height:36px; border-radius: var(--radius);
+    cursor:pointer; font-size: 15px;
+  }
+  .fav-btn.on{
+    color: var(--danger);
+    border-color: rgba(201,122,74,.5);
+    background: rgba(201,122,74,.08);
+  }
+  .link-btn{
+    background: transparent; border:0;
+    color: var(--gold);
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor:pointer; padding: 0;
+    border-bottom: 1px solid rgba(212,180,131,.4);
+    text-decoration:none;
+  }
+  .link-btn:hover{ color: var(--text); border-color: var(--gold);}
+
+  .hover-note{
+    margin-top: 22px;
+    color: var(--muted);
+    font-style: italic;
+    font-family: var(--serif);
+    font-size: 14px;
+    padding-left: 14px;
+    border-left: 2px solid var(--gold);
+  }
+
+  /* ============================================================
+     03 — FORM CONTROLS
+     ============================================================ */
+  .panel{
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 30px;
+  }
+  .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field.full{ grid-column: 1 / -1; }
+  .field label{
+    font-size: 10px; letter-spacing:.22em; text-transform:uppercase;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .field label .req{ color: var(--danger); }
+  .input, .textarea, .select, .file{
+    background: var(--bg);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 11px 13px;
+    width: 100%;
+    outline: 0;
+  }
+  .input:focus, .textarea:focus, .select:focus, .file:focus{
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px var(--gold);
+  }
+  .input::placeholder, .textarea::placeholder{
+    color: var(--muted); font-style: italic; font-family: var(--serif);
+  }
+  .textarea{ resize: vertical; min-height: 90px; line-height: 1.6; }
+  .select{
+    appearance:none;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--gold) 50%),
+      linear-gradient(135deg, var(--gold) 50%, transparent 50%);
+    background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 36px;
+  }
+  .check{
+    display:inline-flex; align-items:center; gap: 10px;
+    color: var(--text); cursor:pointer; font-size: 14px;
+  }
+  .check input{ display:none; }
+  .check .box{
+    width: 18px; height:18px; border-radius: var(--radius);
+    border:1px solid var(--border);
+    background: var(--bg);
+    display:grid; place-items:center;
+    flex-shrink:0;
+  }
+  .check input:checked + .box{
+    background: var(--gold); border-color: var(--gold);
+  }
+  .check input:checked + .box::after{
+    content:"✓"; color: var(--bg); font-size:12px; font-weight:700;
+  }
+  .check.done{ color: var(--muted); text-decoration: line-through; text-decoration-color: var(--muted); }
+
+  /* ============================================================
+     04 — TAG CHIPS INPUT
+     ============================================================ */
+  .chips-input{
+    background: var(--bg);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    display:flex; flex-wrap:wrap; gap: 8px;
+    align-items:center;
+    min-height: 48px;
+  }
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    background: var(--elevated);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 5px 6px 5px 12px;
+    font-size: 12.5px;
+    color: var(--text);
+  }
+  .chip .x{
+    width: 18px; height:18px;
+    display:grid; place-items:center;
+    color: var(--muted); cursor:pointer;
+    border-radius: var(--radius);
+    font-size: 11px;
+  }
+  .chip .x:hover{ color: var(--danger); background: rgba(201,122,74,.1); }
+  .chips-input input{
+    flex:1; min-width: 80px;
+    background:transparent; border:0; outline:0;
+    color: var(--text);
+    font-family: var(--sans); font-size: 13.5px;
+    padding: 4px;
+  }
+  .suggest{
+    margin-top: 8px;
+    background: var(--elevated);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    width: 280px;
+    box-shadow: 0 20px 40px -16px rgba(0,0,0,.7);
+    position: relative;
+  }
+  .suggest .sh{
+    padding: 8px 12px;
+    font-size: 10px; letter-spacing:.22em; text-transform:uppercase;
+    color: var(--muted);
+    border-bottom:1px solid var(--border);
+  }
+  .suggest .si{
+    padding: 9px 12px;
+    font-size: 13.5px;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .suggest .si:hover, .suggest .si.hl{ background: var(--surface); color: var(--gold);}
+  .suggest .si mark{ background:transparent; color: var(--gold); font-weight:600; }
+  .suggest::before{
+    content:""; position:absolute; top:-6px; left:24px;
+    width:10px; height:10px;
+    background: var(--elevated);
+    border-left:1px solid var(--border);
+    border-top:1px solid var(--border);
+    transform: rotate(45deg);
+  }
+
+  /* ============================================================
+     05 — FILTER CHIPS
+     ============================================================ */
+  .filter-group{ margin-bottom: 22px; }
+  .filter-group .label{
+    font-size: 10px; letter-spacing:.24em; text-transform:uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display:flex; align-items:center; gap: 10px;
+  }
+  .filter-group .label::after{
+    content:""; flex:1; height:1px; background: var(--border);
+  }
+  .filters{ display:flex; flex-wrap:wrap; gap: 8px; }
+  .fchip{
+    background: transparent;
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 14px;
+    font-size: 12.5px;
+    color: var(--muted);
+    cursor: pointer;
+    letter-spacing:.02em;
+    font-family: var(--sans);
+  }
+  .fchip:hover{ color: var(--text); border-color: var(--muted);}
+  .fchip.on{
+    background: var(--gold);
+    color: var(--bg);
+    border-color: var(--gold);
+    font-weight: 500;
+  }
+
+  /* ============================================================
+     06 — RECIPE GRID
+     ============================================================ */
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  .card{
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    overflow:hidden;
+    position: relative;
+    transition: border-color .2s;
+  }
+  .card .img{
+    width:100%; aspect-ratio: 4/3; object-fit: cover;
+    display:block;
+    filter: saturate(.92) contrast(1.02);
+  }
+  .card .noimg{
+    width:100%; aspect-ratio: 4/3;
+    background:
+      repeating-linear-gradient(135deg, rgba(212,180,131,.05) 0 12px, transparent 12px 24px),
+      var(--elevated);
+    display:grid; place-items:center;
+    color: var(--muted);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    border-bottom:1px solid var(--border);
+  }
+  .card .noimg .orn{
+    font-size: 30px; color: var(--deep-gold); opacity:.5;
+    margin-bottom: 8px;
+  }
+  .card .body{ padding: 18px 20px 20px; }
+  .card .source{
+    font-size: 10px; letter-spacing:.22em; text-transform:uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .card h3{
+    font-size: 22px;
+    line-height: 1.15;
+    margin: 0 0 10px;
+    font-weight: 700;
+    letter-spacing:-.005em;
+  }
+  .card .meta{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top:1px solid var(--border);
+  }
+  .stars{
+    color: var(--gold);
+    letter-spacing: 1px;
+    font-size: 13px;
+  }
+  .stars .e{ color: var(--border);}
+  .card .tags{ display:flex; gap:6px; flex-wrap:wrap; }
+  .card .mini-chip{
+    font-size: 10.5px; letter-spacing:.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border:1px solid var(--border);
+    padding: 3px 7px;
+    border-radius: var(--radius);
+  }
+  .card.selected{
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px var(--gold), 0 30px 50px -25px rgba(212,180,131,.25);
+  }
+  .card.selected .corner{
+    position:absolute; top:0; right:0;
+    width: 0; height:0;
+    border-style: solid;
+    border-width: 0 44px 44px 0;
+    border-color: transparent var(--gold) transparent transparent;
+  }
+  .card.selected .corner::after{
+    content:"✓";
+    position:absolute; top:6px; right:-38px;
+    color: var(--bg); font-weight:700; font-size: 13px;
+  }
+  .card.selected .corner{ position:absolute;}
+
+  /* ============================================================
+     07 — LIST ROWS
+     ============================================================ */
+  .list{ display:flex; flex-direction:column; }
+  .row{
+    display:grid;
+    grid-template-columns: 80px 1fr auto auto auto;
+    gap: 18px;
+    align-items:center;
+    padding: 14px 16px;
+    border-bottom:1px solid var(--border);
+  }
+  .row:last-child{ border-bottom: 0; }
+  .row .thumb{
+    width: 80px; height: 60px; object-fit:cover;
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    filter: saturate(.92);
+  }
+  .row .nothumb{
+    width:80px; height:60px;
+    background: var(--elevated);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    display:grid; place-items:center;
+    color: var(--deep-gold); opacity:.6;
+    font-family: var(--serif); font-size: 18px;
+  }
+  .row .title{ font-family: var(--serif); font-weight:600; font-size: 17px; letter-spacing:-.005em;}
+  .row .src{
+    font-size: 10px; letter-spacing:.22em; text-transform:uppercase;
+    color: var(--muted); margin-top: 2px;
+  }
+  .row .rtags{ display:flex; gap:6px; }
+  .row .sel{ justify-self:end; }
+
+  /* ============================================================
+     08 — COOK VIEW
+     ============================================================ */
+  .cook{ }
+  .cook .back{
+    color: var(--muted); text-decoration:none;
+    font-family: var(--serif); font-style: italic;
+    font-size: 14px;
+    display:inline-flex; align-items:center; gap:6px;
+    margin-bottom: 18px;
+  }
+  .cook .back:hover{ color: var(--gold); }
+
+  .cook-header{
+    display:grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 36px;
+    align-items:start;
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+  }
+  .cook-header .photo{
+    width:100%; aspect-ratio: 5/4; object-fit:cover;
+    border:1px solid var(--border);
+    filter: saturate(.92) contrast(1.02);
+  }
+  .cook-header .topright{ padding-top: 6px; }
+  .cook-header .eyebrow{ margin-bottom: 12px; }
+  .cook-header h1{
+    font-size: 56px;
+    line-height: 1;
+    margin: 0 0 16px;
+    letter-spacing:-.02em;
+    font-weight: 700;
+  }
+  .cook-header .byline{
+    color: var(--muted);
+    font-size: 12px; letter-spacing:.22em; text-transform:uppercase;
+    margin-bottom: 18px;
+  }
+  .cook-header .byline strong{ color: var(--gold); font-weight:500;}
+  .cook-header .rate-row{
+    display:flex; align-items:center; gap: 12px;
+    margin-bottom: 22px;
+  }
+  .cook-header .rate-row .stars{ font-size: 22px; }
+  .cook-header .rate-row .rtxt{ color: var(--muted); font-size: 12px; letter-spacing:.1em;}
+  .cook-header p.desc{
+    font-size: 16px; line-height: 1.7; color: var(--text);
+    margin: 0 0 20px;
+  }
+  .cook-header p.desc::first-letter{
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 62px;
+    float:left;
+    line-height:.85;
+    padding: 6px 12px 0 0;
+    color: var(--gold);
+  }
+  .cook-header .ctags{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* two-column body */
+  .cook-body{
+    display:grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: 48px;
+  }
+  .col-head{
+    display:flex; align-items:center; gap: 14px;
+    margin-bottom: 20px;
+  }
+  .col-head .num{
+    font-family: var(--serif); font-style: italic;
+    font-size: 14px; color: var(--gold);
+  }
+  .col-head h2{
+    font-size: 26px; margin:0; letter-spacing:-.01em;
+  }
+  .col-head::after{
+    content:""; flex:1; height:1px; background: var(--border);
+  }
+
+  /* servings scaler */
+  .scaler{
+    display:flex; align-items:center; gap: 8px;
+    background: var(--bg);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px;
+    margin-bottom: 24px;
+  }
+  .scaler label{
+    font-size: 10px; letter-spacing:.22em; text-transform:uppercase;
+    color: var(--gold); margin-right: 8px; padding-left: 6px;
+  }
+  .scaler .step-pair .val{ width: 44px; }
+  .scaler .reset{
+    margin-left:auto;
+    background: transparent; border:0; color: var(--muted);
+    font-size: 12px; cursor:pointer; padding: 6px 10px;
+    font-family: var(--serif); font-style: italic;
+  }
+  .scaler .reset:hover{ color: var(--gold); }
+
+  /* ingredient checklist */
+  .ing{ display:flex; flex-direction:column; gap: 4px;}
+  .ing li{
+    list-style:none;
+    padding: 11px 4px;
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap: 12px;
+    font-size: 14.5px;
+  }
+  .ing li:last-child{ border-bottom:0; }
+  .ing li .check .box{ width:16px; height:16px;}
+  .ing li.done{ color: var(--muted); }
+  .ing li.done .ing-text{ text-decoration: line-through; text-decoration-color: var(--muted);}
+
+  /* steps */
+  .progress{
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 24px;
+  }
+  .progress .top{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 10px;
+  }
+  .progress .top .label{
+    font-family: var(--serif); font-style:italic;
+    color: var(--text); font-size: 14px;
+  }
+  .progress .top .label strong{ color: var(--gold); font-weight:700; font-style: normal; font-family: var(--sans);}
+  .progress .top .nav{ display:flex; gap:6px; }
+  .progress .bar{
+    height: 3px; background: var(--bg); border-radius: var(--radius); overflow:hidden;
+  }
+  .progress .bar .fill{
+    width: 33.3%; height:100%;
+    background: linear-gradient(90deg, var(--deep-gold), var(--gold));
+  }
+
+  .steps{ list-style:none; padding:0; margin:0; counter-reset: step;}
+  .steps li{
+    counter-increment: step;
+    display:grid;
+    grid-template-columns: 42px 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .steps li:last-child{ border-bottom:0; }
+  .steps li::before{
+    content: counter(step, decimal-leading-zero);
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 26px;
+    color: var(--muted);
+    line-height: 1;
+  }
+  .steps li.current{
+    background: linear-gradient(90deg, rgba(212,180,131,.07), transparent 80%);
+    padding-left: 14px;
+    margin-left: -14px;
+    padding-right: 14px;
+    border-left: 2px solid var(--gold);
+    margin-right: -14px;
+  }
+  .steps li.current::before{ color: var(--gold); }
+  .steps li.current .stext{ color: var(--text); font-weight: 500;}
+  .steps li.current .badge{
+    display:inline-block; margin-left: 10px;
+    font-family: var(--sans); font-size: 10px;
+    letter-spacing:.22em; text-transform:uppercase;
+    color: var(--gold);
+    border:1px solid var(--gold);
+    padding: 2px 8px;
+    vertical-align: middle;
+    font-style: normal;
+  }
+  .stext{ color: var(--muted); line-height: 1.65; font-size: 14.5px;}
+
+  /* notes pull-quote */
+  .notes-wrap{ margin-top: 56px; }
+  .pullquote{
+    border-left: 3px solid var(--gold);
+    padding: 8px 0 8px 32px;
+    margin: 0;
+    position: relative;
+  }
+  .pullquote::before{
+    content:"\201C";
+    position:absolute; left: 14px; top:-10px;
+    font-family: var(--serif);
+    font-size: 64px; color: var(--gold); opacity:.35;
+    line-height:1;
+  }
+  .pullquote .qkicker{
+    display:block;
+    font-family: var(--serif); font-style: italic;
+    color: var(--gold); font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .pullquote p{
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--text);
+    margin: 0;
+  }
+  .pullquote p::first-letter{
+    font-size: 36px; color: var(--gold);
+  }
+
+  /* cook footer */
+  .cook-foot{
+    margin-top: 48px;
+    padding-top: 28px;
+    border-top:1px solid var(--border);
+    display:flex; align-items:center; gap: 12px; flex-wrap:wrap;
+  }
+  .cook-foot .grow{ flex:1; }
+
+  /* ============================================================
+     09 — EDIT FORM EXCERPT
+     ============================================================ */
+  .edit-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+  .upload{
+    background: var(--bg);
+    border:1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    text-align:center;
+    color: var(--muted);
+  }
+  .upload .ico{ color: var(--gold); font-size: 22px; margin-bottom: 6px;}
+  .upload .t{ color: var(--text); font-size: 13px; margin-bottom: 4px;}
+  .upload .hint{ font-family: var(--serif); font-style: italic; font-size: 12.5px;}
+  .form-foot{
+    margin-top: 22px;
+    display:flex; justify-content:flex-end; gap: 12px;
+    padding-top: 18px; border-top:1px solid var(--border);
+  }
+
+  /* ============================================================
+     10 — SETTINGS CARDS
+     ============================================================ */
+  .settings{ display:flex; flex-direction:column; gap: 18px;}
+  .scard{
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    gap: 30px;
+    align-items:center;
+  }
+  .scard .stitle{
+    font-family: var(--serif); font-weight: 700;
+    font-size: 22px; letter-spacing:-.005em;
+    margin: 0 0 4px;
+  }
+  .scard .skicker{
+    font-family: var(--serif); font-style: italic;
+    color: var(--muted); font-size: 13px;
+  }
+  .scard .sbody{ display:flex; flex-wrap:wrap; gap: 10px; align-items:center;}
+  .scard .hint{
+    color: var(--muted); font-size: 12px;
+    font-family: var(--serif); font-style: italic;
+    width:100%; margin-top: 4px;
+  }
+  .about-logo{
+    display:flex; align-items:center; gap:14px;
+  }
+  .about-logo .mark{
+    width: 44px; height:44px;
+    background: var(--gold); color: var(--bg);
+    display:grid; place-items:center;
+    font-family: var(--serif); font-weight: 800; font-style: italic; font-size: 24px;
+    border-radius: var(--radius);
+  }
+  .about-logo .meta{
+    font-family: var(--serif); font-weight:700; font-size: 18px;
+  }
+  .about-logo .ver{
+    color: var(--muted); font-size: 11px; letter-spacing:.18em;
+    text-transform:uppercase; margin-top: 2px;
+  }
+
+  /* ============================================================
+     11 — AUTH
+     ============================================================ */
+  .auth-wrap{
+    display:grid; place-items:center;
+    padding: 20px 0;
+  }
+  .auth{
+    width: 420px;
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 44px 40px;
+    text-align:center;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,.8);
+  }
+  .auth .ornament{
+    color: var(--gold); font-size: 18px;
+    font-family: var(--serif); margin-bottom: 14px;
+  }
+  .auth h2{
+    font-size: 40px; margin: 0 0 6px;
+    letter-spacing:-.01em;
+  }
+  .auth .sub{
+    font-family: var(--serif); font-style: italic;
+    color: var(--muted); font-size: 14px; margin-bottom: 26px;
+  }
+  .auth .alert{
+    background: rgba(201,122,74,.08);
+    border:1px solid rgba(201,122,74,.35);
+    border-left:3px solid var(--danger);
+    color: var(--danger);
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    text-align:left;
+  }
+  .auth .field{ text-align:left; margin-bottom: 16px;}
+  .auth .btn{ width:100%; justify-content:center; margin-top: 8px;}
+  .auth .links{
+    margin-top: 22px;
+    display:flex; justify-content:space-between;
+    font-size: 12.5px;
+  }
+
+  /* ============================================================
+     12 — FEEDBACK
+     ============================================================ */
+  .feedback-cluster{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .toast{
+    background: var(--elevated);
+    border:1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display:flex; align-items:center; gap: 14px;
+    box-shadow: 0 30px 60px -25px rgba(0,0,0,.7);
+  }
+  .toast .ico{
+    width: 30px; height:30px; border-radius: var(--radius);
+    background: var(--gold); color: var(--bg);
+    display:grid; place-items:center; font-weight:700;
+    flex-shrink:0;
+  }
+  .toast .ttext{ flex:1; }
+  .toast .ttext .t1{ font-size: 13.5px; color: var(--text);}
+  .toast .ttext .t2{ font-size: 11px; color: var(--muted); letter-spacing:.1em; text-transform:uppercase; margin-top:2px;}
+  .toast .x{ color: var(--muted); cursor:pointer; font-size: 14px;}
+
+  .bulk{
+    background: var(--elevated);
+    border:1px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    display:flex; align-items:center; gap: 16px;
+    box-shadow: 0 20px 40px -18px rgba(212,180,131,.25);
+  }
+  .bulk .cnt{ font-family: var(--serif); font-weight:700; color: var(--gold);}
+  .bulk .cnt em{ font-style: italic; color: var(--text); font-weight:600;}
+  .bulk .grow{ flex:1;}
+  .bulk .sep{ color: var(--border);}
+
+  .skeleton{
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    overflow:hidden;
+  }
+  .skeleton .sk-img{
+    height: 110px;
+    background:
+      linear-gradient(90deg, var(--elevated) 0%, var(--surface) 50%, var(--elevated) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite linear;
+  }
+  .skeleton .sk-body{ padding: 14px;}
+  .sk-line{
+    height: 10px; border-radius: var(--radius);
+    background:
+      linear-gradient(90deg, var(--elevated) 0%, var(--surface) 50%, var(--elevated) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite linear;
+    margin-bottom: 8px;
+  }
+  .sk-line.w70{ width:70%;} .sk-line.w40{ width:40%;} .sk-line.w90{ width:90%;}
+  @keyframes shimmer{
+    0%{ background-position: 200% 0; }
+    100%{ background-position: -200% 0; }
+  }
+
+  .spinner{
+    width: 28px; height:28px;
+    border:2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .empty{
+    text-align:center;
+    padding: 30px 20px;
+    border:1px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .empty .orn{ color: var(--gold); font-size: 24px; font-family: var(--serif); margin-bottom: 8px;}
+  .empty .t{ font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--text); margin-bottom: 14px;}
+
+  .banner{
+    background: rgba(201,122,74,.07);
+    border:1px solid rgba(201,122,74,.3);
+    border-left: 3px solid var(--danger);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display:flex; gap: 12px; align-items:flex-start;
+  }
+  .banner .bi{ color: var(--danger); font-size: 16px; flex-shrink:0;}
+  .banner .bt{ font-size: 13px; color: var(--text); }
+  .banner .bt strong{ color: var(--danger); }
+  .banner .bactions{ margin-top: 8px; display:flex; gap: 8px;}
+
+  .fb-block .fb-label{
+    font-size: 10px; letter-spacing:.22em; text-transform:uppercase;
+    color: var(--muted); margin-bottom: 10px;
+  }
+  .fb-block{ display:flex; flex-direction:column; gap: 14px;}
+
+  /* ============================================================
+     13 — STAR RATING SHOWCASE
+     ============================================================ */
+  .stars-show{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+  .star-item{
+    text-align:center;
+    padding: 24px 16px;
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .star-item .big-stars{
+    font-size: 38px; color: var(--gold);
+    letter-spacing: 4px;
+    line-height: 1;
+  }
+  .star-item .big-stars .e{ color: var(--border);}
+  .star-item .lbl{
+    font-size: 10px; letter-spacing:.24em; text-transform:uppercase;
+    color: var(--muted); margin-top: 14px;
+  }
+  .micro-note{
+    margin-top: 26px;
+    padding: 16px 20px;
+    border:1px solid var(--border);
+    border-left:3px solid var(--gold);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15.5px;
+  }
+  .micro-note strong{
+    font-style: normal; font-family: var(--sans);
+    color: var(--gold); font-weight:600;
+  }
+
+  /* ============================================================
+     14 — FOOTER / TOKENS
+     ============================================================ */
+  .footer{
+    margin-top: 96px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+  .footer .ftop{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom: 30px;
+  }
+  .footer .fname{
+    font-family: var(--serif); font-weight:700; font-size: 28px;
+    letter-spacing:-.01em;
+  }
+  .footer .fname em{ color: var(--gold); font-weight:600;}
+  .footer .fmeta{
+    color: var(--muted); font-size: 11px; letter-spacing:.22em; text-transform:uppercase;
+  }
+  .token-table{
+    width:100%; border-collapse: collapse;
+    font-size: 13px;
+  }
+  .token-table th, .token-table td{
+    text-align:left; padding: 12px 14px;
+    border-bottom:1px solid var(--border);
+  }
+  .token-table th{
+    font-size: 10px; letter-spacing:.22em; text-transform:uppercase;
+    color: var(--muted); font-weight:500;
+    border-bottom:1px solid var(--gold);
+  }
+  .token-table td:first-child{
+    font-family: 'Menlo','Consolas',monospace;
+    color: var(--gold);
+    font-size: 12.5px;
+  }
+  .token-table td .sw{
+    display:inline-block; width:18px; height:18px;
+    vertical-align:middle; margin-right: 10px;
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .token-table td.val{
+    font-family: 'Menlo','Consolas',monospace;
+    color: var(--text); font-size: 12.5px;
+  }
+
+  .colophon{
+    margin-top: 50px;
+    text-align:center;
+    font-family: var(--serif); font-style: italic;
+    color: var(--muted); font-size: 13px;
+  }
+  .colophon .orn{ color: var(--gold); margin: 0 14px;}
+
+  /* utilities */
+  .stack > * + *{ margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============================================================
+       PREAMBLE / MASTHEAD
+       ============================================================ -->
+  <header class="masthead">
+    <div class="issue">
+      <span>Recipe Manager · Style Showcase</span>
+      <span class="r">Issue №08 · The Dark Edition</span>
+    </div>
+    <h1>Gourmet <em>Noir</em></h1>
+    <p class="lede">
+      A self-hosted recipe library dressed as a luxury food magazine —
+      warm charcoal pages, cream serif headlines, and gold leaf for accent.
+    </p>
+
+    <div class="palette">
+      <div class="sw"><div class="chip" style="background:#15120e"></div><div class="name">BG</div><div class="hex">#15120E</div></div>
+      <div class="sw"><div class="chip" style="background:#1d1812"></div><div class="name">Surface</div><div class="hex">#1D1812</div></div>
+      <div class="sw"><div class="chip" style="background:#241e16"></div><div class="name">Elevated</div><div class="hex">#241E16</div></div>
+      <div class="sw"><div class="chip" style="background:#3a3128"></div><div class="name">Border</div><div class="hex">#3A3128</div></div>
+      <div class="sw"><div class="chip" style="background:#ece4d3"></div><div class="name">Text</div><div class="hex">#ECE4D3</div></div>
+      <div class="sw"><div class="chip" style="background:#8a7e63"></div><div class="name">Muted</div><div class="hex">#8A7E63</div></div>
+      <div class="sw"><div class="chip" style="background:#d4b483"></div><div class="name">Gold</div><div class="hex">#D4B483</div></div>
+      <div class="sw"><div class="chip" style="background:#c97a4a"></div><div class="name">Danger</div><div class="hex">#C97A4A</div></div>
+    </div>
+
+    <div class="specimen">
+      <div class="spec">
+        <h4>Display · Playfair Display</h4>
+        <p class="display">A <em>Feast</em> in Print</p>
+        <div class="meta">700 / 600 italic · headlines, titles, recipe names</div>
+      </div>
+      <div class="spec">
+        <h4>Text · Inter</h4>
+        <p class="body-sample">
+          <strong>ISSUE №08 · DESSERTS</strong> — body copy runs in Inter for clarity,
+          while italic kickers, drop caps, and pull quotes return the voice to the
+          magazine. Small-caps eyebrows mark every section.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       01 · HEADER BAR
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 01</span>
+      <h2>The Header Bar</h2>
+      <span class="kicker">— where the issue begins, with search and sundries</span>
+    </div>
+
+    <div class="appbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">R</div>
+        <div class="name">Recipe <em>Manager</em></div>
+      </div>
+
+      <div class="search">
+        <span class="gyl" aria-hidden="true">⌕</span>
+        <input type="search" placeholder="Search recipes, ingredients, steps…" aria-label="Search">
+      </div>
+
+      <!-- Add dropdown (open) -->
+      <div class="dropdown dd-demo">
+        <button class="btn primary">+ Add recipe <span class="chev">▾</span></button>
+        <div class="menu left">
+          <div class="head">Create</div>
+          <div class="item">New recipe</div>
+          <div class="item">Import from URL</div>
+        </div>
+      </div>
+
+      <!-- Sort dropdown (open) -->
+      <div class="dropdown dd-demo">
+        <button class="btn">Sort <span class="chev">▾</span></button>
+        <div class="menu left">
+          <div class="item">Name A → Z</div>
+          <div class="item">Name Z → A</div>
+          <div class="item active">Date added (New → Old) <span class="check">✓</span></div>
+          <div class="item">Date added (Old → New)</div>
+          <div class="item">Stars 0 → 5</div>
+          <div class="item">Stars 5 → 0</div>
+        </div>
+      </div>
+
+      <div class="view-toggle" role="group" aria-label="View mode">
+        <button class="on" title="Grid view">▦</button>
+        <button title="List view">≡</button>
+      </div>
+      <button class="icon-btn" title="Theme">☾</button>
+      <button class="icon-btn" title="Settings">⚙</button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       02 · BUTTONS
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 02</span>
+      <h2>Buttons</h2>
+      <span class="kicker">— the full family, from gold leaf to terracotta</span>
+    </div>
+
+    <div class="panel">
+      <div class="btn-row">
+        <span class="lbl">Primary</span>
+        <button class="btn primary">Save</button>
+        <span class="lbl">Default</span>
+        <button class="btn">Edit</button>
+        <span class="lbl">Danger</span>
+        <button class="btn danger">Delete</button>
+        <span class="lbl">Ghost</span>
+        <button class="btn ghost">⚙</button>
+      </div>
+
+      <div class="btn-row" style="margin-top:20px;">
+        <span class="lbl">Step ±</span>
+        <div class="step-pair">
+          <button>−</button>
+          <div class="val">4</div>
+          <button>+</button>
+        </div>
+
+        <span class="lbl">Favorite</span>
+        <button class="fav-btn" title="Not favorited">♡</button>
+        <button class="fav-btn on" title="Favorited">♥</button>
+
+        <span class="lbl">Link</span>
+        <a class="link-btn" href="#">Original ↗</a>
+      </div>
+
+      <p class="hover-note">
+        On hover or focus, borders warm to <em style="color:var(--gold)">gold</em> and the
+        text follows — a single quiet glow, no harsh transitions.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       03 · FORM CONTROLS
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 03</span>
+      <h2>Form Controls</h2>
+      <span class="kicker">— fields set as quiet ruled blanks on the page</span>
+    </div>
+
+    <div class="panel">
+      <div class="grid-2">
+        <div class="field">
+          <label for="f-title">Title</label>
+          <input class="input" id="f-title" type="text" value="Classic Tiramisu">
+        </div>
+        <div class="field">
+          <label for="f-search">Search</label>
+          <input class="input" id="f-search" type="search" placeholder="Find a recipe…">
+        </div>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input class="input" id="f-email" type="email" value="chef@maison.fr">
+        </div>
+        <div class="field">
+          <label for="f-pw">Password</label>
+          <input class="input" id="f-pw" type="password" value="••••••••">
+        </div>
+        <div class="field full">
+          <label for="f-desc">Description</label>
+          <textarea class="textarea" id="f-desc" placeholder="A short headnote for the dish…">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea>
+        </div>
+        <div class="field">
+          <label for="f-serv">Servings</label>
+          <input class="input" id="f-serv" type="number" value="4">
+        </div>
+        <div class="field">
+          <label for="f-rate">Rating</label>
+          <select class="select" id="f-rate">
+            <option>0 stars</option>
+            <option>1 star</option>
+            <option>2 stars</option>
+            <option>3 stars</option>
+            <option selected>4 stars</option>
+            <option>5 stars</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-img">Image</label>
+          <input class="file" id="f-img" type="file">
+        </div>
+        <div class="field" style="justify-content:center;">
+          <label>Pantry</label>
+          <div style="display:flex; gap: 18px; padding-top:6px;">
+            <label class="check done">
+              <input type="checkbox" checked>
+              <span class="box"></span> ¾ cup white sugar
+            </label>
+            <label class="check">
+              <input type="checkbox">
+              <span class="box"></span> 6 egg yolks
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       04 · TAGS CHIPS INPUT
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 04</span>
+      <h2>Tags Chips Input</h2>
+      <span class="kicker">— a wrapped line of removable markers</span>
+    </div>
+
+    <div class="panel" style="max-width: 760px;">
+      <div class="chips-input">
+        <span class="chip">dessert <span class="x">×</span></span>
+        <span class="chip">italian <span class="x">×</span></span>
+        <span class="chip">chocolate <span class="x">×</span></span>
+        <input type="text" value="qui" aria-label="Add tag">
+      </div>
+      <div class="suggest">
+        <div class="sh">Suggestions</div>
+        <div class="si hl"><mark>qui</mark>ck</div>
+        <div class="si"><mark>qui</mark>che</div>
+        <div class="si"><mark>qui</mark>ninoa</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       05 · FILTER CHIPS
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 05</span>
+      <h2>Filter Chips</h2>
+      <span class="kicker">— two indexes, by tag and by source</span>
+    </div>
+
+    <div class="panel">
+      <div class="filter-group">
+        <div class="label">Tags</div>
+        <div class="filters">
+          <button class="fchip on">all</button>
+          <button class="fchip">dessert</button>
+          <button class="fchip">italian</button>
+          <button class="fchip">quick</button>
+          <button class="fchip">vegetarian</button>
+          <button class="fchip">soup</button>
+          <button class="fchip">chocolate</button>
+          <button class="fchip">french</button>
+          <button class="fchip">dinner</button>
+          <button class="fchip">baking</button>
+        </div>
+      </div>
+      <div class="filter-group" style="margin-bottom:0;">
+        <div class="label">Source</div>
+        <div class="filters">
+          <button class="fchip">marmiton</button>
+          <button class="fchip">750g</button>
+          <button class="fchip">allrecipes</button>
+          <button class="fchip">bbc good food</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       06 · RECIPE GRID
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 06 · The Feature</span>
+      <h2>Recipe Grid</h2>
+      <span class="kicker">— six dishes, plated for the table of contents</span>
+    </div>
+
+    <div class="grid">
+      <!-- 1 Tiramisu -->
+      <article class="card">
+        <img class="img" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu">
+        <div class="body">
+          <div class="source">marmiton.org</div>
+          <h3>Classic Tiramisu</h3>
+          <div class="tags">
+            <span class="mini-chip">dessert</span>
+            <span class="mini-chip">italian</span>
+          </div>
+          <div class="meta">
+            <div class="stars">★★★★★</div>
+            <span style="color:var(--muted); font-size:11px; letter-spacing:.1em;">5.0</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 2 Bolognese -->
+      <article class="card">
+        <img class="img" src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600" alt="Spaghetti Bolognese">
+        <div class="body">
+          <div class="source">bbcgoodfood.com</div>
+          <h3>Spaghetti Bolognese</h3>
+          <div class="tags">
+            <span class="mini-chip">italian</span>
+            <span class="mini-chip">dinner</span>
+          </div>
+          <div class="meta">
+            <div class="stars">★★★★<span class="e">★</span></div>
+            <span style="color:var(--muted); font-size:11px; letter-spacing:.1em;">4.0</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 3 Turkey Burgers -->
+      <article class="card">
+        <img class="img" src="https://images.unsplash.com/photo-1528908510736-5258199bc7dd?w=600" alt="Spinach and Feta Turkey Burgers">
+        <div class="body">
+          <div class="source">allrecipes.com</div>
+          <h3>Spinach &amp; Feta Turkey Burgers</h3>
+          <div class="tags">
+            <span class="mini-chip">dinner</span>
+            <span class="mini-chip">quick</span>
+          </div>
+          <div class="meta">
+            <div class="stars">★★★<span class="e">★★</span></div>
+            <span style="color:var(--muted); font-size:11px; letter-spacing:.1em;">3.0</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4 Lava Cake (SELECTED) -->
+      <article class="card selected">
+        <div class="corner" aria-hidden="true"></div>
+        <img class="img" src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Molten Chocolate Lava Cake">
+        <div class="body">
+          <div class="source">allrecipes.com</div>
+          <h3>Molten Chocolate Lava Cake</h3>
+          <div class="tags">
+            <span class="mini-chip">dessert</span>
+            <span class="mini-chip">chocolate</span>
+            <span class="mini-chip">baking</span>
+          </div>
+          <div class="meta">
+            <div class="stars">★★★★★</div>
+            <span style="color:var(--muted); font-size:11px; letter-spacing:.1em;">5.0</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 5 Onion Soup -->
+      <article class="card">
+        <img class="img" src="https://images.unsplash.com/photo-1547592166-23ac45744ffd?w=600" alt="Soupe à l'Oignon">
+        <div class="body">
+          <div class="source">750g.com</div>
+          <h3>Soupe à l'Oignon</h3>
+          <div class="tags">
+            <span class="mini-chip">soup</span>
+            <span class="mini-chip">french</span>
+          </div>
+          <div class="meta">
+            <div class="stars">★★★★<span class="e">★</span></div>
+            <span style="color:var(--muted); font-size:11px; letter-spacing:.1em;">4.0</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 6 Apple Tart (NO IMAGE) -->
+      <article class="card">
+        <div class="noimg">
+          <div>
+            <div class="orn">❦</div>
+            no photograph
+          </div>
+        </div>
+        <div class="body">
+          <div class="source">manual</div>
+          <h3>Grandma's Apple Tart</h3>
+          <div class="tags">
+            <span class="mini-chip">dessert</span>
+            <span class="mini-chip">baking</span>
+          </div>
+          <div class="meta">
+            <div class="stars">★★★★★</div>
+            <span style="color:var(--muted); font-size:11px; letter-spacing:.1em;">5.0</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       07 · RECIPE LIST
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 07</span>
+      <h2>Recipe List</h2>
+      <span class="kicker">— the same index, set as dense rows</span>
+    </div>
+
+    <div class="panel" style="padding: 6px 16px;">
+      <div class="list">
+        <div class="row">
+          <img class="thumb" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu">
+          <div>
+            <div class="title">Classic Tiramisu</div>
+            <div class="src">marmiton.org · ★★★★★</div>
+          </div>
+          <div class="rtags">
+            <span class="mini-chip">dessert</span>
+            <span class="mini-chip">italian</span>
+          </div>
+          <div class="stars">★★★★★</div>
+          <label class="check sel"><input type="checkbox"><span class="box"></span></label>
+        </div>
+
+        <div class="row">
+          <img class="thumb" src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Molten Chocolate Lava Cake">
+          <div>
+            <div class="title">Molten Chocolate Lava Cake</div>
+            <div class="src">allrecipes.com · ★★★★★</div>
+          </div>
+          <div class="rtags">
+            <span class="mini-chip">dessert</span>
+            <span class="mini-chip">chocolate</span>
+            <span class="mini-chip">baking</span>
+          </div>
+          <div class="stars">★★★★★</div>
+          <label class="check sel"><input type="checkbox"><span class="box"></span></label>
+        </div>
+
+        <div class="row">
+          <div class="nothumb" aria-hidden="true">❦</div>
+          <div>
+            <div class="title">Grandma's Apple Tart</div>
+            <div class="src">manual · ★★★★★</div>
+          </div>
+          <div class="rtags">
+            <span class="mini-chip">dessert</span>
+            <span class="mini-chip">baking</span>
+          </div>
+          <div class="stars">★★★★★</div>
+          <label class="check sel"><input type="checkbox"><span class="box"></span></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       08 · COOK VIEW — TIRAMISU
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 08 · The Main Course</span>
+      <h2>The Cook View</h2>
+      <span class="kicker">— a single recipe, as a feature spread</span>
+    </div>
+
+    <div class="cook panel" style="padding: 40px 44px;">
+      <a class="back" href="#">← Recipes</a>
+
+      <div class="cook-header">
+        <img class="photo" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu plated">
+        <div class="topright">
+          <div class="eyebrow">Issue №08 · Desserts · Italian</div>
+          <h1>Classic <em>Tiramisu</em></h1>
+          <div class="byline">From <strong>marmiton.org</strong> · serves 4 · 25 min</div>
+          <div class="rate-row">
+            <div class="stars">★★★★<span class="e">★</span></div>
+            <span class="rtxt">4 / 5 — tap to rate</span>
+          </div>
+          <p class="desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</p>
+          <div class="ctags">
+            <span class="chip">dessert</span>
+            <span class="chip">italian</span>
+            <span class="chip">no-bake</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cook-body">
+        <!-- Ingredients -->
+        <div>
+          <div class="col-head">
+            <span class="num">i.</span>
+            <h2>Ingredients</h2>
+          </div>
+
+          <div class="scaler">
+            <label>Servings</label>
+            <div class="step-pair">
+              <button>−</button>
+              <div class="val">4</div>
+              <button>+</button>
+            </div>
+            <button class="reset">Reset</button>
+          </div>
+
+          <ul class="ing">
+            <li class="done">
+              <label class="check"><input type="checkbox" checked><span class="box"></span></label>
+              <span class="ing-text">¾ cup white sugar</span>
+            </li>
+            <li>
+              <label class="check"><input type="checkbox"><span class="box"></span></label>
+              <span class="ing-text">6 egg yolks</span>
+            </li>
+            <li class="done">
+              <label class="check"><input type="checkbox" checked><span class="box"></span></label>
+              <span class="ing-text">1⅔ cups heavy cream</span>
+            </li>
+            <li>
+              <label class="check"><input type="checkbox"><span class="box"></span></label>
+              <span class="ing-text">1 package (around 30) ladyfingers</span>
+            </li>
+            <li class="done">
+              <label class="check"><input type="checkbox" checked><span class="box"></span></label>
+              <span class="ing-text">1¾ cups strong brewed espresso, cooled</span>
+            </li>
+            <li>
+              <label class="check"><input type="checkbox"><span class="box"></span></label>
+              <span class="ing-text">2 tbsp unsweetened cocoa powder</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Steps -->
+        <div>
+          <div class="col-head">
+            <span class="num">ii.</span>
+            <h2>Method</h2>
+          </div>
+
+          <div class="progress">
+            <div class="top">
+              <div class="label"><strong>Step 2</strong> of 6 · in progress</div>
+              <div class="nav">
+                <button class="btn sm">‹ Prev</button>
+                <button class="btn sm primary">Next ›</button>
+              </div>
+            </div>
+            <div class="bar"><div class="fill"></div></div>
+          </div>
+
+          <ol class="steps">
+            <li><span class="stext">Whisk egg yolks and sugar until thick and pale.</span></li>
+            <li class="current">
+              <span class="stext">Fold in mascarpone until smooth. <span class="badge">Now</span></span>
+            </li>
+            <li><span class="stext">Whip cream to soft peaks and fold in.</span></li>
+            <li><span class="stext">Combine espresso and a splash of liqueur in a shallow dish.</span></li>
+            <li><span class="stext">Dip each ladyfinger briefly and layer in a dish.</span></li>
+            <li><span class="stext">Spread cream, dust with cocoa, chill 4+ hours.</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Notes pull-quote -->
+      <div class="notes-wrap">
+        <div class="pullquote">
+          <span class="qkicker">— a note from the kitchen</span>
+          <p>Best made a day ahead. Don't oversoak the ladyfingers or the layers turn to paste.</p>
+        </div>
+      </div>
+
+      <!-- Cook footer -->
+      <div class="cook-foot">
+        <a class="link-btn" href="#">Original ↗</a>
+        <div class="grow"></div>
+        <button class="btn">🖨 Print</button>
+        <button class="btn">Edit</button>
+        <button class="btn danger">Delete</button>
+        <button class="fav-btn on" title="Favorited">♥</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       09 · EDIT FORM EXCERPT
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 09</span>
+      <h2>Edit Form, Excerpt</h2>
+      <span class="kicker">— the working manuscript, before it goes to press</span>
+    </div>
+
+    <div class="panel">
+      <div class="edit-grid">
+        <div class="field full" style="grid-column: 1 / -1;">
+          <label for="e-title">Title</label>
+          <input class="input" id="e-title" type="text" value="Classic Tiramisu">
+        </div>
+        <div class="field full" style="grid-column: 1 / -1;">
+          <label for="e-desc">Description</label>
+          <textarea class="textarea" id="e-desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea>
+        </div>
+        <div class="field">
+          <label for="e-rate">Rating</label>
+          <select class="select" id="e-rate">
+            <option selected>4 stars</option>
+            <option>5 stars</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="e-src">Source URL</label>
+          <input class="input" id="e-src" type="url" value="https://www.marmiton.org/…/tiramisu">
+        </div>
+        <div class="field full" style="grid-column: 1 / -1;">
+          <label>Tags</label>
+          <div class="chips-input">
+            <span class="chip">dessert <span class="x">×</span></span>
+            <span class="chip">italian <span class="x">×</span></span>
+            <span class="chip">chocolate <span class="x">×</span></span>
+            <input type="text" placeholder="Add a tag…">
+          </div>
+        </div>
+        <div class="field full" style="grid-column: 1 / -1;">
+          <label>Image</label>
+          <div class="upload">
+            <div class="ico" aria-hidden="true">⬆</div>
+            <div class="t">Drop an image, or click to browse</div>
+            <div class="hint">or paste an image here (Ctrl+V)</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-foot">
+        <button class="btn">Cancel</button>
+        <button class="btn primary">Save</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       10 · SETTINGS CARDS
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 10</span>
+      <h2>Settings</h2>
+      <span class="kicker">— the back office, four tidy cards</span>
+    </div>
+
+    <div class="settings">
+      <div class="scard">
+        <div>
+          <div class="stitle">Export</div>
+          <div class="skicker">— take your library elsewhere</div>
+        </div>
+        <div class="sbody">
+          <button class="btn sm">JSON</button>
+          <button class="btn sm">Markdown zip</button>
+          <button class="btn sm">PDF</button>
+          <button class="btn sm">JSON-LD zip</button>
+        </div>
+      </div>
+
+      <div class="scard">
+        <div>
+          <div class="stitle">Import</div>
+          <div class="skicker">— bring recipes back in</div>
+        </div>
+        <div class="sbody">
+          <input class="file" type="file" style="flex:1; min-width: 220px;">
+          <button class="btn primary sm">Preview import</button>
+          <div class="hint">Max 50 MB — JSON, Markdown, or JSON-LD archives accepted.</div>
+        </div>
+      </div>
+
+      <div class="scard">
+        <div>
+          <div class="stitle">About</div>
+          <div class="skicker">— the masthead</div>
+        </div>
+        <div class="sbody">
+          <div class="about-logo" style="width:100%;">
+            <div class="mark" aria-hidden="true">R</div>
+            <div>
+              <div class="meta">Recipe Manager</div>
+              <div class="ver">Version 2.3.0</div>
+            </div>
+            <div style="margin-left:auto;"><a class="link-btn" href="#">GitHub ↗</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scard">
+        <div>
+          <div class="stitle">Sign out</div>
+          <div class="skicker">— end the session</div>
+        </div>
+        <div class="sbody">
+          <button class="btn danger">Log out</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       11 · AUTH FORM
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 11</span>
+      <h2>Sign In</h2>
+      <span class="kicker">— the gate, set in a single framed card</span>
+    </div>
+
+    <div class="auth-wrap">
+      <div class="auth">
+        <div class="ornament" aria-hidden="true">❦</div>
+        <h2>Sign in</h2>
+        <div class="sub">— welcome back to the kitchen</div>
+
+        <div class="alert">Invalid email or password.</div>
+
+        <div class="field">
+          <label for="a-email">Email</label>
+          <input class="input" id="a-email" type="email" value="chef@maison.fr">
+        </div>
+        <div class="field">
+          <label for="a-pw">Password</label>
+          <input class="input" id="a-pw" type="password" value="••••••••">
+        </div>
+
+        <button class="btn primary lg">Sign in</button>
+
+        <div class="links">
+          <a class="link-btn" href="#" style="border:0;">Forgot your password?</a>
+          <a class="link-btn" href="#" style="border:0;">Create an account</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       12 · FEEDBACK COMPONENTS
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 12</span>
+      <h2>Feedback</h2>
+      <span class="kicker">— the small signals between the courses</span>
+    </div>
+
+    <div class="feedback-cluster">
+      <div class="fb-block">
+        <div>
+          <div class="fb-label">Toast</div>
+          <div class="toast">
+            <div class="ico" aria-hidden="true">✓</div>
+            <div class="ttext">
+              <div class="t1">Recipe imported</div>
+              <div class="t2">Classic Tiramisu · just now</div>
+            </div>
+            <button class="btn sm">View</button>
+            <span class="x">×</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="fb-label">Bulk action bar</div>
+          <div class="bulk">
+            <span class="cnt"><em>3</em> selected</span>
+            <span class="sep">·</span>
+            <button class="btn danger sm">Delete</button>
+            <span class="grow"></span>
+            <button class="btn sm">Cancel</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="fb-label">Error / draft banner</div>
+          <div class="banner">
+            <span class="bi" aria-hidden="true">!</span>
+            <div>
+              <div class="bt"><strong>We couldn't extract a recipe</strong> from that page — but a draft has been saved for you to finish by hand.</div>
+              <div class="bactions">
+                <button class="btn sm">Open draft</button>
+                <button class="btn sm ghost">Dismiss</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fb-block">
+        <div>
+          <div class="fb-label">Skeleton loader</div>
+          <div class="skeleton">
+            <div class="sk-img"></div>
+            <div class="sk-body">
+              <div class="sk-line w70"></div>
+              <div class="sk-line w90"></div>
+              <div class="sk-line w40"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:24px; align-items:center;">
+          <div>
+            <div class="fb-label" style="margin-bottom:14px;">Spinner</div>
+            <div class="spinner"></div>
+          </div>
+          <div style="flex:1;">
+            <div class="fb-label" style="margin-bottom:14px;">Empty state</div>
+            <div class="empty">
+              <div class="orn" aria-hidden="true">✦</div>
+              <div class="t">No recipes yet — import your first.</div>
+              <button class="btn primary sm">Import from URL</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       13 · STAR RATING + MICRO
+       ============================================================ -->
+  <section class="show">
+    <div class="sec-head">
+      <span class="eyebrow">Section 13</span>
+      <h2>Star Rating</h2>
+      <span class="kicker">— the verdict, four states of acclaim</span>
+    </div>
+
+    <div class="stars-show">
+      <div class="star-item">
+        <div class="big-stars"><span class="e">★★★★★</span></div>
+        <div class="lbl">0 · Unrated</div>
+      </div>
+      <div class="star-item">
+        <div class="big-stars">★★<span class="e">★★★</span></div>
+        <div class="lbl">2 · Fair</div>
+      </div>
+      <div class="star-item">
+        <div class="big-stars">★★★★<span class="e">★</span></div>
+        <div class="lbl">4 · Very Good</div>
+      </div>
+      <div class="star-item">
+        <div class="big-stars">★★★★★</div>
+        <div class="lbl">5 · A Classic</div>
+      </div>
+    </div>
+
+    <div class="micro-note">
+      <strong>Micro-interaction —</strong> on hover, each star fills with a soft
+      <em>warm gold bloom</em> and a faint glow trails behind the cursor, so the
+      rating feels like lighting a row of candles rather than clicking checkboxes.
+    </div>
+  </section>
+
+  <!-- ============================================================
+       14 · FOOTER / TOKEN REFERENCE
+       ============================================================ -->
+  <section class="show footer">
+    <div class="ftop">
+      <div class="fname">Recipe <em>Manager</em></div>
+      <div class="fmeta">Design Tokens · Gourmet Noir</div>
+    </div>
+
+    <table class="token-table">
+      <thead>
+        <tr><th style="width:30%">Token</th><th style="width:30%">Value</th><th>Usage</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>--bg</td>
+          <td class="val"><span class="sw" style="background:#15120e"></span>#15120E</td>
+          <td>Page background · warm charcoal</td>
+        </tr>
+        <tr>
+          <td>--surface</td>
+          <td class="val"><span class="sw" style="background:#1d1812"></span>#1D1812</td>
+          <td>Cards, panels, list rows</td>
+        </tr>
+        <tr>
+          <td>--elevated</td>
+          <td class="val"><span class="sw" style="background:#241e16"></span>#241E16</td>
+          <td>Menus, raised surfaces, buttons</td>
+        </tr>
+        <tr>
+          <td>--border</td>
+          <td class="val"><span class="sw" style="background:#3a3128"></span>#3A3128</td>
+          <td>Warm hairline rules &amp; borders</td>
+        </tr>
+        <tr>
+          <td>--text</td>
+          <td class="val"><span class="sw" style="background:#ece4d3"></span>#ECE4D3</td>
+          <td>Cream body copy</td>
+        </tr>
+        <tr>
+          <td>--muted</td>
+          <td class="val"><span class="sw" style="background:#8a7e63"></span>#8A7E63</td>
+          <td>Muted gold-brown · meta &amp; sources</td>
+        </tr>
+        <tr>
+          <td>--gold</td>
+          <td class="val"><span class="sw" style="background:#d4b483"></span>#D4B483</td>
+          <td>Accent · primary actions, stars</td>
+        </tr>
+        <tr>
+          <td>--deep-gold</td>
+          <td class="val"><span class="sw" style="background:#b8945a"></span>#B8945A</td>
+          <td>Pressed / secondary gold</td>
+        </tr>
+        <tr>
+          <td>--danger</td>
+          <td class="val"><span class="sw" style="background:#c97a4a"></span>#C97A4A</td>
+          <td>Terracotta · delete &amp; errors</td>
+        </tr>
+        <tr>
+          <td>--radius</td>
+          <td class="val">2px</td>
+          <td>Editorial sharp corners</td>
+        </tr>
+        <tr>
+          <td>--serif</td>
+          <td class="val">Playfair Display</td>
+          <td>Display · titles, recipe names, italics</td>
+        </tr>
+        <tr>
+          <td>--sans</td>
+          <td class="val">Inter</td>
+          <td>Body &amp; UI text</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="colophon">
+      Gourmet Noir <span class="orn">❦</span> a recipe manager style showcase <span class="orn">❦</span> set in Playfair &amp; Inter
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

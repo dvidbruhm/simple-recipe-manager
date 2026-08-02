@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulk Delete — Action bar & undo flow</title>
+<style>
+  :root {
+    --color-bg: #f1f1ef;
+    --color-surface: #ffffff;
+    --color-text: #1a1a1a;
+    --color-muted: #888888;
+    --color-accent: #5a7a4f;
+    --color-border: #d8d8d4;
+    --color-danger: #ef4444;
+    --radius-card: 4px;
+  }
+  [data-theme="dark"] {
+    --color-bg: #161617;
+    --color-surface: #2d2d33;
+    --color-text: #e8e8e6;
+    --color-muted: #8a8a8a;
+    --color-accent: #94b386;
+    --color-border: #3a3a40;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--color-bg); color: var(--color-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px; line-height: 1.5; min-height: 100vh;
+    transition: background-color .3s ease, color .3s ease;
+  }
+  .page-bar {
+    position: sticky; top: 0; z-index: 60;
+    background: var(--color-surface); border-bottom: 1px solid var(--color-border);
+    padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .page-bar h1 { font-size: 0.95rem; font-weight: 600; }
+  .page-bar .pill { font-size: 0.72rem; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .page-bar .spacer { flex: 1; }
+  .theme-btn { border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); border-radius: var(--radius-card); padding: 0.3rem 0.6rem; cursor: pointer; font-size: 0.85rem; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 2rem 1.2rem 6rem; }
+  .intro { margin-bottom: 2rem; }
+  .intro h2 { font-size: 1.4rem; margin-bottom: 0.4rem; }
+  .intro p { color: var(--color-muted); max-width: 62ch; }
+  .intro .rec { color: var(--color-accent); font-weight: 600; }
+  .kbd { font-family: ui-monospace, monospace; font-size: 0.72rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 4px; padding: 0.05rem 0.35rem; }
+
+  .section { margin-bottom: 2.5rem; }
+  .section h3 { font-size: 1.05rem; margin-bottom: 0.3rem; }
+  .section .sub { color: var(--color-muted); font-size: 0.85rem; margin-bottom: 1rem; max-width: 62ch; }
+
+  /* ---- interactive demo ---- */
+  .demo-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-muted); margin-bottom: 0.5rem; font-weight: 600; }
+  .mock-frame { border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; background: var(--color-bg); position: relative; }
+  .app-header { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.6rem 0.8rem; background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
+  .app-logo { font-weight: 600; font-size: 0.95rem; }
+  .app-search { flex: 1; min-width: 120px; padding: 0.32rem 0.6rem; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-bg); color: var(--color-muted); font-size: 0.8rem; }
+  .btn { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.32rem 0.6rem; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); color: var(--color-text); font-size: 0.8rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: border-color .15s, background-color .15s, color .15s, filter .15s; }
+  .btn:hover { border-color: var(--color-accent); }
+  .btn--primary { background: var(--color-accent); color: #fff; border-color: transparent; }
+  .btn--primary:hover { border-color: transparent; filter: brightness(1.08); }
+  .btn--danger { color: var(--color-danger); }
+  .btn--danger:hover { border-color: var(--color-danger); background: var(--color-danger); color: #fff; }
+  .btn--danger-solid { background: var(--color-danger); color: #fff; border-color: transparent; }
+  .ghost { background: transparent; border-color: transparent; color: var(--color-muted); }
+  .select-btn { color: var(--color-accent); border-color: var(--color-accent); }
+
+  .tag-bar { padding: 0.5rem 0.8rem; display: flex; gap: 0.4rem; flex-wrap: wrap; border-bottom: 1px solid var(--color-border); }
+  .tag-bar .chip { font-size: 0.7rem; padding: 0.15rem 0.5rem; border: 1px solid var(--color-border); border-radius: 999px; color: var(--color-text); }
+
+  .grid { padding: 0.8rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.8rem; min-height: 200px; }
+  .card-wrap { position: relative; transition: opacity .25s ease, transform .25s ease; }
+  .card-wrap.removing { opacity: 0; transform: scale(0.92); pointer-events: none; }
+  .card { display: flex; flex-direction: column; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); overflow: hidden; cursor: pointer; }
+  .card-wrap.is-selected .card { border-color: var(--color-accent); box-shadow: 0 0 0 2px var(--color-accent); }
+  .card-img { height: 90px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.6); font-size: 1.6rem; }
+  .card-img.a { background: linear-gradient(135deg, #c9b, #d8b); }
+  .card-img.b { background: linear-gradient(135deg, #b69, #957); }
+  .card-img.c { background: linear-gradient(135deg, #7a8, #5a7a4f); }
+  .card-img.d { background: linear-gradient(135deg, #d97, #c65); }
+  .card-img.e { background: linear-gradient(135deg, #69c, #48a); }
+  .card-img.f { background: linear-gradient(135deg, #da6, #c84); }
+  .card-body { padding: 0.5rem; }
+  .card-title { font-weight: 500; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-meta { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--color-muted); margin-top: 0.2rem; }
+  .check { position: absolute; top: 0.4rem; left: 0.4rem; z-index: 3; width: 1.4rem; height: 1.4rem; border-radius: 999px; border: 2px solid #fff; background: rgba(0,0,0,.4); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; }
+  .check.on { background: var(--color-accent); border-color: var(--color-accent); }
+  .fav-btn { position: absolute; top: 0.35rem; right: 0.35rem; z-index: 2; width: 1.5rem; height: 1.5rem; border: none; border-radius: 999px; background: rgba(0,0,0,.45); color: #fff; font-size: 1rem; line-height: 1; cursor: pointer; }
+
+  /* sticky bottom action bar (recommended) */
+  .actionbar-bottom {
+    position: sticky; bottom: 0; z-index: 10;
+    margin: 0; padding: 0.6rem 0.8rem; background: var(--color-surface);
+    border-top: 1px solid var(--color-border); display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    box-shadow: 0 -2px 12px rgba(0,0,0,.06);
+  }
+  .actionbar-bottom .count { font-weight: 600; font-size: 0.85rem; }
+  .actionbar-bottom .count .n { color: var(--color-accent); }
+  .actionbar-bottom .spacer { flex: 1; }
+
+  /* top inline bar variant */
+  .actionbar-top { padding: 0.6rem 0.8rem; background: var(--color-accent); color: #fff; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .actionbar-top .count { font-weight: 600; font-size: 0.85rem; }
+  .actionbar-top .spacer { flex: 1; }
+  .actionbar-top .btn { background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.3); }
+  .actionbar-top .btn--danger-solid { background: #fff; color: var(--color-danger); border-color: #fff; }
+
+  /* toast (matches real app) */
+  .toast-area { padding: 0.8rem 0.8rem 0; }
+  .toast {
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 4px;
+    padding: 10px 14px; display: none; align-items: center; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    animation: toastIn .28s ease;
+  }
+  .toast.show { display: flex; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .toast-msg { flex: 1; font-size: 0.85rem; }
+  .toast-undo { color: var(--color-accent); font-weight: 600; text-decoration: underline; cursor: pointer; background: none; border: none; font-size: inherit; }
+  .toast-close { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--color-muted); }
+
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem; }
+  @media (max-width: 760px) { .compare { grid-template-columns: 1fr; } }
+  .compare .note { font-size: 0.8rem; color: var(--color-muted); margin-top: 0.5rem; }
+
+  .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1rem; }
+  @media (max-width: 560px) { .pros-cons { grid-template-columns: 1fr; } }
+  .pros, .cons { border: 1px solid var(--color-border); border-radius: 6px; padding: 0.6rem 0.75rem; font-size: 0.8rem; }
+  .pros h4 { color: var(--color-accent); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .cons h4 { color: var(--color-danger); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .pros ul, .cons ul { padding-left: 1.1rem; color: var(--color-muted); }
+  .pros li, .cons li { margin-bottom: 0.15rem; }
+
+  .reset-link { display: inline-block; margin-top: 0.8rem; font-size: 0.78rem; color: var(--color-accent); cursor: pointer; text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="page-bar">
+  <h1>Bulk Delete — Action bar &amp; undo flow</h1>
+  <span class="spacer"></span>
+  <span class="pill">Question 3 of N</span>
+  <button class="theme-btn" onclick="toggleTheme()">◐ Light / Dark</button>
+</div>
+
+<div class="wrap">
+  <div class="intro">
+    <h2>How should bulk delete feel?</h2>
+    <p>
+      Try it: tap checkboxes (or <span class="kbd">Select all</span>), then <span class="kbd">Delete</span>.
+      Selected cards animate out and a toast appears with a single <strong>Undo</strong> that restores all of them at once.
+      This mirrors your existing single-delete flow (soft-delete + toast + undo) — just extended to many IDs.
+      <span class="rec">No confirm dialog</span>, because every delete is reversible.
+    </p>
+  </div>
+
+  <!-- ===== INTERACTIVE DEMO: sticky bottom bar ===== -->
+  <div class="section">
+    <div class="demo-label">Recommended — sticky bottom action bar (try it live)</div>
+    <div class="mock-frame" id="demo">
+      <div class="toast-area"><div class="toast" id="toast"><span class="toast-msg" id="toast-msg">Deleted 0 recipes.</span><button class="toast-undo" id="undo-btn">Undo</button><button class="toast-close" onclick="document.getElementById('toast').classList.remove('show')">×</button></div></div>
+      <div class="app-header">
+        <span class="app-logo">recipes</span>
+        <span class="app-search">Search recipes, ingredients…</span>
+        <button class="btn btn--primary">+ Add</button>
+        <button class="btn select-btn">Select</button>
+      </div>
+      <div class="tag-bar"><span class="chip">all</span><span class="chip">dessert</span><span class="chip">italian</span><span class="chip">quick</span><span class="chip">french</span></div>
+      <div class="grid" id="demo-grid">
+        <div class="card-wrap" data-id="1"><span class="check" onclick="toggle(this)">✓</span><button class="fav-btn">♡</button><div class="card"><div class="card-img a">🍰</div><div class="card-body"><div class="card-title">Classic Tiramisu</div><div class="card-meta"><span>marmiton</span><span>★★★★★</span></div></div></div></div>
+        <div class="card-wrap is-selected" data-id="2"><span class="check on" onclick="toggle(this)">✓</span><button class="fav-btn">♥</button><div class="card"><div class="card-img b">🍝</div><div class="card-body"><div class="card-title">Spaghetti Bolognese</div><div class="card-meta"><span>bbcgood</span><span>★★★★☆</span></div></div></div></div>
+        <div class="card-wrap is-selected" data-id="3"><span class="check on" onclick="toggle(this)">✓</span><button class="fav-btn">♡</button><div class="card"><div class="card-img c">🥗</div><div class="card-body"><div class="card-title">Ratatouille</div><div class="card-meta"><span>750g</span><span>★★★★★</span></div></div></div></div>
+        <div class="card-wrap" data-id="4"><span class="check" onclick="toggle(this)">✓</span><button class="fav-btn">♡</button><div class="card"><div class="card-img d">🍫</div><div class="card-body"><div class="card-title">Molten Lava Cake</div><div class="card-meta"><span>allrecipes</span><span>★★★★★</span></div></div></div></div>
+        <div class="card-wrap is-selected" data-id="5"><span class="check on" onclick="toggle(this)">✓</span><button class="fav-btn">♡</button><div class="card"><div class="card-img e">🐟</div><div class="card-body"><div class="card-title">Salmon en Papillote</div><div class="card-meta"><span>750g</span><span>★★★★☆</span></div></div></div></div>
+        <div class="card-wrap" data-id="6"><span class="check" onclick="toggle(this)">✓</span><button class="fav-btn">♡</button><div class="card"><div class="card-img f">🥧</div><div class="card-body"><div class="card-title">Tarte Tatin</div><div class="card-meta"><span>marmiton</span><span>★★★★★</span></div></div></div></div>
+      </div>
+      <div class="actionbar-bottom">
+        <span class="count"><span class="n" id="sel-count">3</span> selected</span>
+        <span class="spacer"></span>
+        <button class="btn ghost" onclick="selectAll()">Select all</button>
+        <button class="btn ghost" onclick="clearAll()">Clear</button>
+        <button class="btn btn--danger" onclick="doDelete()">Delete</button>
+        <button class="btn ghost">Cancel</button>
+      </div>
+    </div>
+    <a class="reset-link" onclick="resetDemo()">↺ Reset demo</a>
+  </div>
+
+  <!-- ===== ACTION BAR PLACEMENT COMPARISON ===== -->
+  <div class="section">
+    <h3>Action bar placement — bottom vs top</h3>
+    <p class="sub">Bottom (above) stays out of your header toolbar and sits under the thumb on mobile. Top replaces the toolbar — more visible but loses search/sort access mid-selection.</p>
+    <div class="compare">
+      <div>
+        <div class="demo-label">Bottom sticky (recommended)</div>
+        <div class="mock-frame">
+          <div class="app-header"><span class="app-logo">recipes</span><span class="app-search">search…</span><button class="btn select-btn">Select</button></div>
+          <div class="grid" style="min-height:90px"></div>
+          <div class="actionbar-bottom"><span class="count"><span class="n">3</span> selected</span><span class="spacer"></span><button class="btn ghost">Select all</button><button class="btn btn--danger">Delete</button></div>
+        </div>
+        <p class="note">Header stays intact; search/sort still reachable. Bar pins to viewport bottom on mobile.</p>
+      </div>
+      <div>
+        <div class="demo-label">Top inline (replaces toolbar)</div>
+        <div class="mock-frame">
+          <div class="actionbar-top"><span class="count"><span class="n">3</span> selected</span><span class="spacer"></span><button class="btn">Select all</button><button class="btn btn--danger-solid">Delete</button><button class="btn">✕</button></div>
+          <div class="app-header"><span class="app-logo">recipes</span><span class="app-search" style="opacity:.4">search hidden…</span></div>
+          <div class="grid" style="min-height:90px"></div>
+        </div>
+        <p class="note">Strong presence, but you lose the search/sort row while selecting.</p>
+      </div>
+    </div>
+    <div class="pros-cons">
+      <div class="pros"><h4>Why no confirm dialog</h4><ul>
+        <li>Consistent with your existing single-delete (toast + undo)</li>
+        <li>Soft-delete is fully reversible — undo restores all N at once</li>
+        <li>Less friction for the common "clean up a batch" case</li>
+      </ul></div>
+      <div class="cons"><h4>If you'd rather confirm</h4><ul>
+        <li>Add a confirm step for large counts (e.g. &gt;10) only</li>
+        <li>Tradeoff: interrupts flow; undo already covers safety</li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleTheme(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark');}
+  const grid = document.getElementById('demo-grid');
+  function recount(){const n=grid.querySelectorAll('.card-wrap.is-selected').length;document.getElementById('sel-count').textContent=n;}
+  function toggle(el){el.closest('.card-wrap').classList.toggle('is-selected');el.classList.toggle('on');recount();}
+  function selectAll(){grid.querySelectorAll('.card-wrap').forEach(w=>{w.classList.add('is-selected');w.querySelector('.check').classList.add('on');});recount();}
+  function clearAll(){grid.querySelectorAll('.card-wrap').forEach(w=>{w.classList.remove('is-selected');w.querySelector('.check').classList.remove('on');});recount();}
+  let lastDeleted=[];
+  function doDelete(){
+    const sel=[...grid.querySelectorAll('.card-wrap.is-selected')];
+    if(!sel.length)return;
+    lastDeleted=sel;
+    sel.forEach(w=>w.classList.add('removing'));
+    const n=sel.length;
+    setTimeout(()=>{
+      sel.forEach(w=>w.style.display='none');
+      const t=document.getElementById('toast');
+      document.getElementById('toast-msg').textContent=`Deleted ${n} recipe${n===1?'':'s'}.`;
+      t.classList.add('show');
+    },250);
+  }
+  document.getElementById('undo-btn').addEventListener('click',()=>{
+    lastDeleted.forEach(w=>{w.style.display='';w.classList.remove('removing');});
+    document.getElementById('toast').classList.remove('show');
+  });
+  function resetDemo(){
+    grid.querySelectorAll('.card-wrap').forEach(w=>{w.style.display='';w.classList.remove('removing');w.classList.remove('is-selected');w.querySelector('.check').classList.remove('on');});
+    // re-select the original 3
+    [2,3,5].forEach(id=>{const w=grid.querySelector(`[data-id="${id}"]`);w.classList.add('is-selected');w.querySelector('.check').classList.add('on');});
+    document.getElementById('toast').classList.remove('show');
+    recount();
+  }
+</script>
+</body>
+</html>

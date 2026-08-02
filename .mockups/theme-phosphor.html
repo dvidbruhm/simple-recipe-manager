@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECIPES.SYS // PHOSPHOR — UI Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000000;
+    --bg-alt:#050500;
+    --surface:#040a04;
+    --surface-2:#071207;
+    --text:#33ff66;
+    --text-bright:#bdffce;
+    --muted:#1f9e3a;
+    --muted-dim:#127026;
+    --accent:#33ff66;
+    --accent-warn:#f7ff5b;
+    --accent-danger:#ff5c5c;
+    --border:#1a6b2e;
+    --border-bright:#33ff66;
+    --radius:0px;
+    --glow:0 0 4px rgba(51,255,102,.7), 0 0 12px rgba(51,255,102,.35);
+    --glow-soft:0 0 3px rgba(51,255,102,.45);
+    --glow-border:0 0 6px rgba(51,255,102,.35), inset 0 0 8px rgba(51,255,102,.08);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text)}
+  body{
+    font-family:'IBM Plex Mono',ui-monospace,monospace;
+    font-size:14px;
+    line-height:1.5;
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+    text-shadow:var(--glow-soft);
+    letter-spacing:.2px;
+  }
+  /* ===== CRT LAYERS ===== */
+  /* Scanline overlay (fixed, on top of everything except UI text in terms of dimming only) */
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    pointer-events:none;
+    z-index:9000;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(0,0,0,0) 0 2px,
+        rgba(0,0,0,0.22) 2px 4px
+      );
+    mix-blend-mode:multiply;
+  }
+  /* Vignette + curvature feel */
+  body::after{
+    content:"";
+    position:fixed;inset:0;
+    pointer-events:none;
+    z-index:9001;
+    background:
+      radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%),
+      radial-gradient(ellipse at center, rgba(51,255,102,.04) 0%, rgba(0,0,0,0) 60%);
+  }
+  /* Faint flicker animation on whole screen */
+  @keyframes flicker{
+    0%,100%{opacity:1}
+    97%{opacity:1}
+    97.5%{opacity:.92}
+    98%{opacity:1}
+    99%{opacity:.96}
+  }
+  .crt-flicker{animation:flicker 6s infinite}
+
+  /* ===== LAYOUT ===== */
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:28px 28px 80px;
+    position:relative;
+    z-index:1;
+  }
+
+  /* ===== TYPOGRAPHY ===== */
+  h1,h2,h3,h4,.display{
+    font-family:'VT323','IBM Plex Mono',monospace;
+    font-weight:normal;
+    text-transform:uppercase;
+    letter-spacing:3px;
+    color:var(--text-bright);
+  }
+  .display{font-family:'VT323',monospace;line-height:.9}
+  a{color:var(--text-bright);text-decoration:none}
+  a:hover{color:#fff;text-shadow:var(--glow)}
+
+  ::selection{background:var(--accent);color:#000;text-shadow:none}
+
+  /* ===== BOOT HEADER ===== */
+  .boot{
+    border:2px solid var(--border-bright);
+    box-shadow:var(--glow-border);
+    padding:10px 14px;
+    margin-bottom:18px;
+    font-size:13px;
+    color:var(--text-bright);
+    display:flex;justify-content:space-between;align-items:center;
+    flex-wrap:wrap;gap:10px;
+  }
+  .boot .dot{
+    display:inline-block;width:9px;height:9px;background:var(--accent);
+    box-shadow:0 0 8px var(--accent);margin-right:8px;
+    animation:blink 1.4s steps(2,end) infinite;
+  }
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+  .cursor{
+    display:inline-block;width:.6em;height:1em;background:var(--accent);
+    box-shadow:0 0 6px var(--accent);vertical-align:-2px;
+    animation:blink 1s steps(2,end) infinite;margin-left:2px;
+  }
+
+  /* ===== SECTION LABELS ===== */
+  section.show{
+    margin-top:42px;
+    border-top:2px double var(--border-bright);
+    padding-top:18px;
+  }
+  section.show > h2{
+    font-size:30px;
+    color:var(--text-bright);
+    margin-bottom:2px;
+  }
+  section.show > .note{
+    color:var(--muted);
+    font-size:12px;
+    margin-bottom:18px;
+    text-transform:lowercase;
+    letter-spacing:.5px;
+  }
+  .ascii-divider{
+    color:var(--muted-dim);
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:0;
+    white-space:nowrap;
+    overflow:hidden;
+    font-size:12px;
+    user-select:none;
+    margin:6px 0;
+  }
+
+  /* ===== PREAMBLE ===== */
+  .intro{
+    border:2px solid var(--border-bright);
+    box-shadow:var(--glow-border);
+    padding:24px;
+    background:var(--surface);
+  }
+  .intro h1{
+    font-size:74px;letter-spacing:6px;
+    color:var(--text-bright);
+    text-shadow:var(--glow);
+  }
+  .intro .concept{color:var(--muted);margin-top:4px;font-size:13px}
+  .intro .concept b{color:var(--text)}
+  .palette{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+  .swatch{
+    display:flex;align-items:center;gap:8px;
+    border:1px solid var(--border);
+    padding:4px 8px 4px 4px;font-size:11px;color:var(--text);
+    background:#000;
+  }
+  .swatch i{display:block;width:18px;height:18px;border:1px solid var(--border-bright)}
+  .specimen{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .specimen div{border:1px dashed var(--border);padding:8px 10px;font-size:12px;color:var(--muted)}
+  .specimen b{color:var(--text-bright);display:block;font-size:13px;letter-spacing:1px}
+  .specimen .v{font-family:'VT323',monospace;font-size:24px;color:var(--text-bright);text-shadow:var(--glow-soft);letter-spacing:2px}
+  .specimen .m{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text);text-shadow:none}
+
+  /* ===== GENERIC PANELS ===== */
+  .panel{
+    border:2px solid var(--border-bright);
+    background:var(--surface);
+    box-shadow:var(--glow-border);
+    padding:16px;
+  }
+  .panel.dim{border-color:var(--border);box-shadow:none}
+  .panel-title{
+    font-family:'VT323',monospace;
+    font-size:20px;letter-spacing:2px;
+    color:var(--text-bright);
+    border-bottom:1px dashed var(--border);
+    padding-bottom:6px;margin-bottom:10px;
+    text-transform:uppercase;
+  }
+
+  .grid{display:grid;gap:14px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  /* ===== BUTTONS ===== */
+  .btn{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    background:#000;
+    color:var(--text);
+    border:2px solid var(--border-bright);
+    padding:7px 14px;
+    cursor:pointer;
+    box-shadow:var(--glow-soft);
+    text-shadow:var(--glow-soft);
+    position:relative;
+  }
+  .btn:hover,.btn:focus{
+    background:var(--accent);color:#000;text-shadow:none;
+    box-shadow:0 0 10px var(--accent);
+  }
+  .btn.primary{
+    background:var(--accent);color:#000;text-shadow:none;font-weight:700;
+    box-shadow:0 0 8px var(--accent), inset 0 0 6px rgba(255,255,255,.2);
+  }
+  .btn.primary:hover{background:var(--text-bright);box-shadow:0 0 14px var(--text-bright)}
+  .btn.danger{
+    border-color:var(--accent-danger);color:var(--accent-danger);
+    text-shadow:0 0 4px rgba(255,92,92,.6);
+    box-shadow:0 0 4px rgba(255,92,92,.3);
+  }
+  .btn.danger:hover{background:var(--accent-danger);color:#000;text-shadow:none;box-shadow:0 0 10px var(--accent-danger)}
+  .btn.ghost{
+    border-color:transparent;background:transparent;color:var(--text);box-shadow:none;text-shadow:var(--glow-soft);
+  }
+  .btn.ghost:hover{border-color:var(--border-bright);background:#000}
+  .btn.link{
+    border:none;background:none;box-shadow:none;color:var(--text-bright);
+    padding:2px 4px;text-decoration:underline;text-underline-offset:3px;
+  }
+  .btn.link:hover{color:#fff}
+  .btn.sm{padding:4px 10px;font-size:11px}
+  .btn.icon{padding:7px 10px;line-height:1}
+  .btn:focus-visible{outline:2px dashed var(--text-bright);outline-offset:2px}
+
+  .step-btn{
+    width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;
+    font-size:18px;font-family:'VT323',monospace;
+  }
+  .fav{font-size:18px;line-height:1}
+  .fav.active{color:#ff3b6b;text-shadow:0 0 6px rgba(255,59,107,.7)}
+
+  .hint{font-size:11px;color:var(--muted);margin-top:8px}
+
+  /* ===== FORM CONTROLS ===== */
+  label.lbl{
+    display:block;font-size:11px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;
+  }
+  label.lbl::before{content:"// "}
+
+  .input,.textarea,.select,.file{
+    width:100%;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    background:#000;
+    color:var(--text-bright);
+    border:2px solid var(--border);
+    padding:8px 10px;
+    text-shadow:var(--glow-soft);
+    outline:none;
+  }
+  .input:focus,.textarea:focus,.select:focus,.file:focus{
+    border-color:var(--border-bright);
+    box-shadow:var(--glow-border);
+  }
+  .input.prompt{padding-left:26px;background-image:linear-gradient(45deg,transparent 0,transparent 100%);position:relative}
+  .prompt-wrap{position:relative;display:flex;align-items:center}
+  .prompt-wrap::before{
+    content:">";position:absolute;left:10px;color:var(--accent);
+    text-shadow:var(--glow);font-weight:700;pointer-events:none;
+  }
+  .prompt-wrap .input{padding-left:24px}
+
+  .textarea{resize:vertical;min-height:70px}
+  .select{
+    appearance:none;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+      linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+    background-position:calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+    background-size:5px 5px,5px 5px;
+    background-repeat:no-repeat;
+    padding-right:30px;
+  }
+  .select option{background:#000;color:var(--text-bright)}
+  .file{padding:6px 10px;font-size:12px}
+  .file::file-selector-button{
+    background:#000;color:var(--accent);border:1px solid var(--border-bright);
+    padding:4px 8px;margin-right:10px;font-family:inherit;font-size:11px;
+    text-transform:uppercase;letter-spacing:1px;cursor:pointer;
+    box-shadow:var(--glow-soft);
+  }
+  .file::file-selector-button:hover{background:var(--accent);color:#000}
+
+  /* checkbox */
+  .check{
+    display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--text);cursor:pointer;
+  }
+  .check input{
+    appearance:none;width:16px;height:16px;background:#000;
+    border:2px solid var(--border-bright);display:inline-grid;place-content:center;
+    box-shadow:var(--glow-soft);
+  }
+  .check input:checked{background:var(--accent)}
+  .check input:checked::after{
+    content:"X";color:#000;font-family:'VT323',monospace;font-size:14px;line-height:1;font-weight:700;
+  }
+  .check.checked .txt{text-decoration:line-through;color:var(--muted)}
+
+  /* ===== TAG CHIPS ===== */
+  .chip{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:12px;color:var(--text-bright);
+    border:1px solid var(--border-bright);
+    padding:2px 6px;background:#000;
+    box-shadow:var(--glow-soft);
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .chip::before{content:"[";color:var(--muted)}
+  .chip::after{content:"]";color:var(--muted)}
+  .chip .x{color:var(--accent-danger);margin-left:4px;cursor:pointer;text-shadow:0 0 4px rgba(255,92,92,.5)}
+  .chip .x::before{content:"";content:none}
+  .chip.removable{padding-right:8px}
+  .chip.tag{cursor:default}
+  .chip.filter{
+    cursor:pointer;text-transform:lowercase;
+    padding:3px 8px;letter-spacing:.5px;
+  }
+  .chip.filter.active{
+    background:var(--accent);color:#000;text-shadow:none;font-weight:600;
+    box-shadow:0 0 8px var(--accent);
+  }
+  .chip.filter.active::before,.chip.filter.active::after{color:#000}
+  .chip.source{
+    text-transform:lowercase;border-style:dashed;
+  }
+
+  /* ===== HEADER BAR ===== */
+  .topbar{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    border:2px solid var(--border-bright);
+    background:var(--surface);
+    padding:10px 12px;
+    box-shadow:var(--glow-border);
+    position:relative;
+  }
+  .logo{
+    font-family:'VT323',monospace;font-size:26px;letter-spacing:2px;
+    color:var(--text-bright);text-shadow:var(--glow);
+    display:flex;align-items:center;gap:6px;
+  }
+  .logo .mark{
+    width:20px;height:20px;border:2px solid var(--accent);
+    display:inline-block;position:relative;box-shadow:0 0 6px var(--accent);
+  }
+  .logo .mark::after{
+    content:"";position:absolute;inset:3px;background:var(--accent);box-shadow:0 0 4px var(--accent);
+  }
+  .topbar .search{flex:1;min-width:220px}
+  .topbar .search .input{padding-left:24px}
+  .icon-btn{
+    width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;
+    border:2px solid var(--border-bright);background:#000;color:var(--text-bright);
+    cursor:pointer;font-size:15px;box-shadow:var(--glow-soft);
+  }
+  .icon-btn:hover{background:var(--accent);color:#000}
+  .icon-btn.active{background:var(--accent);color:#000}
+  .view-toggle{display:inline-flex;border:2px solid var(--border-bright)}
+  .view-toggle .icon-btn{border:none;border-left:2px solid var(--border-bright);box-shadow:none;width:32px;height:32px}
+  .view-toggle .icon-btn:first-child{border-left:none}
+
+  /* dropdowns */
+  .dropdown{position:relative;display:inline-block}
+  .dd-trigger{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:1px;
+    background:#000;color:var(--text-bright);border:2px solid var(--border-bright);
+    padding:7px 28px 7px 12px;cursor:pointer;box-shadow:var(--glow-soft);position:relative;
+  }
+  .dd-trigger::after{
+    content:"▾";position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--accent);
+  }
+  .dd-trigger:hover{background:var(--accent);color:#000}
+  .dd-trigger.active{background:var(--accent);color:#000;text-shadow:none}
+  .dd-trigger.active::after{color:#000}
+  .dd-menu{
+    position:absolute;top:calc(100% + 4px);left:0;min-width:200px;z-index:50;
+    border:2px solid var(--border-bright);background:#000;
+    box-shadow:0 0 12px rgba(51,255,102,.4);
+    padding:4px;
+  }
+  .dd-item{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:7px 10px;font-size:12px;color:var(--text-bright);cursor:pointer;
+    border:1px solid transparent;
+  }
+  .dd-item:hover{background:var(--accent);color:#000;text-shadow:none;border-color:var(--border-bright)}
+  .dd-item .check-mark{color:var(--accent);font-weight:700}
+  .dd-item:hover .check-mark{color:#000}
+  .dd-item .chk{font-family:'VT323',monospace;font-size:16px}
+
+  /* ===== CARDS GRID ===== */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{
+    border:2px solid var(--border-bright);
+    background:var(--surface);
+    box-shadow:var(--glow-border);
+    display:flex;flex-direction:column;
+    position:relative;
+  }
+  .card .thumb{
+    height:150px;background:#000;border-bottom:2px solid var(--border-bright);
+    position:relative;overflow:hidden;
+  }
+  .card .thumb img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    filter:hue-rotate(70deg) saturate(.55) brightness(.75) contrast(1.05);
+    mix-blend-mode:screen;opacity:.95;
+  }
+  .card .thumb::after{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.3) 2px 3px);
+    pointer-events:none;
+  }
+  .card .body{padding:12px}
+  .card .title{
+    font-family:'VT323',monospace;font-size:22px;letter-spacing:1px;
+    color:var(--text-bright);text-shadow:var(--glow-soft);line-height:1;margin-bottom:6px;
+    text-transform:uppercase;
+  }
+  .card .meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-bottom:8px}
+  .card .src{color:var(--muted)}
+  .card .src::before{content:"<"}
+  .card .src::after{content:">"}
+  .card .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+  .card .stars{color:var(--accent);font-size:12px;letter-spacing:1px;text-shadow:var(--glow-soft)}
+
+  .card.selected{
+    border-color:var(--text-bright);
+    box-shadow:0 0 0 2px var(--text-bright), 0 0 16px rgba(51,255,102,.6);
+  }
+  .card.selected .sel-corner{
+    position:absolute;top:-2px;right:-2px;
+    background:var(--accent);color:#000;
+    font-family:'VT323',monospace;font-size:18px;line-height:1;
+    padding:3px 6px;border:2px solid var(--text-bright);
+    box-shadow:0 0 8px var(--accent);
+  }
+  .sel-corner::before{content:"[X]"}
+
+  .no-img{
+    height:150px;background:#000;
+    border-bottom:2px solid var(--border-bright);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:var(--muted-dim);font-size:11px;text-transform:uppercase;letter-spacing:2px;
+    background-image:
+      linear-gradient(45deg, var(--surface) 25%, transparent 25%, transparent 75%, var(--surface) 75%),
+      linear-gradient(45deg, var(--surface) 25%, #000 25%, #000 75%, var(--surface) 75%);
+    background-size:14px 14px;background-position:0 0,7px 7px;
+  }
+  .no-img .glyph{font-family:'VT323',monospace;font-size:42px;color:var(--muted);margin-bottom:6px;text-shadow:var(--glow-soft)}
+  .no-img .glyph::before{content:"[ ]"}
+
+  /* ===== LIST ROWS ===== */
+  .list-row{
+    display:grid;
+    grid-template-columns:32px 60px 1fr auto auto 28px;
+    gap:14px;align-items:center;
+    border:1px solid var(--border);
+    background:var(--surface);
+    padding:8px 10px;
+    border-left:3px solid var(--border-bright);
+  }
+  .list-row + .list-row{margin-top:6px}
+  .list-row .idx{font-family:'VT323',monospace;font-size:18px;color:var(--muted)}
+  .list-row .thumb{width:60px;height:40px;background:#000;border:1px solid var(--border);overflow:hidden}
+  .list-row .thumb img{width:100%;height:100%;object-fit:cover;filter:hue-rotate(70deg) saturate(.5) brightness(.7);mix-blend-mode:screen}
+  .list-row .thumb.ph{
+    display:flex;align-items:center;justify-content:center;color:var(--muted-dim);
+    font-family:'VT323',monospace;font-size:18px;
+  }
+  .list-row .title-l{font-family:'VT323',monospace;font-size:20px;color:var(--text-bright);letter-spacing:1px;text-transform:uppercase}
+  .list-row .src-l{font-size:11px;color:var(--muted)}
+  .list-row .src-l::before{content:"<"} .list-row .src-l::after{content:">"}
+  .list-row .stars{color:var(--accent);font-size:11px;text-shadow:var(--glow-soft)}
+  .list-row .mini-tags{display:flex;gap:4px}
+
+  /* ===== COOK VIEW ===== */
+  .cook-header{
+    display:grid;grid-template-columns:340px 1fr;gap:20px;
+    border:2px solid var(--border-bright);background:var(--surface);
+    box-shadow:var(--glow-border);padding:16px;
+  }
+  .cook-img{
+    height:240px;background:#000;border:2px solid var(--border-bright);overflow:hidden;position:relative;
+  }
+  .cook-img img{width:100%;height:100%;object-fit:cover;filter:hue-rotate(70deg) saturate(.5) brightness(.7);mix-blend-mode:screen}
+  .cook-img::after{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.25) 2px 3px);
+  }
+  .back-link{font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+  .back-link::before{content:"<< "}
+  .cook-title{font-family:'VT323',monospace;font-size:44px;letter-spacing:2px;color:var(--text-bright);text-shadow:var(--glow);line-height:1;text-transform:uppercase}
+  .cook-stars{margin:8px 0;font-size:22px;color:var(--accent);letter-spacing:3px;text-shadow:var(--glow-soft)}
+  .cook-desc{color:var(--text);font-size:13px;margin:10px 0}
+  .cook-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+
+  .cook-body{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  .ingredients-list,.steps-list{display:flex;flex-direction:column;gap:6px}
+  .ing-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;padding:5px 8px;border-left:2px solid var(--border)}
+  .ing-item.done{border-left-color:var(--border-bright)}
+  .ing-item.done .txt{text-decoration:line-through;color:var(--muted)}
+  .ing-item .cbox{
+    appearance:none;width:16px;height:16px;background:#000;border:2px solid var(--border-bright);
+    display:inline-grid;place-content:center;flex-shrink:0;box-shadow:var(--glow-soft);margin-top:2px;
+  }
+  .ing-item.done .cbox{background:var(--accent)}
+  .ing-item.done .cbox::after{content:"X";color:#000;font-family:'VT323',monospace;font-size:14px;line-height:1;font-weight:700}
+
+  .servings-scaler{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .servings-scaler label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
+  .servings-scaler .num{
+    width:54px;text-align:center;background:#000;color:var(--text-bright);
+    border:2px solid var(--border-bright);padding:5px;font-family:'VT323',monospace;font-size:18px;
+    box-shadow:var(--glow-soft);
+  }
+
+  .step-item{
+    display:grid;grid-template-columns:36px 1fr;gap:10px;
+    padding:8px 10px;border:1px solid var(--border);background:#000;
+    font-size:13px;
+  }
+  .step-item.current{
+    border-color:var(--border-bright);background:var(--surface-2);
+    box-shadow:var(--glow-border);
+  }
+  .step-item .num{
+    font-family:'VT323',monospace;font-size:24px;color:var(--muted);line-height:1;text-align:right;
+  }
+  .step-item.current .num{color:var(--text-bright);text-shadow:var(--glow)}
+  .step-item.current .txt{color:var(--text-bright)}
+
+  .cook-progress{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    border:1px dashed var(--border);padding:8px 10px;margin-bottom:12px;
+  }
+  .cook-progress .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .bar{flex:1;min-width:120px;height:8px;background:#000;border:1px solid var(--border);position:relative;overflow:hidden}
+  .bar > i{display:block;height:100%;background:var(--accent);box-shadow:0 0 8px var(--accent);width:33%}
+
+  .notes-block{
+    margin-top:16px;border:1px dashed var(--border-bright);padding:12px;background:#000;
+  }
+  .notes-block .pt{font-family:'VT323',monospace;font-size:18px;letter-spacing:2px;color:var(--text-bright);margin-bottom:6px;text-transform:uppercase}
+  .notes-block .pt::before{content:"## "}
+  .notes-block p{color:var(--text);font-size:13px;font-style:italic}
+
+  .cook-footer{
+    margin-top:16px;border-top:2px double var(--border-bright);padding-top:12px;
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  }
+
+  /* ===== SETTINGS CARDS ===== */
+  .settings-card{margin-bottom:12px}
+  .settings-card .panel-title{display:flex;justify-content:space-between;align-items:center}
+  .settings-card .panel-title .meta{font-size:11px;color:var(--muted);text-transform:lowercase;letter-spacing:.5px}
+  .about-logo{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .about-logo .logo{font-size:30px}
+  .about-logo .v{font-size:11px;color:var(--muted);letter-spacing:1px}
+
+  /* ===== AUTH ===== */
+  .auth-wrap{display:flex;justify-content:center}
+  .auth-card{
+    width:100%;max-width:380px;
+    border:2px solid var(--border-bright);background:var(--surface);
+    box-shadow:var(--glow-border);padding:22px;
+  }
+  .auth-title{font-family:'VT323',monospace;font-size:34px;letter-spacing:3px;color:var(--text-bright);text-shadow:var(--glow);text-align:center;margin-bottom:6px;text-transform:uppercase}
+  .auth-sub{text-align:center;font-size:11px;color:var(--muted);margin-bottom:14px;letter-spacing:1px}
+  .auth-sub::before{content:"["} .auth-sub::after{content:"]"}
+  .error-note{
+    border:1px solid var(--accent-danger);color:var(--accent-danger);
+    padding:8px 10px;font-size:12px;margin-bottom:14px;
+    text-shadow:0 0 4px rgba(255,92,92,.5);
+    background:rgba(255,92,92,.05);
+  }
+  .error-note::before{content:"!! "}
+  .form-stack{display:flex;flex-direction:column;gap:12px}
+  .form-stack .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .auth-links{display:flex;justify-content:space-between;margin-top:14px;font-size:11px}
+
+  /* ===== FEEDBACK ===== */
+  .toast{
+    border:2px solid var(--border-bright);background:#000;
+    box-shadow:0 0 12px rgba(51,255,102,.5);
+    padding:10px 12px;display:flex;align-items:center;gap:12px;max-width:380px;
+  }
+  .toast .ico{color:var(--accent);font-size:16px;text-shadow:var(--glow)}
+  .toast .ico::before{content:"[OK]"}
+  .toast .msg{flex:1;font-size:12px;color:var(--text-bright)}
+  .toast .close{color:var(--muted);cursor:pointer;font-size:14px}
+  .toast .close:hover{color:var(--accent-danger)}
+
+  .bulk-bar{
+    border:2px solid var(--border-bright);background:var(--surface);
+    box-shadow:var(--glow-border);
+    padding:10px 12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .bulk-bar .count{font-family:'VT323',monospace;font-size:20px;color:var(--text-bright);letter-spacing:1px}
+
+  .skeleton-card{border:1px solid var(--border);padding:10px;background:#000}
+  .skel{
+    background:linear-gradient(90deg, #051205 0%, #0d2a14 50%, #051205 100%);
+    background-size:200% 100%;
+    animation:shimmer 1.4s linear infinite;
+    height:12px;margin-bottom:8px;
+  }
+  .skel.big{height:80px;margin-bottom:10px}
+  .skel.w50{width:50%}.skel.w80{width:80%}.skel.w30{width:30%}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  .spinner{
+    width:36px;height:36px;border:2px solid var(--border);
+    border-top-color:var(--accent);border-right-color:var(--accent);
+    border-radius:50%;animation:spin .8s linear infinite;
+    box-shadow:0 0 8px rgba(51,255,102,.4);
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .empty-state{
+    border:2px dashed var(--border);padding:24px;text-align:center;
+    background:#000;
+  }
+  .empty-state .glyph{font-family:'VT323',monospace;font-size:50px;color:var(--muted);margin-bottom:8px;text-shadow:var(--glow-soft)}
+  .empty-state .glyph::before{content:"[ ]"}
+  .empty-state .msg{color:var(--text);font-size:13px;margin-bottom:14px}
+  .empty-state .msg::before{content:"> "}
+
+  .banner{
+    border:2px solid var(--accent-warn);background:rgba(247,255,91,.04);
+    padding:10px 12px;font-size:12px;color:var(--accent-warn);
+    text-shadow:0 0 4px rgba(247,255,91,.5);
+    display:flex;gap:10px;align-items:flex-start;
+  }
+  .banner::before{content:"!! ";color:var(--accent-warn);font-weight:700}
+
+  /* ===== STAR RATING SHOWCASE ===== */
+  .stars-big{font-size:34px;letter-spacing:6px;color:var(--accent);text-shadow:var(--glow)}
+  .stars-big .empty{color:var(--muted-dim);text-shadow:none}
+  .star-row{display:flex;align-items:center;gap:18px;padding:8px 0;border-bottom:1px dashed var(--border)}
+  .star-row .lbl{font-size:11px;color:var(--muted);min-width:120px;text-transform:uppercase;letter-spacing:1px}
+
+  /* ===== TOKEN TABLE ===== */
+  .tokens{font-size:12px;width:100%;border-collapse:collapse}
+  .tokens th,.tokens td{
+    border:1px solid var(--border);padding:6px 10px;text-align:left;
+  }
+  .tokens th{
+    background:#000;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-size:11px;
+  }
+  .tokens td:first-child{color:var(--text-bright)}
+  .tokens td.code{font-family:'IBM Plex Mono',monospace;color:var(--text)}
+  .tokens .sw{display:inline-block;width:14px;height:14px;border:1px solid var(--border-bright);vertical-align:middle;margin-right:6px}
+
+  .footer-line{
+    margin-top:30px;text-align:center;font-size:11px;color:var(--muted);
+    letter-spacing:2px;text-transform:uppercase;
+  }
+  .footer-line::before{content:"══════ "}
+  .footer-line::after{content:" ══════"}
+
+  /* utility */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .stack{display:flex;flex-direction:column;gap:10px}
+  .muted{color:var(--muted)}
+  .bright{color:var(--text-bright)}
+  .mb0{margin-bottom:0}
+
+  @media (max-width:820px){
+    .cards{grid-template-columns:repeat(2,1fr)}
+    .cook-header{grid-template-columns:1fr}
+    .cook-body{grid-template-columns:1fr}
+    .specimen{grid-template-columns:1fr}
+    .list-row{grid-template-columns:24px 50px 1fr auto}
+    .list-row .mini-tags,.list-row .stars{display:none}
+  }
+</style>
+</head>
+<body class="crt-flicker">
+<div class="wrap">
+
+  <!-- ============ BOOT HEADER ============ -->
+  <div class="boot" role="banner">
+    <span><span class="dot" aria-hidden="true"></span>RECIPES.SYS&nbsp;v2.3&nbsp;—&nbsp;<b style="color:#fff">READY</b></span>
+    <span class="muted">USR: COOK@LOCALHOST &nbsp;//&nbsp; SESSION 0x4F2A &nbsp;//&nbsp; <span style="color:var(--text-bright)">8 RECORDS</span></span>
+  </div>
+
+  <!-- ============ PREAMBLE / STYLE INTRO ============ -->
+  <div class="intro">
+    <h1>PHOSPHOR</h1>
+    <div class="concept">&gt; concept: a 1986 green-phosphor CRT cooking database — every recipe is a record, every action a command typed into the dark.<span class="cursor"></span></div>
+
+    <div class="palette" aria-label="Palette swatches">
+      <div class="swatch"><i style="background:#000000"></i> BG · #000000</div>
+      <div class="swatch"><i style="background:#040a04"></i> SURFACE · #040a04</div>
+      <div class="swatch"><i style="background:#33ff66"></i> ACCENT · #33ff66</div>
+      <div class="swatch"><i style="background:#bdffce"></i> BRIGHT · #bdffce</div>
+      <div class="swatch"><i style="background:#1f9e3a"></i> MUTED · #1f9e3a</div>
+      <div class="swatch"><i style="background:#1a6b2e"></i> BORDER · #1a6b2e</div>
+      <div class="swatch"><i style="background:#f7ff5b"></i> WARN · #f7ff5b</div>
+      <div class="swatch"><i style="background:#ff5c5c"></i> DANGER · #ff5c5c</div>
+    </div>
+
+    <div class="specimen">
+      <div>
+        <b>VT323 · DISPLAY</b>
+        <span class="v">AaBb 0123 — RECIPES.SYS</span>
+      </div>
+      <div>
+        <b>IBM PLEX MONO · BODY</b>
+        <span class="m">AaBb 0123 — ingredients &amp; steps</span>
+      </div>
+    </div>
+
+    <div class="ascii-divider" aria-hidden="true">═════════════════════════════════════════════════════════════════════════════════════════════════</div>
+  </div>
+
+  <!-- ============ 01 · HEADER BAR ============ -->
+  <section class="show" id="s01">
+    <h2>01 · Header</h2>
+    <div class="note">&gt; top app bar — search, add, sort, view, theme, settings</div>
+
+    <div class="topbar">
+      <div class="logo"><span class="mark" aria-hidden="true"></span>RECIPES.SYS</div>
+
+      <div class="search prompt-wrap" style="flex:1;min-width:240px">
+        <input class="input" type="search" placeholder="Search recipes, ingredients, steps…" aria-label="Search recipes">
+      </div>
+
+      <!-- Add recipe dropdown (OPEN) -->
+      <div class="dropdown">
+        <button class="dd-trigger active">+ Add recipe</button>
+        <div class="dd-menu" role="menu">
+          <div class="dd-item"><span>New recipe</span><span class="chk">_</span></div>
+          <div class="dd-item"><span>Import from URL</span><span class="chk">_</span></div>
+        </div>
+      </div>
+
+      <!-- Sort dropdown (OPEN) -->
+      <div class="dropdown">
+        <button class="dd-trigger active">Sort</button>
+        <div class="dd-menu" role="menu">
+          <div class="dd-item"><span>Name A → Z</span></div>
+          <div class="dd-item"><span>Name Z → A</span></div>
+          <div class="dd-item"><span>Date added (New → Old)</span><span class="check-mark">✓</span></div>
+          <div class="dd-item"><span>Date added (Old → New)</span></div>
+          <div class="dd-item"><span>Stars 0 → 5</span></div>
+          <div class="dd-item"><span>Stars 5 → 0</span></div>
+        </div>
+      </div>
+
+      <div class="view-toggle" role="group" aria-label="View toggle">
+        <button class="icon-btn active" title="Card view" aria-label="Card view">▦</button>
+        <button class="icon-btn" title="List view" aria-label="List view">≡</button>
+      </div>
+      <button class="icon-btn" title="Theme" aria-label="Theme toggle">☾</button>
+      <button class="icon-btn" title="Settings" aria-label="Settings">⚙</button>
+    </div>
+  </section>
+
+  <!-- ============ 02 · BUTTONS ============ -->
+  <section class="show" id="s02">
+    <h2>02 · Buttons</h2>
+    <div class="note">&gt; full button family — primary / default / danger / ghost / step / favorite / link</div>
+
+    <div class="panel">
+      <div class="row" style="gap:14px">
+        <button class="btn primary">Save</button>
+        <button class="btn">Edit</button>
+        <button class="btn danger">Delete</button>
+        <button class="btn icon ghost" aria-label="Settings">⚙</button>
+
+        <span style="display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border-bright);padding:2px">
+          <button class="btn sm step-btn" aria-label="Decrease">−</button>
+          <span style="font-family:'VT323',monospace;font-size:18px;color:var(--text-bright);min-width:24px;text-align:center">4</span>
+          <button class="btn sm step-btn" aria-label="Increase">+</button>
+        </span>
+
+        <button class="btn fav" aria-label="Favorite, unfilled">♡</button>
+        <button class="btn fav active" aria-label="Favorite, active">♥</button>
+
+        <button class="btn link">Original ↗</button>
+      </div>
+      <div class="hint">// hover/focus: fill inverts to accent green, bg→#33ff66, glow intensifies. primary is solid-filled by default.</div>
+    </div>
+  </section>
+
+  <!-- ============ 03 · FORM CONTROLS ============ -->
+  <section class="show" id="s03">
+    <h2>03 · Form controls</h2>
+    <div class="note">&gt; inputs, textarea, number, select, file, checkbox — all green-on-black</div>
+
+    <div class="panel">
+      <div class="two-col">
+        <div>
+          <label class="lbl" for="f-title">Title</label>
+          <input class="input" id="f-title" type="text" value="Classic Tiramisu">
+        </div>
+        <div>
+          <label class="lbl" for="f-search">Search</label>
+          <div class="prompt-wrap">
+            <input class="input" id="f-search" type="search" placeholder="query…">
+          </div>
+        </div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <div class="two-col">
+        <div>
+          <label class="lbl" for="f-email">Email</label>
+          <input class="input" id="f-email" type="email" value="cook@kitchen.lan">
+        </div>
+        <div>
+          <label class="lbl" for="f-pw">Password</label>
+          <input class="input" id="f-pw" type="password" value="••••••••••">
+        </div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <label class="lbl" for="f-desc">Description</label>
+      <textarea class="textarea" id="f-desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea>
+
+      <div style="height:14px"></div>
+
+      <div class="two-col">
+        <div>
+          <label class="lbl" for="f-serv">Servings</label>
+          <input class="input" id="f-serv" type="number" value="4" style="font-family:'VT323',monospace;font-size:18px">
+        </div>
+        <div>
+          <label class="lbl" for="f-rate">Rating</label>
+          <select class="select" id="f-rate">
+            <option>0 stars</option>
+            <option>1 star</option>
+            <option>2 stars</option>
+            <option>3 stars</option>
+            <option selected>4 stars</option>
+            <option>5 stars</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <label class="lbl" for="f-img">Image</label>
+      <input class="file" id="f-img" type="file" aria-label="Image file">
+
+      <div style="height:14px"></div>
+
+      <div class="row">
+        <label class="check checked">
+          <input type="checkbox" checked>
+          <span class="txt">200g flour</span>
+        </label>
+        <label class="check">
+          <input type="checkbox">
+          <span class="txt">100g sugar</span>
+        </label>
+      </div>
+      <div class="hint">// checked ingredients render struck-through (a bought item); checkbox shows an X glyph.</div>
+    </div>
+  </section>
+
+  <!-- ============ 04 · TAGS CHIPS INPUT ============ -->
+  <section class="show" id="s04">
+    <h2>04 · Tags chips input</h2>
+    <div class="note">&gt; chip editor with active suggestions dropdown</div>
+
+    <div class="panel" style="max-width:560px;position:relative">
+      <label class="lbl">Tags</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px;border:2px solid var(--border);background:#000;min-height:46px">
+        <span class="chip removable">dessert<span class="x">×</span></span>
+        <span class="chip removable">italian<span class="x">×</span></span>
+        <span class="chip removable">chocolate<span class="x">×</span></span>
+        <div class="prompt-wrap" style="flex:1;min-width:120px">
+          <input class="input" type="text" value="qui" style="border:none;background:transparent;box-shadow:none;padding-left:18px">
+        </div>
+      </div>
+
+      <!-- Suggestions dropdown (OPEN) -->
+      <div class="dd-menu" style="position:relative;top:auto;left:auto;width:100%;margin-top:6px">
+        <div class="dd-item"><span>quick</span><span class="chk">↵</span></div>
+        <div class="dd-item"><span>quiche</span><span class="chk">↵</span></div>
+        <div class="dd-item"><span>quininoa</span><span class="chk">↵</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · FILTER CHIPS ============ -->
+  <section class="show" id="s05">
+    <h2>05 · Filter chips</h2>
+    <div class="note">&gt; tags group + source group — active = filled green</div>
+
+    <div class="panel">
+      <label class="lbl">Tags</label>
+      <div class="row" style="gap:6px">
+        <span class="chip filter active">all</span>
+        <span class="chip filter">dessert</span>
+        <span class="chip filter">italian</span>
+        <span class="chip filter">quick</span>
+        <span class="chip filter">vegetarian</span>
+        <span class="chip filter">soup</span>
+        <span class="chip filter">chocolate</span>
+        <span class="chip filter">french</span>
+        <span class="chip filter">dinner</span>
+        <span class="chip filter">baking</span>
+      </div>
+      <div style="height:14px"></div>
+      <label class="lbl">Source</label>
+      <div class="row" style="gap:6px">
+        <span class="chip source">marmiton</span>
+        <span class="chip source">750g</span>
+        <span class="chip source">allrecipes</span>
+        <span class="chip source">bbc good food</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 06 · RECIPE GRID ============ -->
+  <section class="show" id="s06">
+    <h2>06 · Recipe grid</h2>
+    <div class="note">&gt; 6 cards — lava cake is selected (bulk-select); tart has no image</div>
+
+    <div class="cards">
+      <!-- 1 Tiramisu -->
+      <article class="card">
+        <div class="thumb"><img src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu"></div>
+        <div class="body">
+          <div class="title">Classic Tiramisu</div>
+          <div class="meta"><span class="src">marmiton.org</span><span class="stars">★★★★★</span></div>
+          <div class="tags"><span class="chip">dessert</span><span class="chip">italian</span></div>
+        </div>
+      </article>
+      <!-- 2 Spaghetti Bolognese -->
+      <article class="card">
+        <div class="thumb"><img src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600" alt="Spaghetti Bolognese"></div>
+        <div class="body">
+          <div class="title">Spaghetti Bolognese</div>
+          <div class="meta"><span class="src">bbcgoodfood.com</span><span class="stars">★★★★☆</span></div>
+          <div class="tags"><span class="chip">italian</span><span class="chip">dinner</span></div>
+        </div>
+      </article>
+      <!-- 3 Turkey Burgers -->
+      <article class="card">
+        <div class="thumb"><img src="https://images.unsplash.com/photo-1528908510736-5258199bc7dd?w=600" alt="Spinach and Feta Turkey Burgers"></div>
+        <div class="body">
+          <div class="title">Spinach &amp; Feta Turkey Burgers</div>
+          <div class="meta"><span class="src">allrecipes.com</span><span class="stars">★★★☆☆</span></div>
+          <div class="tags"><span class="chip">dinner</span><span class="chip">quick</span></div>
+        </div>
+      </article>
+      <!-- 4 Lava Cake SELECTED -->
+      <article class="card selected">
+        <div class="sel-corner" aria-label="Selected"></div>
+        <div class="thumb"><img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Molten Chocolate Lava Cake"></div>
+        <div class="body">
+          <div class="title">Molten Chocolate Lava Cake</div>
+          <div class="meta"><span class="src">allrecipes.com</span><span class="stars">★★★★★</span></div>
+          <div class="tags"><span class="chip">dessert</span><span class="chip">chocolate</span><span class="chip">baking</span></div>
+        </div>
+      </article>
+      <!-- 5 Soupe à l'Oignon -->
+      <article class="card">
+        <div class="thumb"><img src="https://images.unsplash.com/photo-1547592166-23ac45744ffd?w=600" alt="Soupe à l'Oignon"></div>
+        <div class="body">
+          <div class="title">Soupe à l'Oignon</div>
+          <div class="meta"><span class="src">750g.com</span><span class="stars">★★★★☆</span></div>
+          <div class="tags"><span class="chip">soup</span><span class="chip">french</span></div>
+        </div>
+      </article>
+      <!-- 6 Apple Tart NO IMAGE -->
+      <article class="card">
+        <div class="no-img">
+          <span class="glyph" aria-hidden="true"></span>
+          <span>// no_image.dat</span>
+        </div>
+        <div class="body">
+          <div class="title">Grandma's Apple Tart</div>
+          <div class="meta"><span class="src">manual</span><span class="stars">★★★★★</span></div>
+          <div class="tags"><span class="chip">dessert</span><span class="chip">baking</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ 07 · RECIPE LIST ============ -->
+  <section class="show" id="s07">
+    <h2>07 · Recipe list</h2>
+    <div class="note">&gt; dense compact rows — tart row uses placeholder glyph</div>
+
+    <div>
+      <!-- Row 1 Tiramisu -->
+      <div class="list-row">
+        <span class="idx">01</span>
+        <div class="thumb"><img src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt=""></div>
+        <div>
+          <div class="title-l">Classic Tiramisu</div>
+          <span class="src-l">marmiton.org</span>
+        </div>
+        <span class="stars">★★★★★</span>
+        <div class="mini-tags"><span class="chip">dessert</span><span class="chip">italian</span></div>
+        <label class="check" style="margin:0"><input type="checkbox"></label>
+      </div>
+      <!-- Row 2 Lava Cake -->
+      <div class="list-row">
+        <span class="idx">02</span>
+        <div class="thumb"><img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt=""></div>
+        <div>
+          <div class="title-l">Molten Chocolate Lava Cake</div>
+          <span class="src-l">allrecipes.com</span>
+        </div>
+        <span class="stars">★★★★★</span>
+        <div class="mini-tags"><span class="chip">dessert</span><span class="chip">chocolate</span></div>
+        <label class="check" style="margin:0"><input type="checkbox"></label>
+      </div>
+      <!-- Row 3 Apple Tart NO IMG -->
+      <div class="list-row">
+        <span class="idx">03</span>
+        <div class="thumb ph" aria-hidden="true">[ ]</div>
+        <div>
+          <div class="title-l">Grandma's Apple Tart</div>
+          <span class="src-l">manual</span>
+        </div>
+        <span class="stars">★★★★★</span>
+        <div class="mini-tags"><span class="chip">dessert</span><span class="chip">baking</span></div>
+        <label class="check" style="margin:0"><input type="checkbox"></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 08 · COOK VIEW ============ -->
+  <section class="show" id="s08">
+    <h2>08 · Recipe cook view</h2>
+    <div class="note">&gt; classic tiramisu — header + ingredients/steps + notes + footer</div>
+
+    <div class="cook-header">
+      <div class="cook-img"><img src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu"></div>
+      <div>
+        <div class="back-link">Recipes</div>
+        <div class="cook-title">Classic Tiramisu</div>
+        <div class="cook-stars">★★★★☆<span style="color:var(--muted-dim)">☆</span></div>
+        <div class="cook-desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</div>
+        <div class="cook-tags">
+          <span class="chip">dessert</span>
+          <span class="chip">italian</span>
+          <span class="chip">no-bake</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cook-body">
+      <!-- Ingredients -->
+      <div class="panel dim">
+        <div class="panel-title">// Ingredients</div>
+
+        <div class="servings-scaler">
+          <label>Servings</label>
+          <button class="btn sm step-btn" aria-label="Decrease servings">−</button>
+          <input class="num" type="text" value="4" aria-label="Servings count">
+          <button class="btn sm step-btn" aria-label="Increase servings">+</button>
+          <button class="btn sm">Reset</button>
+        </div>
+
+        <div class="ingredients-list">
+          <div class="ing-item"><span class="cbox" aria-hidden="true"></span><span class="txt">6 egg yolks</span></div>
+          <div class="ing-item done"><span class="cbox" aria-hidden="true"></span><span class="txt">¾ cup white sugar</span></div>
+          <div class="ing-item done"><span class="cbox" aria-hidden="true"></span><span class="txt">1⅔ cups heavy cream</span></div>
+          <div class="ing-item"><span class="cbox" aria-hidden="true"></span><span class="txt">1 package (around 30) ladyfingers</span></div>
+          <div class="ing-item done"><span class="cbox" aria-hidden="true"></span><span class="txt">1¾ cups strong brewed espresso, cooled</span></div>
+          <div class="ing-item"><span class="cbox" aria-hidden="true"></span><span class="txt">2 tbsp unsweetened cocoa powder</span></div>
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="panel dim">
+        <div class="panel-title">// Steps</div>
+
+        <div class="cook-progress">
+          <span class="label">Step 2 of 6</span>
+          <div class="bar"><i></i></div>
+          <button class="btn sm">Prev</button>
+          <button class="btn sm primary">Next</button>
+        </div>
+
+        <div class="steps-list">
+          <div class="step-item"><span class="num">01</span><span class="txt">Whisk egg yolks and sugar until thick and pale.</span></div>
+          <div class="step-item current"><span class="num">02</span><span class="txt">Fold in mascarpone until smooth.</span></div>
+          <div class="step-item"><span class="num">03</span><span class="txt">Whip cream to soft peaks and fold in.</span></div>
+          <div class="step-item"><span class="num">04</span><span class="txt">Combine espresso and a splash of liqueur in a shallow dish.</span></div>
+          <div class="step-item"><span class="num">05</span><span class="txt">Dip each ladyfinger briefly and layer in a dish.</span></div>
+          <div class="step-item"><span class="num">06</span><span class="txt">Spread cream, dust with cocoa, chill 4+ hours.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-block">
+      <div class="pt">Notes</div>
+      <p>Best made a day ahead. Don't oversoak the ladyfingers or the layers turn to paste.</p>
+    </div>
+
+    <div class="cook-footer">
+      <button class="btn link">Original ↗</button>
+      <span style="flex:1"></span>
+      <button class="btn">Edit</button>
+      <button class="btn danger">Delete</button>
+      <button class="btn">Print</button>
+      <button class="btn fav active" aria-label="Favorite">♥</button>
+    </div>
+  </section>
+
+  <!-- ============ 09 · EDIT FORM EXCERPT ============ -->
+  <section class="show" id="s09">
+    <h2>09 · Edit form excerpt</h2>
+    <div class="note">&gt; condensed recipe editor — title, desc, rating, tags, image, source</div>
+
+    <div class="panel" style="max-width:680px">
+      <div class="panel-title">// edit_record</div>
+
+      <div class="stack">
+        <div>
+          <label class="lbl" for="e-title">Title</label>
+          <input class="input" id="e-title" type="text" value="Classic Tiramisu">
+        </div>
+        <div>
+          <label class="lbl" for="e-desc">Description</label>
+          <textarea class="textarea" id="e-desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea>
+        </div>
+        <div class="two-col">
+          <div>
+            <label class="lbl" for="e-rate">Rating</label>
+            <select class="select" id="e-rate">
+              <option selected>4 stars</option>
+              <option>5 stars</option>
+            </select>
+          </div>
+          <div>
+            <label class="lbl" for="e-img">Image</label>
+            <input class="file" id="e-img" type="file">
+          </div>
+        </div>
+        <div>
+          <div class="hint" style="margin:0 0 6px">// or paste an image here (Ctrl+V)</div>
+        </div>
+        <div>
+          <label class="lbl">Tags</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px;border:2px solid var(--border);background:#000;min-height:44px">
+            <span class="chip removable">dessert<span class="x">×</span></span>
+            <span class="chip removable">italian<span class="x">×</span></span>
+            <span class="chip removable">no-bake<span class="x">×</span></span>
+            <div class="prompt-wrap" style="flex:1;min-width:100px">
+              <input class="input" type="text" placeholder="add tag…" style="border:none;background:transparent;box-shadow:none;padding-left:18px">
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="lbl" for="e-src">Source URL</label>
+          <input class="input" id="e-src" type="url" value="https://www.marmiton.org/recettes/recette_tiramisu.aspx">
+        </div>
+        <div class="row" style="justify-content:flex-end;margin-top:6px">
+          <button class="btn">Cancel</button>
+          <button class="btn primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 10 · SETTINGS CARDS ============ -->
+  <section class="show" id="s10">
+    <h2>10 · Settings</h2>
+    <div class="note">&gt; export / import / about / sign out — stacked panels</div>
+
+    <div class="stack">
+      <!-- Export -->
+      <div class="panel settings-card">
+        <div class="panel-title">// Export <span class="meta">dump records to disk</span></div>
+        <div class="row" style="gap:8px">
+          <button class="btn sm">JSON</button>
+          <button class="btn sm">Markdown zip</button>
+          <button class="btn sm">PDF</button>
+          <button class="btn sm">JSON-LD zip</button>
+        </div>
+      </div>
+
+      <!-- Import -->
+      <div class="panel settings-card">
+        <div class="panel-title">// Import <span class="meta">load records from disk</span></div>
+        <input class="file" type="file" style="margin-bottom:10px">
+        <div class="row">
+          <button class="btn primary">Preview import</button>
+          <span class="hint" style="margin:0">// Max 50 MB. JSON, Markdown, or JSON-LD archive.</span>
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="panel settings-card">
+        <div class="panel-title">// About</div>
+        <div class="about-logo">
+          <span class="logo"><span class="mark" aria-hidden="true"></span>RECIPES.SYS</span>
+          <span class="v">v2.3.0</span>
+        </div>
+        <div class="row">
+          <span class="muted">Recipe Manager · self-hosted cooking database</span>
+          <button class="btn link">GitHub ↗</button>
+        </div>
+      </div>
+
+      <!-- Sign out -->
+      <div class="panel settings-card">
+        <div class="panel-title">// Session</div>
+        <div class="row" style="justify-content:space-between">
+          <span class="muted">// logged in as cook@localhost</span>
+          <button class="btn danger">Log out</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 11 · AUTH FORM ============ -->
+  <section class="show" id="s11">
+    <h2>11 · Auth</h2>
+    <div class="note">&gt; sign-in card with error banner</div>
+
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="auth-title">Sign in</div>
+        <div class="auth-sub">authenticate to continue</div>
+
+        <div class="error-note">Invalid email or password.</div>
+
+        <form class="form-stack" onsubmit="return false">
+          <div>
+            <label class="lbl" for="a-email">Email</label>
+            <input class="input" id="a-email" type="email" value="cook@kitchen.lan">
+          </div>
+          <div>
+            <label class="lbl" for="a-pw">Password</label>
+            <input class="input" id="a-pw" type="password" value="hunter2">
+          </div>
+          <button class="btn primary" type="submit">Sign in</button>
+        </form>
+
+        <div class="auth-links">
+          <a href="#">Forgot your password?</a>
+          <a href="#">Create an account</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 12 · FEEDBACK COMPONENTS ============ -->
+  <section class="show" id="s12">
+    <h2>12 · Feedback</h2>
+    <div class="note">&gt; toast / bulk-bar / skeleton / spinner / empty / error banner</div>
+
+    <div class="two-col">
+      <div class="stack">
+        <!-- Toast -->
+        <div class="toast">
+          <span class="ico" aria-hidden="true"></span>
+          <span class="msg">Recipe imported</span>
+          <button class="btn sm">View</button>
+          <span class="close" aria-label="Close">×</span>
+        </div>
+
+        <!-- Bulk action bar -->
+        <div class="bulk-bar">
+          <span class="count">3 selected</span>
+          <span class="muted">//</span>
+          <button class="btn sm danger">Delete</button>
+          <button class="btn sm">Cancel</button>
+        </div>
+
+        <!-- Error / draft banner -->
+        <div class="banner">We couldn't extract a recipe from that page — paste the ingredients and steps manually, or try another URL.</div>
+      </div>
+
+      <div class="stack">
+        <!-- Skeleton -->
+        <div class="skeleton-card">
+          <div class="skel big"></div>
+          <div class="skel w80"></div>
+          <div class="skel w50"></div>
+          <div class="skel w30"></div>
+        </div>
+
+        <!-- Spinner + Empty state row -->
+        <div class="row" style="align-items:center;gap:20px">
+          <div class="spinner" role="status" aria-label="Loading"></div>
+          <span class="muted" style="font-size:12px">// loading_record…</span>
+        </div>
+
+        <div class="empty-state">
+          <div class="glyph" aria-hidden="true"></div>
+          <div class="msg">No recipes yet — import your first</div>
+          <button class="btn primary">Import from URL</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 13 · STAR RATING ============ -->
+  <section class="show" id="s13">
+    <h2>13 · Star rating + micro-interaction</h2>
+    <div class="note">&gt; rating states 0 / 2 / 4 / 5 — and the signature flourish</div>
+
+    <div class="panel">
+      <div class="star-row">
+        <span class="lbl">// 0 stars</span>
+        <span class="stars-big"><span class="empty">★★★★★</span></span>
+      </div>
+      <div class="star-row">
+        <span class="lbl">// 2 stars</span>
+        <span class="stars-big">★★<span class="empty">★★★</span></span>
+      </div>
+      <div class="star-row">
+        <span class="lbl">// 4 stars</span>
+        <span class="stars-big">★★★★<span class="empty">★</span></span>
+      </div>
+      <div class="star-row" style="border-bottom:none">
+        <span class="lbl">// 5 stars</span>
+        <span class="stars-big">★★★★★</span>
+      </div>
+      <div class="hint">// signature micro-interaction: on hover, stars ignite left-to-right — each glyph brightens from --muted-dim to --text-bright with a phosphor bloom (text-shadow pulse), and a soft CRT blink confirms the click. The chosen value locks with a 1px scanline sweep.</div>
+    </div>
+  </section>
+
+  <!-- ============ 14 · FOOTER / TOKEN REFERENCE ============ -->
+  <section class="show" id="s14">
+    <h2>14 · Token reference</h2>
+    <div class="note">&gt; design tokens — the language of the deck</div>
+
+    <div class="panel">
+      <table class="tokens">
+        <thead>
+          <tr><th>Token</th><th>CSS var</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>background</td><td class="code">--bg</td><td><span class="sw" style="background:#000000"></span>#000000</td></tr>
+          <tr><td>surface</td><td class="code">--surface</td><td><span class="sw" style="background:#040a04"></span>#040a04</td></tr>
+          <tr><td>text</td><td class="code">--text</td><td><span class="sw" style="background:#33ff66"></span>#33ff66</td></tr>
+          <tr><td>text-bright</td><td class="code">--text-bright</td><td><span class="sw" style="background:#bdffce"></span>#bdffce</td></tr>
+          <tr><td>muted</td><td class="code">--muted</td><td><span class="sw" style="background:#1f9e3a"></span>#1f9e3a</td></tr>
+          <tr><td>accent</td><td class="code">--accent</td><td><span class="sw" style="background:#33ff66"></span>#33ff66</td></tr>
+          <tr><td>border</td><td class="code">--border</td><td><span class="sw" style="background:#1a6b2e"></span>#1a6b2e</td></tr>
+          <tr><td>border-bright</td><td class="code">--border-bright</td><td><span class="sw" style="background:#33ff66"></span>#33ff66</td></tr>
+          <tr><td>radius</td><td class="code">--radius</td><td>0px</td></tr>
+          <tr><td>glow</td><td class="code">--glow</td><td class="code">0 0 4px rgba(51,255,102,.7)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer-line">RECIPES.SYS // 8 RECORDS // v2.3 // END_OF_FILE<span class="cursor"></span></div>
+  </section>
+
+</div>
+</body>
+</html>

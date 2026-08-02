@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frost — Recipe Manager Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* FROST — Glassmorphism over a vivid mesh-gradient aurora */
+  :root{
+    --bg:#0b0a1a; --purple:#7c3aed; --blue:#2563eb; --pink:#ec4899; --teal:#14b8a6;
+    --accent:#a78bfa; --accent-2:#f472b6; --accent-3:#2dd4bf;
+    --accent-glow:rgba(167,139,250,.5);
+    --text:#f3f4fb; --muted:rgba(243,244,251,.62); --faint:rgba(243,244,251,.4);
+    --panel:rgba(255,255,255,.06); --panel-2:rgba(255,255,255,.10); --panel-3:rgba(255,255,255,.14);
+    --panel-fallback:rgba(18,16,38,.82);
+    --border:rgba(255,255,255,.15); --border-2:rgba(255,255,255,.25); --border-faint:rgba(255,255,255,.08);
+    --danger:#fb7185; --success:#34d399; --gold:#fbbf24;
+    --radius:18px; --radius-sm:12px; --radius-xs:9px; --radius-pill:999px;
+    --shadow:0 8px 32px rgba(0,0,0,.35); --shadow-lg:0 16px 48px rgba(0,0,0,.45);
+    --sans:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;
+       -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+
+  /* aurora mesh gradient */
+  .aurora{position:fixed;inset:0;z-index:-2;background:var(--bg);overflow:hidden}
+  .aurora::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 80% at 50% 40%,transparent 30%,rgba(5,4,12,.55) 100%),
+               radial-gradient(60% 50% at 50% 50%,rgba(0,0,0,.2),transparent 70%)}
+  .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.75;will-change:transform}
+  .b1{width:55vw;height:55vw;background:var(--purple);top:-12%;left:-8%;animation:drift1 26s ease-in-out infinite}
+  .b2{width:50vw;height:50vw;background:var(--blue);top:-18%;right:-10%;animation:drift2 30s ease-in-out infinite}
+  .b3{width:58vw;height:58vw;background:var(--pink);bottom:-18%;right:0%;animation:drift3 34s ease-in-out infinite}
+  .b4{width:52vw;height:52vw;background:var(--teal);bottom:-12%;left:-10%;animation:drift4 28s ease-in-out infinite}
+  .b5{width:34vw;height:34vw;background:var(--accent);top:35%;left:42%;opacity:.35;animation:drift5 38s ease-in-out infinite}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(8%,6%) scale(1.08)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-7%,5%) scale(1.05)}}
+  @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-6%,-7%) scale(1.07)}}
+  @keyframes drift4{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(7%,-5%) scale(1.05)}}
+  @keyframes drift5{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-4%,4%) scale(1.12)}}
+
+  /* glass primitive */
+  .glass{background:var(--panel);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),var(--shadow);
+    border-radius:var(--radius)}
+  .glass-2{background:var(--panel-2)}
+  .glass-3{background:var(--panel-3)}
+  @supports not ((backdrop-filter:blur(10px)) or (-webkit-backdrop-filter:blur(10px))){
+    .glass{background:var(--panel-fallback)}
+  }
+
+  .wrap{max-width:1180px;margin:0 auto;padding:56px 36px 140px;position:relative;z-index:1}
+  h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-0.01em}
+  p{margin:0}
+  a{color:var(--accent);text-decoration:none}
+  a.linky{text-decoration:underline;text-decoration-color:rgba(167,139,250,.4);text-underline-offset:3px}
+  code{font-family:SFMono-Regular,Consolas,monospace;font-size:.92em;
+       background:rgba(255,255,255,.08);padding:1px 5px;border-radius:5px;color:var(--accent)}
+
+  .gradient-text{background:linear-gradient(115deg,#c4b5fd 0%,#a78bfa 25%,#f472b6 60%,#2dd4bf 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+
+  /* preamble */
+  .preamble{margin-bottom:64px}
+  .brand-row{display:inline-flex;align-items:center;gap:10px;padding:8px 14px 8px 10px;border-radius:var(--radius-pill);
+    background:var(--panel-2);-webkit-backdrop-filter:blur(20px) saturate(140%);backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);margin-bottom:28px;font-size:13px}
+  .brand-mark{width:26px;height:26px;border-radius:8px;display:inline-block;
+    background:conic-gradient(from 140deg at 50% 50%,var(--purple),var(--blue),var(--teal),var(--pink),var(--purple));
+    box-shadow:0 0 16px rgba(167,139,250,.55),inset 0 1px 0 rgba(255,255,255,.4)}
+  .preamble .title{font-size:clamp(64px,12vw,132px);font-weight:700;line-height:.95;letter-spacing:-0.04em;
+    margin-bottom:18px;filter:drop-shadow(0 12px 40px rgba(124,58,237,.35))}
+  .concept{font-size:19px;color:var(--muted);max-width:640px;margin-bottom:36px}
+  .preamble-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+  .block-label{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:14px}
+  .preamble-block{padding:22px 24px}
+  .palette{display:flex;flex-wrap:wrap;gap:10px}
+  .swatch{display:flex;flex-direction:column;gap:6px;width:92px}
+  .swatch .dot{width:100%;height:44px;border-radius:10px;background:var(--c);border:1px solid var(--border);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 14px rgba(0,0,0,.3)}
+  .swatch .hex{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .swatch .name{font-size:11px;color:var(--text);font-weight:500}
+  .specimen{display:flex;flex-direction:column;gap:14px}
+  .spec-row{display:flex;flex-direction:column;gap:2px}
+  .spec-name{font-size:11px;color:var(--accent);letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+  .spec-sample.display{font-size:30px;font-weight:700;letter-spacing:-0.02em}
+  .spec-sample.body{font-size:15px;color:var(--text)}
+  .spec-sample.muted{font-size:13px;color:var(--muted)}
+
+  /* section frame */
+  .show{margin-bottom:56px;padding:26px 28px 30px;position:relative}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--border-faint)}
+  .sec-num{font-size:12px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums;
+    padding:3px 9px;border-radius:var(--radius-pill);background:rgba(167,139,250,.12);
+    border:1px solid rgba(167,139,250,.3);letter-spacing:.06em}
+  .sec-title{font-size:22px;font-weight:600;letter-spacing:-0.01em;text-shadow:0 2px 14px rgba(0,0,0,.4)}
+  .sec-note{margin-left:auto;font-size:13px;color:var(--muted)}
+
+  /* 01 header */
+  .appbar{display:flex;align-items:center;gap:14px;padding:10px 14px}
+  .appbar .logo{display:flex;align-items:center;gap:10px;padding-right:14px;border-right:1px solid var(--border-faint);font-weight:600;font-size:15px}
+  .search-field{flex:1;min-width:200px;display:flex;align-items:center;gap:10px;padding:9px 14px;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-pill);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.2);color:var(--muted)}
+  .search-field input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font:inherit;font-size:14px}
+  .search-field input::placeholder{color:var(--faint)}
+  .search-field svg{opacity:.7;flex-shrink:0}
+  .ctrl{position:relative;display:inline-flex;align-items:center;gap:8px;padding:9px 14px;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-pill);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.2);color:var(--text);font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+  .ctrl.icon-only{padding:9px}
+  .ctrl.primary{background:linear-gradient(135deg,rgba(167,139,250,.95),rgba(124,58,237,.95));
+    border-color:rgba(255,255,255,.3);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 18px rgba(124,58,237,.4)}
+  .ctrl:hover{background:var(--panel-3)}
+  .menu{position:absolute;top:calc(100% + 10px);left:0;min-width:220px;z-index:5;padding:6px;
+    background:var(--panel-3);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:1px solid var(--border-2);border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 16px 50px rgba(0,0,0,.5)}
+  .menu.right{left:auto;right:0}
+  .menu-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:13px;color:var(--text);cursor:pointer}
+  .menu-item:hover{background:rgba(255,255,255,.08)}
+  .menu-item.active{background:rgba(167,139,250,.18);color:#fff}
+  .menu-item .check{margin-left:auto;color:var(--accent)}
+  .view-toggle{display:inline-flex;padding:3px;background:var(--panel-2);border:1px solid var(--border);
+    border-radius:var(--radius-pill);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+  .view-toggle button{padding:6px 9px;border:0;background:transparent;color:var(--muted);cursor:pointer;
+    border-radius:var(--radius-pill);display:inline-flex}
+  .view-toggle button.on{background:linear-gradient(135deg,rgba(167,139,250,.5),rgba(124,58,237,.5));color:#fff}
+
+  /* 02 buttons */
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:var(--panel-2);
+    border:1px solid var(--border);border-radius:var(--radius-pill);box-shadow:inset 0 1px 0 rgba(255,255,255,.2);
+    color:var(--text);font:inherit;font-size:14px;font-weight:500;cursor:pointer;
+    transition:transform .15s ease,box-shadow .15s ease}
+  .btn:hover{transform:translateY(-1px);background:var(--panel-3)}
+  .btn.primary{background:linear-gradient(135deg,#a78bfa,#7c3aed);border-color:rgba(255,255,255,.3);color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 6px 22px rgba(124,58,237,.45)}
+  .btn.danger{background:linear-gradient(135deg,rgba(251,113,133,.85),rgba(225,29,72,.85));
+    border-color:rgba(255,255,255,.25);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 22px rgba(225,29,72,.4)}
+  .btn.ghost{background:transparent;border-color:var(--border)}
+  .btn.icon{padding:10px}
+  .btn.sm{padding:6px 12px;font-size:13px}
+  .btn.step{padding:0;width:34px;height:34px;justify-content:center;font-size:18px;font-weight:500}
+  .btn:focus-visible{outline:0;box-shadow:0 0 0 2px var(--accent-glow),inset 0 1px 0 rgba(255,255,255,.3)}
+  .btn-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .btn-label{font-size:11px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-right:4px}
+  .fav-btn{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+    background:var(--panel-2);border:1px solid var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,.2);
+    cursor:pointer;color:var(--muted)}
+  .fav-btn.on{background:rgba(244,114,182,.18);border-color:rgba(244,114,182,.45);color:var(--accent-2);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 0 18px rgba(244,114,182,.4)}
+  .note{font-size:12px;color:var(--muted);margin-left:8px}
+
+  /* 03 forms */
+  .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 18px}
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field.full{grid-column:1 / -1}
+  .field label{font-size:12px;font-weight:500;color:var(--text)}
+  .input,.textarea,.select{width:100%;padding:11px 14px;background:rgba(255,255,255,.05);
+    border:1px solid var(--border);border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+    color:var(--text);font:inherit;font-size:14px;outline:0}
+  .input::placeholder,.textarea::placeholder{color:var(--faint)}
+  .input:focus,.textarea:focus,.select:focus{border-color:rgba(167,139,250,.6);
+    box-shadow:0 0 0 3px var(--accent-glow),inset 0 1px 0 rgba(255,255,255,.18);background:rgba(255,255,255,.08)}
+  .textarea{resize:vertical;min-height:76px;line-height:1.55}
+  .select{appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+  .input-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .check{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--text)}
+  .check input{display:none}
+  .check .box{width:20px;height:20px;border-radius:7px;background:rgba(255,255,255,.06);
+    border:1px solid var(--border-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.2);
+    display:inline-flex;align-items:center;justify-content:center;color:transparent}
+  .check input:checked + .box{background:linear-gradient(135deg,#a78bfa,#7c3aed);border-color:rgba(255,255,255,.4);
+    color:#fff;box-shadow:0 0 12px rgba(167,139,250,.5)}
+  .check input:checked + .box::after{content:"";width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;
+    transform:rotate(45deg) translate(-1px,-1px)}
+  input[type="file"]{font-size:13px}
+  input[type="file"]::file-selector-button{padding:8px 14px;margin-right:12px;
+    background:linear-gradient(135deg,rgba(167,139,250,.9),rgba(124,58,237,.9));color:#fff;
+    border:1px solid rgba(255,255,255,.3);border-radius:999px;font:inherit;font-size:13px;cursor:pointer;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+
+  /* 04 chips input */
+  .chip-input{padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+    background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:14px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12);position:relative}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 12px;
+    background:linear-gradient(135deg,rgba(167,139,250,.4),rgba(124,58,237,.35));
+    border:1px solid rgba(167,139,250,.4);border-radius:999px;font-size:13px;color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 8px rgba(124,58,237,.25)}
+  .chip .x{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.18);border:0;color:#fff;cursor:pointer;font-size:14px;line-height:1}
+  .chip .x:hover{background:rgba(255,255,255,.32)}
+  .chip-input input{flex:1;min-width:120px;background:transparent;border:0;outline:0;color:var(--text);font:inherit;font-size:14px;padding:4px}
+  .suggest{position:absolute;top:calc(100% + 8px);left:0;min-width:200px;z-index:4;padding:6px;
+    background:var(--panel-3);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:1px solid var(--border-2);border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 12px 40px rgba(0,0,0,.5)}
+  .suggest .s-head{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:6px 10px 4px}
+  .suggest .s-item{padding:8px 12px;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px}
+  .suggest .s-item.hl{background:rgba(167,139,250,.2);color:#fff}
+  .suggest .s-item .hit{color:var(--accent);font-weight:600}
+  .suggest .s-item::before{content:"#";color:var(--muted);margin-right:2px}
+
+  /* 05 filter chips */
+  .filter-group{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+  .filter-group:last-child{margin-bottom:0}
+  .filter-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .filters{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{padding:7px 14px;background:var(--panel-2);border:1px solid var(--border);border-radius:999px;
+    font-size:13px;color:var(--text);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.18);transition:all .15s ease}
+  .pill:hover{background:var(--panel-3)}
+  .pill.active{background:linear-gradient(135deg,rgba(167,139,250,.85),rgba(124,58,237,.85));
+    border-color:rgba(255,255,255,.35);color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 16px rgba(124,58,237,.5)}
+
+  /* 06 grid */
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  .card{overflow:hidden;padding:0;display:flex;flex-direction:column;position:relative;transition:transform .2s ease,box-shadow .2s ease}
+  .card:hover{transform:translateY(-3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),var(--shadow-lg)}
+  .card-img{aspect-ratio:4/3;width:100%;object-fit:cover;display:block}
+  .card-img-wrap{position:relative;overflow:hidden}
+  .card-img-wrap::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(to top,rgba(11,10,26,.55),transparent 50%);pointer-events:none}
+  .no-img{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    background:radial-gradient(120% 80% at 30% 20%,rgba(167,139,250,.35),transparent 60%),
+               radial-gradient(120% 80% at 80% 80%,rgba(20,184,166,.3),transparent 60%),
+               rgba(255,255,255,.04);
+    color:var(--muted);font-size:12px;letter-spacing:.18em;text-transform:uppercase}
+  .no-img svg{opacity:.6}
+  .card-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px}
+  .card-title{font-size:16px;font-weight:600;line-height:1.3}
+  .card-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+  .card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+  .tag{font-size:11px;padding:3px 9px;background:rgba(255,255,255,.08);border:1px solid var(--border-faint);
+    border-radius:999px;color:var(--text);box-shadow:inset 0 1px 0 rgba(255,255,255,.15)}
+  .card.selected{box-shadow:inset 0 0 0 2px rgba(167,139,250,.7),0 0 28px rgba(167,139,250,.35),var(--shadow-lg)}
+  .card.selected .select-corner{position:absolute;top:12px;right:12px;z-index:2;width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(135deg,#a78bfa,#7c3aed);border:1px solid rgba(255,255,255,.4);
+    display:inline-flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.6)}
+  .select-corner::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+  .stars{display:inline-flex;gap:1px;font-size:13px;line-height:1;color:rgba(243,244,251,.22)}
+  .stars .s{color:rgba(243,244,251,.22)}
+  .stars .s.on{color:var(--gold);text-shadow:0 0 8px rgba(251,191,36,.55)}
+  .rating-text{color:var(--muted);font-size:12px;margin-left:2px}
+
+  /* 07 list */
+  .list{display:flex;flex-direction:column;gap:10px}
+  .row{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--panel-2);
+    border:1px solid var(--border);border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+  .row .thumb{width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)}
+  .row .thumb.no-img{display:inline-flex;align-items:center;justify-content:center;
+    background:radial-gradient(120% 80% at 30% 20%,rgba(167,139,250,.4),transparent 60%),
+               radial-gradient(120% 80% at 80% 80%,rgba(236,72,153,.3),transparent 60%),
+               rgba(255,255,255,.04);color:var(--muted)}
+  .row .r-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .row .r-title{font-size:15px;font-weight:600}
+  .row .r-sub{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .row .r-tags{display:flex;gap:6px}
+  .row .r-check{width:22px;height:22px;border-radius:7px;border:1px solid var(--border-2);
+    background:rgba(255,255,255,.06);box-shadow:inset 0 1px 0 rgba(255,255,255,.2);flex-shrink:0}
+  .row .r-check.on{background:linear-gradient(135deg,#a78bfa,#7c3aed);border-color:rgba(255,255,255,.4);
+    box-shadow:0 0 12px rgba(167,139,250,.5);display:inline-flex;align-items:center;justify-content:center}
+  .row .r-check.on::after{content:"";width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+
+  /* 08 cook view */
+  .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-size:13px;margin-bottom:16px}
+  .cook-header{display:grid;grid-template-columns:1fr 1.2fr;gap:24px;margin-bottom:22px;align-items:stretch}
+  .cook-img{width:100%;height:100%;min-height:240px;object-fit:cover;border-radius:var(--radius);
+    border:1px solid var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),var(--shadow)}
+  .cook-head-info{display:flex;flex-direction:column;gap:12px;justify-content:center;padding:6px 4px}
+  .cook-title{font-size:38px;font-weight:700;letter-spacing:-0.02em;line-height:1.05}
+  .cook-rating-row{display:flex;align-items:center;gap:10px}
+  .cook-rating-row .stars{font-size:18px}
+  .cook-desc{color:var(--muted);font-size:15px}
+  .cook-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .cook-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:18px}
+  .cook-col{padding:20px 22px;border-radius:var(--radius);border:1px solid var(--border)}
+  .cook-col h3{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;font-weight:600}
+  .servings{display:inline-flex;align-items:center;gap:6px;padding:6px;border-radius:var(--radius-pill);
+    background:var(--panel-2);border:1px solid var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,.2);margin-bottom:18px}
+  .servings .lbl{padding:0 10px 0 12px;font-size:13px;color:var(--muted)}
+  .servings .step-btn{width:28px;height:28px;border-radius:50%;background:var(--panel-3);border:1px solid var(--border);
+    color:var(--text);cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center}
+  .servings .step-btn:hover{background:rgba(167,139,250,.3)}
+  .servings input{width:38px;text-align:center;background:transparent;border:0;outline:0;color:var(--text);font:inherit;font-size:15px;font-weight:600}
+  .servings .reset{margin-left:6px;padding:4px 12px;background:transparent;border:1px solid var(--border);
+    border-radius:var(--radius-pill);color:var(--muted);font:inherit;font-size:12px;cursor:pointer}
+  .servings .reset:hover{color:var(--text);border-color:var(--border-2)}
+  .ing-list{display:flex;flex-direction:column;gap:6px;list-style:none;padding:0;margin:0}
+  .ing-list li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;font-size:14px}
+  .ing-list li:hover{background:rgba(255,255,255,.04)}
+  .ing-list li.done{color:var(--muted)}
+  .ing-list li.done .ing-text{text-decoration:line-through;text-decoration-color:rgba(243,244,251,.35)}
+  .ing-list .ck{width:20px;height:20px;border-radius:6px;border:1px solid var(--border-2);background:rgba(255,255,255,.06);
+    flex-shrink:0;display:inline-flex;align-items:center;justify-content:center}
+  .ing-list li.done .ck{background:linear-gradient(135deg,#34d399,#14b8a6);border-color:rgba(255,255,255,.4);box-shadow:0 0 10px rgba(52,211,153,.4)}
+  .ing-list li.done .ck::after{content:"";width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+  .progress-wrap{margin-bottom:18px}
+  .progress-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px}
+  .progress-head .pcount{color:var(--muted)}
+  .progress-head .pcount b{color:var(--accent);font-weight:600}
+  .progress-nav{display:flex;gap:6px}
+  .progress-nav button{padding:5px 12px;border-radius:var(--radius-pill);background:var(--panel-2);border:1px solid var(--border);
+    color:var(--text);font:inherit;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .progress-nav button:hover{background:var(--panel-3)}
+  .progress-bar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--border-faint);
+    overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
+  .progress-bar > span{display:block;height:100%;width:33.33%;
+    background:linear-gradient(90deg,var(--purple),var(--accent),var(--accent-2));
+    box-shadow:0 0 12px rgba(167,139,250,.7);border-radius:999px}
+  .step-list{list-style:none;padding:0;margin:0;counter-reset:step;display:flex;flex-direction:column;gap:10px}
+  .step-list li{counter-increment:step;display:flex;gap:14px;padding:12px 14px;border-radius:12px;
+    background:rgba(255,255,255,.03);border:1px solid var(--border-faint);font-size:14px;color:var(--muted);position:relative}
+  .step-list li::before{content:counter(step);flex-shrink:0;width:28px;height:28px;border-radius:50%;
+    background:var(--panel-2);border:1px solid var(--border);color:var(--muted);
+    display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+  .step-list li.done{color:var(--faint)}
+  .step-list li.done::before{background:rgba(52,211,153,.15);color:var(--success);border-color:rgba(52,211,153,.4)}
+  .step-list li.current{color:var(--text);background:linear-gradient(135deg,rgba(167,139,250,.22),rgba(124,58,237,.12));
+    border-color:rgba(167,139,250,.5);box-shadow:0 0 0 1px rgba(167,139,250,.3),0 8px 26px rgba(124,58,237,.25)}
+  .step-list li.current::before{background:linear-gradient(135deg,#a78bfa,#7c3aed);border-color:rgba(255,255,255,.4);
+    color:#fff;box-shadow:0 0 14px rgba(167,139,250,.6)}
+  .step-list li.current::after{content:"current";position:absolute;top:10px;right:12px;font-size:10px;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:600;padding:2px 8px;border-radius:999px;
+    background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.35)}
+  .notes-block{margin-top:18px;padding:18px 22px;border-radius:var(--radius);border:1px solid var(--border)}
+  .notes-block h3{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .notes-block p{color:var(--muted);font-size:14px;font-style:italic}
+  .cook-footer{margin-top:18px;padding:14px 20px;border-radius:var(--radius);border:1px solid var(--border);
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .cook-footer .spacer{flex:1}
+
+  /* 09 edit form */
+  .edit-form{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}
+  .edit-form .full{grid-column:1 / -1}
+  .drop-hint{font-size:12px;color:var(--muted);margin-top:6px;padding-left:4px}
+  .form-actions{grid-column:1 / -1;display:flex;gap:10px;justify-content:flex-end;padding-top:8px;
+    border-top:1px solid var(--border-faint);margin-top:4px}
+
+  /* 10 settings */
+  .settings{display:flex;flex-direction:column;gap:14px}
+  .set-card{padding:18px 22px;display:flex;gap:18px;align-items:flex-start;border-radius:var(--radius);border:1px solid var(--border)}
+  .set-icon{width:42px;height:42px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,rgba(167,139,250,.35),rgba(124,58,237,.25));border:1px solid rgba(167,139,250,.35);
+    color:var(--accent);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 16px rgba(124,58,237,.25);flex-shrink:0}
+  .set-body{flex:1}
+  .set-title{font-size:16px;font-weight:600;margin-bottom:4px}
+  .set-desc{font-size:13px;color:var(--muted);margin-bottom:12px}
+  .set-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .set-hint{font-size:12px;color:var(--faint);margin-left:4px}
+
+  /* 11 auth */
+  .auth-wrap{display:flex;justify-content:center}
+  .auth-card{width:100%;max-width:400px;padding:32px 32px 28px;display:flex;flex-direction:column;gap:16px}
+  .auth-title{font-size:26px;font-weight:700;letter-spacing:-0.02em;text-align:center}
+  .auth-sub{text-align:center;color:var(--muted);font-size:13px;margin-top:-6px}
+  .error-banner{padding:10px 14px;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.4);
+    border-radius:10px;color:#fecdd3;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 0 14px rgba(251,113,133,.15)}
+  .auth-links{display:flex;justify-content:space-between;font-size:13px;margin-top:4px}
+
+  /* 12 feedback */
+  .feedback-cluster{display:flex;flex-direction:column;gap:18px}
+  .toast{padding:14px 16px;display:flex;align-items:center;gap:14px;background:var(--panel-2);border:1px solid var(--border-2);
+    border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),var(--shadow-lg);max-width:420px}
+  .toast .t-ic{width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,rgba(52,211,153,.4),rgba(20,184,166,.3));border:1px solid rgba(52,211,153,.45);
+    color:var(--success);display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(52,211,153,.3);flex-shrink:0}
+  .toast .t-body{flex:1}
+  .toast .t-title{font-size:14px;font-weight:600}
+  .toast .t-sub{font-size:12px;color:var(--muted)}
+  .toast .t-close{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.08);border:0;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
+  .bulk-bar{padding:12px 18px;display:flex;align-items:center;gap:14px;
+    background:linear-gradient(135deg,rgba(124,58,237,.4),rgba(37,99,235,.3));border:1px solid rgba(167,139,250,.45);
+    border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 10px 30px rgba(124,58,237,.3);max-width:520px}
+  .bulk-bar .b-count{font-size:14px;font-weight:600;color:#fff}
+  .bulk-bar .spacer{flex:1}
+  .skeleton-card{padding:14px 16px;max-width:320px;border-radius:var(--radius);border:1px solid var(--border)}
+  .sk{border-radius:8px;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.05) 100%);
+    background-size:200% 100%;animation:shimmer 1.6s linear infinite}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .sk.line{height:12px;margin-bottom:10px}
+  .sk.line.w-60{width:60%}.sk.line.w-40{width:40%}.sk.line.w-80{width:80%}
+  .sk.thumb{width:100%;aspect-ratio:4/3;border-radius:12px;margin-bottom:12px}
+  .spinner{width:34px;height:34px;border-radius:50%;border:3px solid rgba(167,139,250,.2);border-top-color:var(--accent);
+    animation:spin .9s linear infinite;box-shadow:0 0 16px rgba(167,139,250,.4)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .empty{padding:32px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;
+    max-width:380px;margin:0 auto;border-radius:var(--radius);border:1px solid var(--border)}
+  .empty-ic{width:60px;height:60px;border-radius:18px;display:inline-flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,rgba(167,139,250,.3),rgba(124,58,237,.2));border:1px solid rgba(167,139,250,.4);
+    color:var(--accent);box-shadow:0 0 24px rgba(167,139,250,.3)}
+  .empty-title{font-size:17px;font-weight:600}
+  .empty-desc{color:var(--muted);font-size:14px}
+  .banner{padding:12px 16px;display:flex;gap:12px;align-items:flex-start;background:rgba(251,191,36,.1);
+    border:1px solid rgba(251,191,36,.4);border-radius:12px;color:#fde68a;font-size:13px;
+    box-shadow:0 0 16px rgba(251,191,36,.1);max-width:540px}
+  .banner .b-ic{flex-shrink:0;color:var(--gold);margin-top:1px}
+  .feedback-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .feedback-cell{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+  .cell-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+  /* 13 star specimen */
+  .rating-specimen{display:flex;gap:36px;flex-wrap:wrap;align-items:center}
+  .rating-spec{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .rating-spec .stars{font-size:36px;gap:4px}
+  .rating-spec .stars .s.on{text-shadow:0 0 16px rgba(251,191,36,.7)}
+  .rating-spec .lbl{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .micro-note{margin-top:22px;padding:14px 18px;background:var(--panel-2);border:1px solid var(--border);
+    border-left:3px solid var(--accent);border-radius:10px;color:var(--muted);font-size:14px;max-width:720px}
+  .micro-note b{color:var(--text)}
+
+  /* 14 footer */
+  .footer-card{padding:28px 32px}
+  .footer-top{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+  .footer-top .brand-mark{width:36px;height:36px;border-radius:10px}
+  .footer-top .ft-title{font-size:22px;font-weight:700}
+  .footer-top .ft-tag{color:var(--muted);font-size:13px;margin-left:auto}
+  .tokens-table{width:100%;border-collapse:collapse;font-size:13px}
+  .tokens-table th,.tokens-table td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border-faint)}
+  .tokens-table th{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  .tokens-table td:first-child{font-family:SFMono-Regular,Consolas,monospace;color:var(--text);font-size:12px}
+  .tokens-table td.value{font-family:SFMono-Regular,Consolas,monospace;color:var(--muted);font-size:12px}
+  .tokens-table tr:last-child td{border-bottom:0}
+  .tok-dot{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:8px;border:1px solid var(--border)}
+
+  @media (prefers-reduced-motion: reduce){
+    .blob{animation:none}.spinner{animation:none}.sk{animation:none;background:rgba(255,255,255,.08)}
+    .card,.btn,.pill{transition:none}
+  }
+  @media (max-width:980px){
+    .preamble-grid{grid-template-columns:1fr}
+    .grid{grid-template-columns:repeat(2,1fr)}
+    .cook-header,.cook-grid,.edit-form,.feedback-grid{grid-template-columns:1fr}
+    .form-grid{grid-template-columns:1fr}
+  }
+  @media (max-width:640px){
+    .wrap{padding:36px 18px 100px}
+    .grid{grid-template-columns:1fr}
+    .appbar{flex-wrap:wrap}
+  }
+</style>
+</head>
+<body>
+
+<!-- aurora mesh-gradient background (fixed) -->
+<div class="aurora" aria-hidden="true">
+  <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+  <span class="blob b4"></span><span class="blob b5"></span>
+</div>
+
+<div class="wrap">
+
+  <!-- PREAMBLE -->
+  <section class="preamble">
+    <div class="brand-row">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Recipe Manager</span>
+      <span style="color:var(--muted);font-weight:400;">· style tile</span>
+    </div>
+    <h1 class="title gradient-text">Frost</h1>
+    <p class="concept">Glassmorphism floating over a vivid mesh aurora — glossy, layered, Apple-liquid-glass depth for a modern recipe studio.</p>
+    <div class="preamble-grid">
+      <div class="glass preamble-block">
+        <div class="block-label">Palette</div>
+        <div class="palette">
+          <div class="swatch" style="--c:#0b0a1a"><span class="dot"></span><span class="name">Void</span><span class="hex">#0b0a1a</span></div>
+          <div class="swatch" style="--c:#7c3aed"><span class="dot"></span><span class="name">Purple</span><span class="hex">#7c3aed</span></div>
+          <div class="swatch" style="--c:#2563eb"><span class="dot"></span><span class="name">Blue</span><span class="hex">#2563eb</span></div>
+          <div class="swatch" style="--c:#ec4899"><span class="dot"></span><span class="name">Pink</span><span class="hex">#ec4899</span></div>
+          <div class="swatch" style="--c:#14b8a6"><span class="dot"></span><span class="name">Teal</span><span class="hex">#14b8a6</span></div>
+          <div class="swatch" style="--c:#a78bfa"><span class="dot"></span><span class="name">Accent</span><span class="hex">#a78bfa</span></div>
+          <div class="swatch" style="--c:#f3f4fb"><span class="dot"></span><span class="name">Text</span><span class="hex">#f3f4fb</span></div>
+          <div class="swatch" style="--c:#fbbf24"><span class="dot"></span><span class="name">Stars</span><span class="hex">#fbbf24</span></div>
+          <div class="swatch" style="--c:#fb7185"><span class="dot"></span><span class="name">Danger</span><span class="hex">#fb7185</span></div>
+        </div>
+      </div>
+      <div class="glass preamble-block">
+        <div class="block-label">Typography</div>
+        <div class="specimen">
+          <div class="spec-row">
+            <span class="spec-name">Inter · Display · 700</span>
+            <span class="spec-sample display gradient-text">Classic Tiramisu</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-name">Inter · Body · 400</span>
+            <span class="spec-sample body">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream.</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-name">Inter · Muted · 400</span>
+            <span class="spec-sample muted">Source: marmiton.org · serves 4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01 HEADER -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2 class="sec-title">Header bar</h2>
+      <span class="sec-note">app bar · open menus shown</span>
+    </div>
+    <div class="appbar">
+      <div class="logo">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Recipes</span>
+      </div>
+      <label class="search-field">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" placeholder="Search recipes, ingredients, steps…" aria-label="Search recipes">
+      </label>
+      <div style="position:relative;">
+        <button class="ctrl primary" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Add recipe
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="menu" role="menu">
+          <div class="menu-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            New recipe
+          </div>
+          <div class="menu-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Import from URL
+          </div>
+        </div>
+      </div>
+      <div style="position:relative;">
+        <button class="ctrl" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 18V4"/></svg>
+          Sort
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="menu" role="menu">
+          <div class="menu-item">Name A → Z</div>
+          <div class="menu-item">Name Z → A</div>
+          <div class="menu-item active">Date added (New → Old)<span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+          <div class="menu-item">Date added (Old → New)</div>
+          <div class="menu-item">Stars 0 → 5</div>
+          <div class="menu-item">Stars 5 → 0</div>
+        </div>
+      </div>
+      <div class="view-toggle" role="group" aria-label="View mode">
+        <button class="on" type="button" aria-label="Grid view"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+        <button type="button" aria-label="List view"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg></button>
+      </div>
+      <button class="ctrl icon-only" type="button" aria-label="Toggle theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      <button class="ctrl icon-only" type="button" aria-label="Settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+  </section>
+
+  <!-- 02 BUTTONS -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2 class="sec-title">Buttons</h2>
+      <span class="sec-note">pill · glassy · glowing focus ring</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="btn-row">
+        <span class="btn-label">Primary</span>
+        <button class="btn primary" type="button">Save</button>
+        <span class="btn-label" style="margin-left:14px;">Default</span>
+        <button class="btn" type="button">Edit</button>
+        <span class="btn-label" style="margin-left:14px;">Danger</span>
+        <button class="btn danger" type="button">Delete</button>
+      </div>
+      <div class="btn-row">
+        <span class="btn-label">Ghost / Icon</span>
+        <button class="btn ghost icon" type="button" aria-label="Settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <span class="btn-label" style="margin-left:14px;">Servings ±</span>
+        <button class="btn step" type="button" aria-label="Decrease">−</button>
+        <button class="btn step" type="button" aria-label="Increase">+</button>
+        <span class="btn-label" style="margin-left:14px;">Favorite</span>
+        <button class="fav-btn" type="button" aria-label="Favorite"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <button class="fav-btn on" type="button" aria-label="Favorited" aria-pressed="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <span class="btn-label" style="margin-left:14px;">Link</span>
+        <a class="btn ghost sm" href="#">Original <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+      </div>
+      <div class="btn-row">
+        <span class="btn-label">Focus</span>
+        <button class="btn primary" type="button" style="box-shadow:0 0 0 2px var(--accent-glow),inset 0 1px 0 rgba(255,255,255,.4),0 6px 22px rgba(124,58,237,.45);">Save (focused)</button>
+        <span class="note">Glowing 2px violet ring on <code>:focus-visible</code>.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 FORM CONTROLS -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2 class="sec-title">Form controls</h2>
+      <span class="sec-note">inputs · 12px radius · violet focus ring</span>
+    </div>
+    <div class="form-grid">
+      <div class="field full">
+        <label for="f-title">Title</label>
+        <input class="input" id="f-title" type="text" value="Classic Tiramisu">
+      </div>
+      <div class="field">
+        <label for="f-search">Search</label>
+        <input class="input" id="f-search" type="search" placeholder="Find a recipe…">
+      </div>
+      <div class="field">
+        <label>Account</label>
+        <div class="input-pair">
+          <input class="input" type="email" placeholder="Email" aria-label="Email" value="chef@frost.kitchen">
+          <input class="input" type="password" placeholder="Password" aria-label="Password" value="••••••••">
+        </div>
+      </div>
+      <div class="field full">
+        <label for="f-desc">Description</label>
+        <textarea class="textarea" id="f-desc" placeholder="Short description…">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea>
+      </div>
+      <div class="field">
+        <label for="f-serv">Servings</label>
+        <input class="input" id="f-serv" type="number" value="4" min="1">
+      </div>
+      <div class="field">
+        <label for="f-rate">Rating</label>
+        <select class="select" id="f-rate">
+          <option>0 stars</option><option>1 star</option><option>2 stars</option>
+          <option>3 stars</option><option selected>4 stars</option><option>5 stars</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-img">Image</label>
+        <input class="input" id="f-img" type="file" accept="image/*">
+      </div>
+      <div class="field">
+        <label>Shopping list</label>
+        <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px;">
+          <label class="check"><input type="checkbox" checked><span class="box" aria-hidden="true"></span>¾ cup white sugar <span style="color:var(--muted);font-size:13px;">(bought)</span></label>
+          <label class="check"><input type="checkbox"><span class="box" aria-hidden="true"></span>1 package ladyfingers</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 TAGS CHIPS INPUT -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2 class="sec-title">Tags chips input</h2>
+      <span class="sec-note">editor · open suggestions</span>
+    </div>
+    <div class="chip-input" style="max-width:560px;">
+      <span class="chip">dessert <button class="x" aria-label="Remove dessert">×</button></span>
+      <span class="chip">italian <button class="x" aria-label="Remove italian">×</button></span>
+      <span class="chip">chocolate <button class="x" aria-label="Remove chocolate">×</button></span>
+      <input type="text" value="qui" aria-label="Add tag" autocomplete="off">
+      <div class="suggest" role="listbox">
+        <div class="s-head">Suggestions</div>
+        <div class="s-item hl"><span class="hit">qui</span>ck</div>
+        <div class="s-item"><span class="hit">qui</span>che</div>
+        <div class="s-item"><span class="hit">qui</span>ninoa</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 FILTER CHIPS -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2 class="sec-title">Filter chips</h2>
+      <span class="sec-note">two groups · active vs inactive</span>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Tags</span>
+      <div class="filters">
+        <button class="pill active" type="button">all</button>
+        <button class="pill" type="button">dessert</button>
+        <button class="pill" type="button">italian</button>
+        <button class="pill" type="button">quick</button>
+        <button class="pill" type="button">vegetarian</button>
+        <button class="pill" type="button">soup</button>
+        <button class="pill" type="button">chocolate</button>
+        <button class="pill" type="button">french</button>
+        <button class="pill" type="button">dinner</button>
+        <button class="pill" type="button">baking</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Source</span>
+      <div class="filters">
+        <button class="pill" type="button">marmiton</button>
+        <button class="pill" type="button">750g</button>
+        <button class="pill" type="button">allrecipes</button>
+        <button class="pill" type="button">bbc good food</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 RECIPE GRID -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <h2 class="sec-title">Recipe grid</h2>
+      <span class="sec-note">6 cards · 1 selected · 1 no-image</span>
+    </div>
+    <div class="grid">
+      <article class="card glass">
+        <div class="card-img-wrap"><img class="card-img" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu" loading="lazy"></div>
+        <div class="card-body">
+          <div class="card-title">Classic Tiramisu</div>
+          <div class="card-meta"><span>marmiton.org</span><span>·</span><span class="stars" aria-label="5 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span></span></div>
+          <div class="card-tags"><span class="tag">dessert</span><span class="tag">italian</span></div>
+        </div>
+      </article>
+      <article class="card glass">
+        <div class="card-img-wrap"><img class="card-img" src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600" alt="Spaghetti Bolognese" loading="lazy"></div>
+        <div class="card-body">
+          <div class="card-title">Spaghetti Bolognese</div>
+          <div class="card-meta"><span>bbcgoodfood.com</span><span>·</span><span class="stars" aria-label="4 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s">★</span></span></div>
+          <div class="card-tags"><span class="tag">italian</span><span class="tag">dinner</span></div>
+        </div>
+      </article>
+      <article class="card glass">
+        <div class="card-img-wrap"><img class="card-img" src="https://images.unsplash.com/photo-1528908510736-5258199bc7dd?w=600" alt="Spinach and Feta Turkey Burgers" loading="lazy"></div>
+        <div class="card-body">
+          <div class="card-title">Spinach and Feta Turkey Burgers</div>
+          <div class="card-meta"><span>allrecipes.com</span><span>·</span><span class="stars" aria-label="3 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s">★</span><span class="s">★</span></span></div>
+          <div class="card-tags"><span class="tag">dinner</span><span class="tag">quick</span></div>
+        </div>
+      </article>
+      <article class="card glass selected">
+        <span class="select-corner" aria-label="Selected"></span>
+        <div class="card-img-wrap"><img class="card-img" src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Molten Chocolate Lava Cake" loading="lazy"></div>
+        <div class="card-body">
+          <div class="card-title">Molten Chocolate Lava Cake</div>
+          <div class="card-meta"><span>allrecipes.com</span><span>·</span><span class="stars" aria-label="5 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span></span></div>
+          <div class="card-tags"><span class="tag">dessert</span><span class="tag">chocolate</span><span class="tag">baking</span></div>
+        </div>
+      </article>
+      <article class="card glass">
+        <div class="card-img-wrap"><img class="card-img" src="https://images.unsplash.com/photo-1547592166-23ac45744ffd?w=600" alt="Soupe à l'Oignon" loading="lazy"></div>
+        <div class="card-body">
+          <div class="card-title">Soupe à l'Oignon</div>
+          <div class="card-meta"><span>750g.com</span><span>·</span><span class="stars" aria-label="4 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s">★</span></span></div>
+          <div class="card-tags"><span class="tag">soup</span><span class="tag">french</span></div>
+        </div>
+      </article>
+      <article class="card glass">
+        <div class="card-img-wrap">
+          <div class="card-img no-img" role="img" aria-label="No image available">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+            <span>no image</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Grandma's Apple Tart</div>
+          <div class="card-meta"><span>manual</span><span>·</span><span class="stars" aria-label="5 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span></span></div>
+          <div class="card-tags"><span class="tag">dessert</span><span class="tag">baking</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 07 RECIPE LIST -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">07</span>
+      <h2 class="sec-title">Recipe list (rows)</h2>
+      <span class="sec-note">dense · 3 rows · inline select</span>
+    </div>
+    <div class="list">
+      <div class="row">
+        <img class="thumb" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu">
+        <div class="r-main">
+          <div class="r-title">Classic Tiramisu</div>
+          <div class="r-sub"><span>marmiton.org</span><span>·</span><span class="stars" aria-label="5 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span></span><span class="r-tags"><span class="tag">dessert</span><span class="tag">italian</span></span></div>
+        </div>
+        <div class="r-check" aria-label="Select row" role="checkbox"></div>
+      </div>
+      <div class="row">
+        <img class="thumb" src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Molten Chocolate Lava Cake">
+        <div class="r-main">
+          <div class="r-title">Molten Chocolate Lava Cake</div>
+          <div class="r-sub"><span>allrecipes.com</span><span>·</span><span class="stars" aria-label="5 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span></span><span class="r-tags"><span class="tag">dessert</span><span class="tag">chocolate</span><span class="tag">baking</span></span></div>
+        </div>
+        <div class="r-check on" aria-label="Row selected" role="checkbox" aria-checked="true"></div>
+      </div>
+      <div class="row">
+        <div class="thumb no-img" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/></svg></div>
+        <div class="r-main">
+          <div class="r-title">Grandma's Apple Tart</div>
+          <div class="r-sub"><span>manual</span><span>·</span><span class="stars" aria-label="5 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span></span><span class="r-tags"><span class="tag">dessert</span><span class="tag">baking</span></span></div>
+        </div>
+        <div class="r-check" aria-label="Select row" role="checkbox"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 RECIPE COOK VIEW -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">08</span>
+      <h2 class="sec-title">Recipe cook view</h2>
+      <span class="sec-note">Classic Tiramisu · step 2 of 6</span>
+    </div>
+    <a class="back-link" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg> Recipes</a>
+
+    <div class="cook-header">
+      <img class="cook-img" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu">
+      <div class="cook-head-info">
+        <h3 class="cook-title gradient-text">Classic Tiramisu</h3>
+        <div class="cook-rating-row">
+          <span class="stars" role="img" aria-label="4 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s">★</span></span>
+          <span class="rating-text">4.0 · marmiton.org</span>
+        </div>
+        <p class="cook-desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</p>
+        <div class="cook-tags"><span class="tag">dessert</span><span class="tag">italian</span><span class="tag">no-bake</span></div>
+      </div>
+    </div>
+
+    <div class="cook-grid">
+      <div class="cook-col glass-2">
+        <h3>Ingredients</h3>
+        <div class="servings">
+          <span class="lbl">Servings</span>
+          <button class="step-btn" type="button" aria-label="Decrease servings">−</button>
+          <input type="text" value="4" aria-label="Servings" readonly>
+          <button class="step-btn" type="button" aria-label="Increase servings">+</button>
+          <button class="reset" type="button">Reset</button>
+        </div>
+        <ul class="ing-list">
+          <li><span class="ck" aria-hidden="true"></span><span class="ing-text">6 egg yolks</span></li>
+          <li class="done"><span class="ck" aria-hidden="true"></span><span class="ing-text">¾ cup white sugar</span></li>
+          <li class="done"><span class="ck" aria-hidden="true"></span><span class="ing-text">1⅔ cups heavy cream</span></li>
+          <li><span class="ck" aria-hidden="true"></span><span class="ing-text">1 package (around 30) ladyfingers</span></li>
+          <li class="done"><span class="ck" aria-hidden="true"></span><span class="ing-text">1¾ cups strong brewed espresso, cooled</span></li>
+          <li><span class="ck" aria-hidden="true"></span><span class="ing-text">2 tbsp unsweetened cocoa powder</span></li>
+        </ul>
+      </div>
+
+      <div class="cook-col glass-2">
+        <h3>Steps</h3>
+        <div class="progress-wrap">
+          <div class="progress-head">
+            <span class="pcount">Step <b>2</b> of 6</span>
+            <div class="progress-nav">
+              <button type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Prev</button>
+              <button type="button">Next <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+            </div>
+          </div>
+          <div class="progress-bar"><span></span></div>
+        </div>
+        <ol class="step-list">
+          <li class="done">Whisk egg yolks and sugar until thick and pale.</li>
+          <li class="current">Fold in mascarpone until smooth.</li>
+          <li>Whip cream to soft peaks and fold in.</li>
+          <li>Combine espresso and a splash of liqueur in a shallow dish.</li>
+          <li>Dip each ladyfinger briefly and layer in a dish.</li>
+          <li>Spread cream, dust with cocoa, chill 4+ hours.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="notes-block glass-2">
+      <h3>Notes</h3>
+      <p>Best made a day ahead. Don't oversoak the ladyfingers or the layers turn to paste.</p>
+    </div>
+
+    <div class="cook-footer glass-2">
+      <a class="btn ghost sm" href="#">Original <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+      <span class="spacer"></span>
+      <button class="btn" type="button">Edit</button>
+      <button class="btn danger" type="button">Delete</button>
+      <button class="btn" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</button>
+      <button class="fav-btn on" type="button" aria-label="Favorited" aria-pressed="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+    </div>
+  </section>
+
+  <!-- 09 EDIT FORM -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">09</span>
+      <h2 class="sec-title">Edit form excerpt</h2>
+      <span class="sec-note">condensed · reuses chip input</span>
+    </div>
+    <div class="edit-form">
+      <div class="field full">
+        <label for="e-title">Title</label>
+        <input class="input" id="e-title" type="text" value="Classic Tiramisu">
+      </div>
+      <div class="field full">
+        <label for="e-desc">Description</label>
+        <textarea class="textarea" id="e-desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea>
+      </div>
+      <div class="field">
+        <label for="e-rate">Rating</label>
+        <select class="select" id="e-rate">
+          <option>0 stars</option><option>1 star</option><option>2 stars</option>
+          <option>3 stars</option><option selected>4 stars</option><option>5 stars</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="e-src">Source URL</label>
+        <input class="input" id="e-src" type="url" value="https://www.marmiton.org/recipes/tiramisu">
+      </div>
+      <div class="field full">
+        <label for="e-tags">Tags</label>
+        <div class="chip-input" id="e-tags">
+          <span class="chip">dessert <button class="x" aria-label="Remove">×</button></span>
+          <span class="chip">italian <button class="x" aria-label="Remove">×</button></span>
+          <span class="chip">no-bake <button class="x" aria-label="Remove">×</button></span>
+          <input type="text" placeholder="Add tag…" aria-label="Add tag">
+        </div>
+      </div>
+      <div class="field full">
+        <label for="e-img">Image</label>
+        <input class="input" id="e-img" type="file" accept="image/*">
+        <div class="drop-hint">or paste an image here (Ctrl+V)</div>
+      </div>
+      <div class="form-actions">
+        <button class="btn" type="button">Cancel</button>
+        <button class="btn primary" type="button">Save</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 SETTINGS -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">10</span>
+      <h2 class="sec-title">Settings cards</h2>
+      <span class="sec-note">four stacked · icon tiles</span>
+    </div>
+    <div class="settings">
+      <div class="set-card glass-2">
+        <div class="set-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+        <div class="set-body">
+          <div class="set-title">Export</div>
+          <div class="set-desc">Download your recipe library in a single archive.</div>
+          <div class="set-actions">
+            <button class="btn sm" type="button">JSON</button>
+            <button class="btn sm" type="button">Markdown zip</button>
+            <button class="btn sm" type="button">PDF</button>
+            <button class="btn sm" type="button">JSON-LD zip</button>
+          </div>
+        </div>
+      </div>
+      <div class="set-card glass-2">
+        <div class="set-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <div class="set-body">
+          <div class="set-title">Import</div>
+          <div class="set-desc">Restore from a previous backup file.</div>
+          <div class="set-actions">
+            <input type="file" aria-label="Import file">
+            <button class="btn primary sm" type="button">Preview import</button>
+            <span class="set-hint">Max 50 MB · JSON, .zip, .md</span>
+          </div>
+        </div>
+      </div>
+      <div class="set-card glass-2">
+        <div class="set-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+        <div class="set-body">
+          <div class="set-title">About</div>
+          <div class="set-desc"><span class="brand-mark" style="width:18px;height:18px;border-radius:5px;vertical-align:-3px;margin-right:6px;"></span>Recipe Manager · Version 2.3.0</div>
+          <div class="set-actions">
+            <a class="btn sm" href="#">GitHub <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <div class="set-card glass-2">
+        <div class="set-icon" style="background:linear-gradient(135deg,rgba(251,113,133,.3),rgba(225,29,72,.2));border-color:rgba(251,113,133,.4);color:var(--danger);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 16px rgba(225,29,72,.2);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+        <div class="set-body">
+          <div class="set-title">Sign out</div>
+          <div class="set-desc">End your session on this device.</div>
+          <div class="set-actions"><button class="btn danger sm" type="button">Log out</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 AUTH -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">11</span>
+      <h2 class="sec-title">Auth form</h2>
+      <span class="sec-note">centered card · error state</span>
+    </div>
+    <div class="auth-wrap">
+      <form class="auth-card glass" onsubmit="return false;">
+        <div style="display:flex;justify-content:center;margin-bottom:4px;"><span class="brand-mark" style="width:40px;height:40px;border-radius:12px;"></span></div>
+        <div>
+          <div class="auth-title">Sign in</div>
+          <div class="auth-sub">Welcome back to your kitchen.</div>
+        </div>
+        <div class="error-banner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Invalid email or password.</div>
+        <div class="field">
+          <label for="a-email">Email</label>
+          <input class="input" id="a-email" type="email" value="chef@frost.kitchen">
+        </div>
+        <div class="field">
+          <label for="a-pass">Password</label>
+          <input class="input" id="a-pass" type="password" value="wrongpassword">
+        </div>
+        <button class="btn primary" type="submit" style="justify-content:center;width:100%;">Sign in</button>
+        <div class="auth-links">
+          <a href="#" class="linky">Forgot your password?</a>
+          <a href="#" class="linky">Create an account</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 12 FEEDBACK -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">12</span>
+      <h2 class="sec-title">Feedback components</h2>
+      <span class="sec-note">toast · bulk · skeleton · spinner · empty · banner</span>
+    </div>
+    <div class="feedback-grid">
+      <div class="feedback-cell">
+        <div>
+          <div class="cell-label" style="margin-bottom:10px;">Toast</div>
+          <div class="toast">
+            <div class="t-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="t-body"><div class="t-title">Recipe imported</div><div class="t-sub">Classic Tiramisu · marmiton.org</div></div>
+            <button class="btn sm primary" type="button">View</button>
+            <button class="t-close" aria-label="Dismiss">×</button>
+          </div>
+        </div>
+        <div>
+          <div class="cell-label" style="margin-bottom:10px;">Bulk-action bar</div>
+          <div class="bulk-bar">
+            <span class="b-count">3 selected</span>
+            <span class="spacer"></span>
+            <button class="btn danger sm" type="button">Delete</button>
+            <button class="btn sm" type="button" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);">Cancel</button>
+          </div>
+        </div>
+        <div>
+          <div class="cell-label" style="margin-bottom:10px;">Spinner</div>
+          <div class="spinner" role="status" aria-label="Loading"></div>
+        </div>
+      </div>
+      <div class="feedback-cell">
+        <div>
+          <div class="cell-label" style="margin-bottom:10px;">Skeleton loader</div>
+          <div class="skeleton-card glass-2">
+            <div class="sk thumb"></div>
+            <div class="sk line w-60"></div>
+            <div class="sk line w-40"></div>
+            <div class="sk line w-80" style="margin-bottom:0;"></div>
+          </div>
+        </div>
+        <div>
+          <div class="cell-label" style="margin-bottom:10px;">Empty state</div>
+          <div class="empty glass-2">
+            <div class="empty-ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg></div>
+            <div class="empty-title">No recipes yet</div>
+            <div class="empty-desc">Import your first recipe to start building your cookbook.</div>
+            <button class="btn primary" type="button">Import from URL</button>
+          </div>
+        </div>
+        <div>
+          <div class="cell-label" style="margin-bottom:10px;">Error / draft banner</div>
+          <div class="banner">
+            <svg class="b-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div><b style="color:#fde68a;">We couldn't extract a recipe from that page.</b><br><span style="color:rgba(253,230,138,.85);">You can edit the draft manually below.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 STAR SPECIMEN -->
+  <section class="show glass">
+    <div class="sec-head">
+      <span class="sec-num">13</span>
+      <h2 class="sec-title">Star rating + micro-interactions</h2>
+      <span class="sec-note">4 states · glow on hover</span>
+    </div>
+    <div class="rating-specimen">
+      <div class="rating-spec">
+        <span class="stars" role="img" aria-label="0 of 5 stars"><span class="s">★</span><span class="s">★</span><span class="s">★</span><span class="s">★</span><span class="s">★</span></span>
+        <span class="lbl">0 stars</span>
+      </div>
+      <div class="rating-spec">
+        <span class="stars" role="img" aria-label="2 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s">★</span><span class="s">★</span><span class="s">★</span></span>
+        <span class="lbl">2 stars</span>
+      </div>
+      <div class="rating-spec">
+        <span class="stars" role="img" aria-label="4 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s">★</span></span>
+        <span class="lbl">4 stars</span>
+      </div>
+      <div class="rating-spec">
+        <span class="stars" role="img" aria-label="5 of 5 stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span></span>
+        <span class="lbl">5 stars</span>
+      </div>
+    </div>
+    <div class="micro-note">
+      <b>Signature micro-interaction:</b> on hover, each star ignities with a soft gold bloom — <code>text-shadow: 0 0 16px rgba(251,191,36,.7)</code> — and the filled portion sweeps left-to-right with a quick <code>background-clip:text</code> gradient wipe. Tap-confetti is intentionally omitted; the aurora does enough moving.
+    </div>
+  </section>
+
+  <!-- 14 FOOTER / TOKENS -->
+  <section class="show glass footer-card">
+    <div class="sec-head">
+      <span class="sec-num">14</span>
+      <h2 class="sec-title">Footer / token reference</h2>
+      <span class="sec-note">design language · explicit</span>
+    </div>
+    <div class="footer-top">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="ft-title">Recipe Manager</span>
+      <span class="ft-tag">Frost · glassmorphism over mesh-gradient</span>
+    </div>
+    <table class="tokens-table">
+      <thead>
+        <tr><th>Token</th><th>Value</th><th>Use</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="tok-dot" style="background:#0b0a1a"></span>--bg</td><td class="value">#0b0a1a</td><td>Void base behind the aurora</td></tr>
+        <tr><td><span class="tok-dot" style="background:rgba(255,255,255,.06)"></span>--panel</td><td class="value">rgba(255,255,255,.06)</td><td>Frosted glass surface</td></tr>
+        <tr><td><span class="tok-dot" style="background:rgba(255,255,255,.10)"></span>--panel-2</td><td class="value">rgba(255,255,255,.10)</td><td>Hover / nested glass</td></tr>
+        <tr><td><span class="tok-dot" style="background:rgba(255,255,255,.15)"></span>--border</td><td class="value">rgba(255,255,255,.15)</td><td>Glass hairline + inset highlight</td></tr>
+        <tr><td><span class="tok-dot" style="background:#f3f4fb"></span>--text</td><td class="value">#f3f4fb</td><td>Primary text</td></tr>
+        <tr><td><span class="tok-dot" style="background:rgba(243,244,251,.62)"></span>--muted</td><td class="value">rgba(243,244,251,.62)</td><td>Meta / descriptions</td></tr>
+        <tr><td><span class="tok-dot" style="background:#a78bfa"></span>--accent</td><td class="value">#a78bfa</td><td>Soft violet accent + glow</td></tr>
+        <tr><td><span class="tok-dot" style="background:linear-gradient(135deg,#7c3aed,#2563eb,#ec4899,#14b8a6)"></span>mesh</td><td class="value">#7c3aed · #2563eb · #ec4899 · #14b8a6</td><td>Aurora blobs (blurred, drifting)</td></tr>
+        <tr><td><span class="tok-dot" style="background:#fb7185"></span>--danger</td><td class="value">#fb7185</td><td>Destructive actions</td></tr>
+        <tr><td><span class="tok-dot" style="background:#fbbf24"></span>--gold</td><td class="value">#fbbf24</td><td>Star ratings (warm contrast)</td></tr>
+        <tr><td>--radius</td><td class="value">18px (12 / 9 / 999 pill)</td><td>Soft rounded corners</td></tr>
+        <tr><td>--shadow</td><td class="value">0 8px 32px rgba(0,0,0,.35)</td><td>Soft elevation, always + inset highlight</td></tr>
+        <tr><td>focus ring</td><td class="value">0 0 0 2px rgba(167,139,250,.5)</td><td>Glowing violet ring on :focus-visible</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+</body>
+</html>

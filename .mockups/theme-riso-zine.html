@@ -1,0 +1,1569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1180">
+<title>Recipe Manager — Riso Zine Style Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Roboto+Slab:wght@300;400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     RISO ZINE — punk newsprint / risograph art-zine, DARK
+     Two-ink palette (orange + blue) over ink black & cream.
+     ============================================================ */
+
+  :root{
+    --bg:        #141414;
+    --surface:   #1c1c1c;
+    --surface-2: #232323;
+    --orange:    #ff5c2b;
+    --blue:      #2b6cff;
+    --cream:     #f4ede0;
+    --muted:     #9a8f80;
+    --black:     #0a0a0a;
+    --hair:      #2a2a2a;
+    --radius:    0px;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+
+  body{
+    background:var(--bg);
+    color:var(--cream);
+    font-family:'Roboto Slab', Georgia, serif;
+    font-size:15px;
+    line-height:1.55;
+    /* layered paper grain + faint global orange halftone */
+    background-image:
+      radial-gradient(circle at 50% 50%, rgba(255,92,43,0.045) 0.7px, transparent 1.1px),
+      radial-gradient(circle at 50% 50%, rgba(43,108,255,0.025) 0.6px, transparent 1px),
+      linear-gradient(115deg, rgba(255,255,255,0.012) 0px, rgba(0,0,0,0.05) 1px, rgba(255,255,255,0.012) 2px),
+      linear-gradient(33deg, rgba(0,0,0,0.06) 0px, rgba(255,255,255,0.01) 2px, rgba(0,0,0,0.05) 3px);
+    background-size: 5px 5px, 7px 7px, 3px 3px, 4px 4px;
+    background-attachment: fixed;
+    overflow-x:hidden;
+  }
+
+  /* registration crosshair marks pinned in the viewport corners */
+  body::before, body::after{
+    content:"✛";
+    position:fixed;
+    color:var(--orange);
+    font-size:22px;
+    opacity:.7;
+    z-index:1000;
+    pointer-events:none;
+  }
+  body::before{ top:10px; left:10px; text-shadow:2px 2px 0 var(--blue); }
+  body::after{ bottom:10px; right:10px; text-shadow:2px 2px 0 var(--blue); }
+
+  .wrap{
+    max-width:1160px;
+    margin:0 auto;
+    padding:42px 28px 80px;
+  }
+
+  /* ---------- type ---------- */
+  h1,h2,h3,h4,.display{
+    font-family:'Anton','Archivo Black',Impact,sans-serif;
+    font-weight:400; /* Anton is single weight */
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    line-height:.95;
+    margin:0;
+  }
+
+  /* ink misregistration helpers */
+  .misreg-o{ color:var(--orange); text-shadow:3px 3px 0 var(--blue); }
+  .misreg-b{ color:var(--blue);   text-shadow:3px 3px 0 var(--orange); }
+  .misreg-c{ color:var(--cream);  text-shadow:3px 3px 0 var(--orange), 6px 6px 0 var(--blue); }
+
+  .grain-chip{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+  }
+
+  a{ color:var(--cream); }
+
+  /* ---------- section scaffold ---------- */
+  .sect{ margin:54px 0 0; position:relative; }
+  .sect-head{
+    display:flex;
+    align-items:flex-end;
+    gap:18px;
+    border-bottom:3px solid var(--black);
+    padding-bottom:10px;
+    margin-bottom:22px;
+    position:relative;
+  }
+  .sect-head::after{
+    /* dashed under-rule for that layered zine look */
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:-7px;
+    border-bottom:2px dashed var(--orange);
+    opacity:.6;
+  }
+  .sect-no{
+    font-family:'Anton',sans-serif;
+    font-size:34px;
+    color:var(--bg);
+    background:var(--orange);
+    padding:2px 12px 0;
+    border:3px solid var(--black);
+    box-shadow:4px 4px 0 var(--blue);
+    line-height:1;
+  }
+  .sect-title{
+    font-size:30px;
+    color:var(--cream);
+  }
+  .sect-note{
+    margin-left:auto;
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    max-width:42%;
+    text-align:right;
+  }
+  .sect-note b{ color:var(--orange); }
+
+  /* halftone overlay utility — applied to photos / surfaces */
+  .halftone{
+    position:relative;
+    isolation:isolate;
+  }
+  .halftone::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image:radial-gradient(circle at 50% 50%, rgba(20,20,20,0.55) 1.1px, transparent 1.6px);
+    background-size:4px 4px;
+    mix-blend-mode:multiply;
+    pointer-events:none;
+    z-index:2;
+  }
+  .halftone-orange::after{
+    background-image:radial-gradient(circle at 50% 50%, rgba(255,92,43,0.55) 1.1px, transparent 1.7px);
+    background-size:5px 5px;
+    mix-blend-mode:screen;
+  }
+
+  /* ============================================================
+     PREAMBLE / STYLE INTRO
+     ============================================================ */
+  .intro{
+    border:3px solid var(--black);
+    background:var(--surface);
+    padding:26px 28px 24px;
+    position:relative;
+    box-shadow:10px 10px 0 var(--blue);
+    margin-bottom:10px;
+  }
+  .intro::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:radial-gradient(circle at 50% 50%, rgba(255,92,43,0.06) 1px, transparent 1.6px);
+    background-size:6px 6px;
+    pointer-events:none;
+  }
+  .masthead{
+    display:flex; justify-content:space-between; align-items:center;
+    border-bottom:2px dashed var(--muted);
+    padding-bottom:8px; margin-bottom:18px;
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .masthead em{ color:var(--orange); font-style:normal; }
+  .intro h1{
+    font-size:96px;
+    letter-spacing:1px;
+  }
+  .intro .concept{
+    font-size:17px; color:var(--cream); max-width:760px;
+    margin-top:14px;
+    border-left:4px solid var(--orange);
+    padding-left:14px;
+  }
+  .intro .concept b{ color:var(--orange); }
+
+  .palette{
+    display:flex; flex-wrap:wrap; gap:10px; margin-top:22px;
+  }
+  .sw{
+    border:3px solid var(--black);
+    box-shadow:4px 4px 0 var(--blue);
+    display:flex; align-items:flex-end;
+    width:120px; height:74px;
+    position:relative;
+  }
+  .sw i{ display:block; width:100%; height:38px; }
+  .sw span{
+    position:absolute; top:4px; left:6px;
+    font-family:'Space Mono',monospace; font-size:10px;
+    color:var(--bg); background:var(--cream);
+    padding:1px 5px; letter-spacing:.08em;
+  }
+  .sw small{
+    position:absolute; bottom:4px; left:6px;
+    font-family:'Space Mono',monospace; font-size:9px;
+    color:var(--cream);
+  }
+
+  .specimen{
+    display:grid; grid-template-columns:1fr 1fr; gap:18px;
+    margin-top:22px; border-top:2px dashed var(--muted); padding-top:18px;
+  }
+  .specimen .sp-label{
+    font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--orange); display:block; margin-bottom:6px;
+  }
+  .specimen .sp-display{ font-size:54px; color:var(--cream); }
+  .specimen .sp-body{ font-size:15px; color:var(--cream); }
+  .specimen .sp-body em{ color:var(--muted); }
+
+  /* ============================================================
+     01 · HEADER BAR
+     ============================================================ */
+  .topbar{
+    display:flex; align-items:center; gap:14px;
+    background:var(--surface);
+    border:3px solid var(--black);
+    box-shadow:7px 7px 0 var(--blue);
+    padding:12px 14px;
+    flex-wrap:wrap;
+  }
+  .logo{
+    font-family:'Anton',sans-serif; font-size:30px; line-height:1;
+    color:var(--orange);
+    text-shadow:3px 3px 0 var(--blue);
+    padding-right:14px; border-right:3px solid var(--black);
+    letter-spacing:.5px;
+  }
+  .logo b{ color:var(--cream); }
+
+  .search{
+    flex:1 1 260px; min-width:220px;
+    display:flex; align-items:center; gap:8px;
+    background:var(--bg); border:3px solid var(--black);
+    padding:8px 10px;
+  }
+  .search .glyph{ color:var(--orange); font-size:14px; }
+  .search input{
+    flex:1; background:transparent; border:0; outline:0; color:var(--cream);
+    font-family:'Roboto Slab',serif; font-size:14px;
+  }
+  .search input::placeholder{ color:var(--muted); }
+
+  /* dropdowns (shown OPEN) */
+  .dd{ position:relative; }
+  .dd-btn{
+    background:var(--bg); border:3px solid var(--black);
+    color:var(--cream); font-family:'Anton',sans-serif; text-transform:uppercase;
+    font-size:14px; letter-spacing:.6px; padding:8px 12px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .dd-btn .caret{ color:var(--orange); }
+  .dd-btn.is-open{ background:var(--orange); color:var(--black); box-shadow:4px 4px 0 var(--blue); }
+  .dd-btn.is-open .caret{ color:var(--black); }
+  .dd-menu{
+    position:absolute; top:calc(100% + 8px); left:0; z-index:6;
+    min-width:230px;
+    background:var(--surface);
+    border:3px solid var(--black);
+    box-shadow:7px 7px 0 var(--blue);
+    padding:6px;
+  }
+  .dd-menu::before{
+    content:"✛"; position:absolute; top:-14px; left:-14px; color:var(--orange);
+    font-size:14px; text-shadow:2px 2px 0 var(--blue);
+  }
+  .dd-item{
+    display:flex; align-items:center; gap:10px;
+    padding:7px 10px; font-family:'Roboto Slab',serif; font-size:14px; color:var(--cream);
+    border-bottom:1px dotted var(--hair);
+  }
+  .dd-item:last-child{ border-bottom:0; }
+  .dd-item:hover, .dd-item.is-active{ background:var(--orange); color:var(--black); }
+  .dd-item.is-active{ font-weight:700; }
+  .dd-item .check{ margin-left:auto; color:var(--black); font-weight:700; }
+  .dd-item .ic{ color:var(--orange); width:18px; }
+  .dd-item:hover .ic, .dd-item.is-active .ic{ color:var(--black); }
+
+  .icon-btn{
+    width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;
+    background:var(--bg); border:3px solid var(--black); color:var(--cream);
+    font-size:16px; cursor:pointer;
+  }
+  .icon-btn:hover{ color:var(--orange); }
+  .view-toggle{ display:flex; }
+  .view-toggle .icon-btn{ border-right:0; }
+  .view-toggle .icon-btn:last-child{ border-right:3px solid var(--black); }
+  .view-toggle .icon-btn.is-active{ background:var(--orange); color:var(--black); }
+
+  /* ============================================================
+     02 · BUTTONS
+     ============================================================ */
+  .btn-row{
+    display:flex; flex-wrap:wrap; align-items:center; gap:16px;
+  }
+  .btn{
+    font-family:'Anton',sans-serif; text-transform:uppercase; letter-spacing:.7px;
+    font-size:15px; padding:11px 18px; cursor:pointer; border:3px solid var(--black);
+    background:var(--bg); color:var(--cream); line-height:1;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary{ background:var(--orange); color:var(--black); box-shadow:5px 5px 0 var(--blue); }
+  .btn-primary:hover{ box-shadow:2px 2px 0 var(--blue); transform:translate(3px,3px); }
+  .btn-default{ background:transparent; color:var(--cream); }
+  .btn-danger{ background:var(--blue); color:var(--cream); box-shadow:5px 5px 0 var(--orange); }
+  .btn-ghost{ background:transparent; }
+  .btn-link{
+    background:transparent; border:0; color:var(--orange); padding:0;
+    font-family:'Roboto Slab',serif; font-weight:700; text-decoration:underline;
+    text-decoration-style:dotted; text-underline-offset:3px;
+  }
+  .step-btn{
+    width:38px; height:38px; padding:0; justify-content:center; font-size:20px;
+  }
+  .fav-btn{
+    font-size:22px; width:42px; height:42px; padding:0; justify-content:center;
+  }
+  .fav-filled{ color:var(--orange); background:var(--bg); }
+  .btn-note{
+    width:100%; margin-top:8px;
+    font-family:'Space Mono',monospace; font-size:11px; color:var(--muted);
+    letter-spacing:.14em; text-transform:uppercase;
+  }
+  .btn-note b{ color:var(--orange); }
+
+  /* ============================================================
+     03 · FORM CONTROLS
+     ============================================================ */
+  .form-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:18px 28px;
+    background:var(--surface); padding:22px; border:3px solid var(--black);
+    box-shadow:7px 7px 0 var(--blue);
+  }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field.full{ grid-column:1 / -1; }
+  .field label{
+    font-family:'Anton',sans-serif; text-transform:uppercase; letter-spacing:.7px;
+    font-size:12px; color:var(--orange);
+  }
+  .field label .req{ color:var(--blue); }
+  .field input[type=text],
+  .field input[type=search],
+  .field input[type=email],
+  .field input[type=password],
+  .field input[type=number],
+  .field input[type=file],
+  .field select,
+  .field textarea{
+    width:100%;
+    background:var(--bg); color:var(--cream);
+    border:3px solid var(--black);
+    font-family:'Roboto Slab',serif; font-size:14px;
+    padding:10px 12px; outline:0; border-radius:0;
+  }
+  .field textarea{ resize:vertical; min-height:84px; }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    box-shadow:4px 4px 0 var(--orange); border-color:var(--orange);
+  }
+  .field input[type=file]{ padding:7px 10px; }
+  .field input[type=file]::file-selector-button{
+    background:var(--orange); color:var(--black); border:3px solid var(--black);
+    font-family:'Anton',sans-serif; text-transform:uppercase; font-size:12px;
+    padding:4px 10px; margin-right:10px; cursor:pointer; border-radius:0;
+  }
+  .field select{
+    appearance:none;
+    background-image:linear-gradient(45deg, transparent 50%, var(--orange) 50%),
+                     linear-gradient(135deg, var(--orange) 50%, transparent 50%);
+    background-position:calc(100% - 18px) 18px, calc(100% - 12px) 18px;
+    background-size:6px 6px; background-repeat:no-repeat;
+  }
+  .check-line{ display:flex; align-items:center; gap:10px; font-size:14px; color:var(--cream); }
+  .check-line input{
+    appearance:none; width:20px; height:20px; border:3px solid var(--black);
+    background:var(--bg); position:relative; cursor:pointer; flex:0 0 auto;
+  }
+  .check-line input:checked{ background:var(--orange); }
+  .check-line input:checked::after{
+    content:"✕"; position:absolute; inset:0; color:var(--black);
+    font-family:'Anton',sans-serif; font-size:14px; text-align:center; line-height:16px; font-weight:700;
+  }
+  .check-line.checked{ text-decoration:line-through; color:var(--muted); }
+
+  /* ============================================================
+     04 & 09 · TAG EDITOR
+     ============================================================ */
+  .tag-editor{
+    background:var(--bg); border:3px solid var(--black);
+    box-shadow:4px 4px 0 var(--blue);
+    padding:10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+    position:relative;
+  }
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--surface-2); border:2px dashed var(--orange);
+    color:var(--cream); font-family:'Space Mono',monospace; font-size:12px;
+    padding:4px 9px; letter-spacing:.04em;
+  }
+  .chip .x{ color:var(--orange); font-weight:700; cursor:pointer; }
+  .tag-editor input{
+    flex:1; min-width:90px; background:transparent; border:0; outline:0;
+    color:var(--cream); font-family:'Roboto Slab',serif; font-size:14px; padding:6px;
+  }
+  .suggestions{
+    margin-top:8px; background:var(--surface); border:3px solid var(--black);
+    box-shadow:5px 5px 0 var(--orange); padding:4px; max-width:260px;
+    position:relative;
+  }
+  .suggestions .s-head{
+    font-family:'Space Mono',monospace; font-size:10px; color:var(--muted);
+    padding:4px 8px; text-transform:uppercase; letter-spacing:.18em;
+  }
+  .suggestions .s-item{
+    padding:6px 8px; color:var(--cream); font-size:14px;
+    border-top:1px dotted var(--hair);
+  }
+  .suggestions .s-item mark{ background:var(--orange); color:var(--black); }
+  .suggestions .s-item:first-of-type{ border-top:0; }
+
+  /* ============================================================
+     05 · FILTER CHIPS (stamp style)
+     ============================================================ */
+  .chip-groups{ display:flex; flex-direction:column; gap:18px; }
+  .chip-group{}
+  .chip-group .glabel{
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--blue); margin-right:10px;
+  }
+  .stamp{
+    display:inline-flex; align-items:center;
+    font-family:'Anton',sans-serif; text-transform:uppercase; font-size:13px;
+    letter-spacing:.6px;
+    padding:5px 12px; margin:0 8px 8px 0;
+    border:3px solid var(--cream);
+    color:var(--cream); background:transparent;
+    transform:rotate(-1.5deg);
+    position:relative;
+  }
+  .stamp:nth-child(odd){ transform:rotate(1.3deg); }
+  .stamp:nth-child(3n){ transform:rotate(-2.2deg); }
+  .stamp.is-active{
+    background:var(--orange); color:var(--black); border-color:var(--black);
+    box-shadow:3px 3px 0 var(--blue);
+  }
+  .stamp.blue-active{ background:var(--blue); color:var(--cream); border-color:var(--black); box-shadow:3px 3px 0 var(--orange); }
+
+  /* ============================================================
+     06 · RECIPE GRID
+     ============================================================ */
+  .grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:22px;
+  }
+  .card{
+    background:var(--surface); border:3px solid var(--black);
+    box-shadow:6px 6px 0 var(--blue);
+    position:relative; overflow:hidden;
+  }
+  .card.selected{
+    box-shadow:6px 6px 0 var(--orange), 0 0 0 3px var(--orange) inset;
+    outline:3px solid var(--orange);
+  }
+  .card .media{
+    position:relative; aspect-ratio: 4/3; background:var(--black); overflow:hidden;
+    border-bottom:3px solid var(--black);
+  }
+  .card .media img{ width:100%; height:100%; object-fit:cover; display:block; filter:contrast(1.15) saturate(1.05); }
+  .card .noimg{
+    width:100%; height:100%;
+    background:
+      repeating-linear-gradient(45deg, var(--surface-2) 0 12px, var(--bg) 12px 24px);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-family:'Anton',sans-serif; font-size:18px; letter-spacing:1px;
+    position:relative;
+  }
+  .card .noimg::after{
+    content:"NO PHOTO ON FILE";
+    color:var(--orange); text-shadow:2px 2px 0 var(--blue);
+    transform:rotate(-6deg); position:absolute;
+  }
+  .card .noimg .stamp-tape{
+    position:absolute; top:12px; right:-26px; transform:rotate(8deg);
+    background:var(--orange); color:var(--black); font-family:'Space Mono',monospace;
+    font-size:10px; padding:2px 30px; letter-spacing:.2em;
+  }
+  .card .body{ padding:14px 14px 16px; }
+  .card .src{
+    font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--blue); margin-bottom:6px;
+  }
+  .card h3{
+    font-size:24px; color:var(--cream); margin:0 0 8px;
+  }
+  .card .rating{ color:var(--orange); font-size:15px; letter-spacing:2px; }
+  .card .rating .empty{ color:var(--muted); }
+  .card .tags{ margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+  .tag-mini{
+    font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--cream); border:2px solid var(--cream);
+    padding:2px 7px;
+  }
+  .card .sel-corner{
+    position:absolute; top:10px; left:10px; z-index:5;
+    width:30px; height:30px; background:var(--orange); border:3px solid var(--black);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--black); font-family:'Anton',sans-serif; font-size:18px;
+    box-shadow:3px 3px 0 var(--blue);
+  }
+  .card .no-stamp{
+    position:absolute; top:-2px; right:-10px; transform:rotate(8deg); z-index:5;
+    background:var(--blue); color:var(--cream); font-family:'Anton',sans-serif;
+    font-size:11px; letter-spacing:.6px; padding:4px 14px; border:3px solid var(--black);
+  }
+
+  /* ============================================================
+     07 · RECIPE LIST
+     ============================================================ */
+  .list{ display:flex; flex-direction:column; gap:12px; }
+  .row{
+    display:grid; grid-template-columns:64px 1fr auto auto auto;
+    align-items:center; gap:16px;
+    background:var(--surface); border:3px solid var(--black);
+    box-shadow:4px 4px 0 var(--blue);
+    padding:10px 14px;
+  }
+  .row .thumb{ width:64px; height:64px; border:3px solid var(--black); background:var(--black); overflow:hidden; }
+  .row .thumb img{ width:100%; height:100%; object-fit:cover; }
+  .row .thumb.ph{
+    background:repeating-linear-gradient(45deg, var(--surface-2) 0 8px, var(--bg) 8px 16px);
+  }
+  .row .thumb.ph::after{
+    content:"✛"; display:flex; align-items:center; justify-content:center;
+    height:100%; color:var(--orange); font-size:22px;
+  }
+  .row .meta .t{ font-family:'Anton',sans-serif; font-size:20px; color:var(--cream); text-transform:uppercase; line-height:1; }
+  .row .meta .s{ font-family:'Space Mono',monospace; font-size:11px; color:var(--blue); letter-spacing:.12em; text-transform:uppercase; }
+  .row .rstars{ color:var(--orange); font-size:14px; letter-spacing:2px; }
+  .row .rstars .empty{ color:var(--muted); }
+  .row .rtags{ display:flex; gap:6px; }
+  .row .rcheck{
+    appearance:none; width:24px; height:24px; border:3px solid var(--black); background:var(--bg);
+    cursor:pointer; position:relative;
+  }
+  .row .rcheck:checked{ background:var(--orange); }
+  .row .rcheck:checked::after{
+    content:"✕"; position:absolute; inset:0; color:var(--black);
+    font-family:'Anton',sans-serif; font-size:16px; text-align:center; line-height:18px;
+  }
+
+  /* ============================================================
+     08 · COOK VIEW
+     ============================================================ */
+  .cook{ display:flex; flex-direction:column; gap:20px; }
+  .back-link{
+    font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--orange); text-decoration:none;
+  }
+  .cook-hero{
+    border:3px solid var(--black); background:var(--surface);
+    box-shadow:8px 8px 0 var(--blue);
+    display:grid; grid-template-columns: 1.1fr 1fr; gap:0;
+  }
+  .cook-hero .photo{
+    position:relative; border-right:3px solid var(--black); overflow:hidden;
+    min-height:320px;
+  }
+  .cook-hero .photo img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:contrast(1.25) saturate(.85) brightness(.95);
+  }
+  .cook-hero .photo .corner-no{
+    position:absolute; top:12px; left:12px;
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.2em;
+    color:var(--black); background:var(--orange); border:3px solid var(--black);
+    padding:2px 8px;
+  }
+  .cook-hero .info{ padding:22px 24px; }
+  .cook-hero .src{
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--blue);
+  }
+  .cook-hero h2{
+    font-size:54px; color:var(--cream); margin:6px 0 12px;
+  }
+  .cook-hero .stars{ color:var(--orange); font-size:24px; letter-spacing:4px; }
+  .cook-hero .stars .empty{ color:var(--muted); }
+  .cook-hero .desc{
+    color:var(--cream); margin:12px 0 14px; font-size:15px;
+    column-count:1;
+  }
+  .cook-hero .tags{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  .cook-cols{ display:grid; grid-template-columns:1fr 1.3fr; gap:20px; }
+  .panel{
+    border:3px solid var(--black); background:var(--surface);
+    box-shadow:6px 6px 0 var(--orange);
+    padding:18px 20px;
+  }
+  .panel.blue-shadow{ box-shadow:6px 6px 0 var(--blue); }
+  .panel-h{
+    font-family:'Anton',sans-serif; text-transform:uppercase; font-size:22px;
+    color:var(--orange); border-bottom:2px dashed var(--muted); padding-bottom:8px; margin-bottom:14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .panel-h .pn{ font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:.2em; font-weight:400; }
+
+  .scaler{ display:flex; align-items:center; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .scaler .sclabel{ font-family:'Anton',sans-serif; font-size:13px; color:var(--blue); text-transform:uppercase; letter-spacing:.6px; }
+  .scaler input{
+    width:58px; text-align:center; background:var(--bg); color:var(--cream);
+    border:3px solid var(--black); font-family:'Anton',sans-serif; font-size:18px; padding:6px 0;
+  }
+
+  .ingr{ display:flex; flex-direction:column; gap:2px; }
+  .ingr .iline{
+    display:flex; align-items:flex-start; gap:10px; padding:7px 4px;
+    border-bottom:1px dotted var(--hair); color:var(--cream);
+  }
+  .ingr .iline input{
+    appearance:none; width:20px; height:20px; border:3px solid var(--black); background:var(--bg);
+    flex:0 0 auto; margin-top:2px; position:relative; cursor:pointer;
+  }
+  .ingr .iline input:checked{ background:var(--orange); }
+  .ingr .iline input:checked::after{
+    content:"✕"; position:absolute; inset:0; color:var(--black);
+    font-family:'Anton',sans-serif; font-size:14px; text-align:center; line-height:16px;
+  }
+  .ingr .iline.done{ color:var(--muted); text-decoration:line-through; text-decoration-color:var(--orange); }
+
+  .progress{
+    display:flex; align-items:center; gap:14px; margin-bottom:14px; flex-wrap:wrap;
+  }
+  .progress .lbl{ font-family:'Anton',sans-serif; font-size:15px; color:var(--cream); text-transform:uppercase; }
+  .progress .lbl b{ color:var(--orange); }
+  .progress .bar{
+    flex:1 1 160px; height:18px; background:var(--bg); border:3px solid var(--black);
+    position:relative; overflow:hidden;
+  }
+  .progress .bar i{
+    display:block; height:100%; width:33%;
+    background:repeating-linear-gradient(45deg, var(--orange) 0 8px, var(--blue) 8px 16px);
+  }
+  .progress .nav{ display:flex; gap:8px; margin-left:auto; }
+
+  .steps{ list-style:none; padding:0; margin:0; counter-reset:step; display:flex; flex-direction:column; gap:10px; }
+  .steps li{
+    counter-increment:step; position:relative;
+    padding:10px 12px 10px 54px;
+    border:2px dashed var(--hair); color:var(--cream);
+    font-size:14px;
+  }
+  .steps li::before{
+    content:counter(step,decimal-leading-zero);
+    position:absolute; left:8px; top:8px;
+    font-family:'Anton',sans-serif; font-size:22px; color:var(--muted);
+    width:36px; text-align:center;
+  }
+  .steps li.current{
+    border:3px solid var(--orange); background:var(--surface-2);
+    box-shadow:4px 4px 0 var(--blue);
+  }
+  .steps li.current::before{ color:var(--orange); text-shadow:2px 2px 0 var(--blue); }
+  .steps li.current::after{
+    content:"NOW";
+    position:absolute; right:8px; top:8px;
+    font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.2em;
+    background:var(--orange); color:var(--black); border:2px solid var(--black); padding:1px 6px;
+  }
+
+  .notes{
+    border:3px solid var(--black); background:var(--surface);
+    box-shadow:6px 6px 0 var(--orange);
+    padding:18px 22px; position:relative;
+  }
+  .notes::before{
+    content:"NOTES — HAND SET";
+    position:absolute; top:-13px; left:14px;
+    font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.2em;
+    background:var(--orange); color:var(--black); border:2px solid var(--black); padding:2px 8px;
+  }
+  .notes p{ margin:0; color:var(--cream); }
+
+  .cook-footer{
+    display:flex; flex-wrap:wrap; align-items:center; gap:14px;
+    border-top:3px solid var(--black); padding-top:16px;
+  }
+  .cook-footer .sp{ margin-left:auto; display:flex; gap:10px; }
+
+  /* ============================================================
+     10 · SETTINGS CARDS
+     ============================================================ */
+  .settings{ display:flex; flex-direction:column; gap:18px; }
+  .scard{
+    border:3px solid var(--black); background:var(--surface);
+    box-shadow:6px 6px 0 var(--blue);
+    padding:18px 22px; display:grid; grid-template-columns: 1fr auto; gap:16px; align-items:center;
+  }
+  .scard.alt{ box-shadow:6px 6px 0 var(--orange); }
+  .scard h3{ font-size:24px; color:var(--cream); }
+  .scard .desc{ color:var(--muted); font-size:13px; margin-top:4px; }
+  .scard .actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .scard .about-line{ display:flex; align-items:center; gap:14px; }
+  .scard .about-logo{
+    font-family:'Anton',sans-serif; font-size:22px; color:var(--orange);
+    text-shadow:2px 2px 0 var(--blue); padding:6px 10px; border:3px solid var(--black); background:var(--bg);
+  }
+  .scard .ver{ font-family:'Space Mono',monospace; font-size:11px; color:var(--blue); letter-spacing:.14em; }
+  .scard .hint{ font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); margin-top:6px; letter-spacing:.06em; }
+
+  /* ============================================================
+     11 · AUTH FORM
+     ============================================================ */
+  .auth-wrap{ display:flex; justify-content:center; }
+  .auth-card{
+    width:100%; max-width:430px;
+    border:3px solid var(--black); background:var(--surface);
+    box-shadow:10px 10px 0 var(--orange);
+    padding:28px 28px 24px;
+    position:relative;
+  }
+  .auth-card::before{
+    content:"✛"; position:absolute; top:10px; right:12px;
+    color:var(--blue); font-size:16px; text-shadow:2px 2px 0 var(--orange);
+  }
+  .auth-card h2{ font-size:42px; color:var(--cream); }
+  .auth-card .sub{ font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.2em; color:var(--orange); text-transform:uppercase; margin-bottom:18px; }
+  .auth-err{
+    border:3px solid var(--orange); background:var(--bg);
+    color:var(--orange); font-family:'Space Mono',monospace; font-size:12px;
+    letter-spacing:.08em; padding:9px 12px; margin-bottom:14px;
+    transform:rotate(-.6deg);
+  }
+  .auth-card .field{ margin-bottom:14px; }
+  .auth-links{ display:flex; justify-content:space-between; margin-top:6px; }
+  .auth-links a{ font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.1em; color:var(--blue); text-decoration:underline; text-decoration-style:dotted; }
+
+  /* ============================================================
+     12 · FEEDBACK
+     ============================================================ */
+  .fb-cluster{ display:flex; flex-direction:column; gap:22px; }
+  .toast{
+    border:3px solid var(--black); background:var(--surface);
+    box-shadow:5px 5px 0 var(--blue);
+    padding:12px 14px; display:flex; align-items:center; gap:14px; max-width:430px;
+    position:relative; transform:rotate(-.5deg);
+  }
+  .toast .dot{
+    width:30px; height:30px; background:var(--orange); border:3px solid var(--black);
+    color:var(--black); font-family:'Anton',sans-serif; display:flex; align-items:center; justify-content:center;
+  }
+  .toast .msg{ flex:1; }
+  .toast .msg .t{ font-family:'Anton',sans-serif; text-transform:uppercase; font-size:16px; color:var(--cream); }
+  .toast .msg .s{ font-size:12px; color:var(--muted); }
+  .toast .x{ color:var(--muted); font-size:18px; cursor:pointer; }
+
+  .bulk-bar{
+    border:3px solid var(--black); background:var(--blue);
+    box-shadow:6px 6px 0 var(--orange);
+    padding:12px 16px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    color:var(--cream);
+  }
+  .bulk-bar .count{ font-family:'Anton',sans-serif; font-size:22px; text-transform:uppercase; color:var(--cream); }
+  .bulk-bar .count b{ color:var(--orange); }
+  .bulk-bar .sp{ margin-left:auto; display:flex; gap:8px; }
+
+  .skeleton{
+    border:3px solid var(--black); background:var(--surface);
+    box-shadow:5px 5px 0 var(--blue); padding:14px; display:flex; flex-direction:column; gap:10px;
+  }
+  .sk{ height:14px; background:linear-gradient(90deg, var(--surface-2) 0%, var(--surface) 40%, var(--surface-2) 80%);
+       background-size:200% 100%; animation:shimmer 1.6s infinite linear; border:2px dashed var(--hair); }
+  .sk.line-lg{ height:18px; width:60%; }
+  .sk.line-md{ width:85%; }
+  .sk.line-sm{ width:40%; }
+  .sk.block{ height:90px; width:100%; }
+  @keyframes shimmer{ 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+  .mini-row{ display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+  .spinner{
+    width:38px; height:38px; border:4px solid var(--surface-2);
+    border-top-color:var(--orange); border-right-color:var(--blue);
+    border-radius:50%; animation:spin 1s infinite linear;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .empty-state{
+    border:3px dashed var(--orange); background:var(--surface);
+    padding:30px 26px; text-align:center; max-width:420px;
+  }
+  .empty-state .e-glyph{ font-size:40px; color:var(--orange); text-shadow:2px 2px 0 var(--blue); }
+  .empty-state h3{ font-size:26px; color:var(--cream); margin:8px 0 6px; }
+  .empty-state p{ color:var(--muted); margin:0 0 14px; }
+
+  .err-banner{
+    border:3px solid var(--orange); background:var(--bg);
+    box-shadow:5px 5px 0 var(--blue);
+    padding:14px 16px; display:flex; gap:14px; align-items:flex-start; max-width:540px;
+    transform:rotate(.4deg);
+  }
+  .err-banner .stamp-no{
+    background:var(--orange); color:var(--black); border:3px solid var(--black);
+    font-family:'Anton',sans-serif; padding:4px 10px; font-size:14px; transform:rotate(-3deg);
+    flex:0 0 auto;
+  }
+  .err-banner .et{ font-family:'Anton',sans-serif; text-transform:uppercase; color:var(--orange); font-size:16px; }
+  .err-banner .ed{ color:var(--cream); font-size:13px; }
+
+  /* ============================================================
+     13 · STAR RATING + MICRO-INTERACTIONS
+     ============================================================ */
+  .star-states{ display:flex; align-items:flex-end; gap:38px; flex-wrap:wrap; }
+  .star-state{ text-align:center; }
+  .star-state .big{ font-size:54px; color:var(--orange); letter-spacing:6px; text-shadow:3px 3px 0 var(--blue); }
+  .star-state .big .empty{ color:var(--surface-2); text-shadow:none; }
+  .star-state .cap{ font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.18em; color:var(--muted); text-transform:uppercase; margin-top:8px; }
+  .star-state .cap b{ color:var(--orange); }
+  .micro-note{
+    margin-top:22px; max-width:680px;
+    border-left:4px solid var(--blue); padding:6px 0 6px 14px; color:var(--cream);
+  }
+  .micro-note b{ color:var(--orange); }
+
+  /* ============================================================
+     14 · FOOTER / TOKEN REFERENCE
+     ============================================================ */
+  .footer{
+    margin-top:60px;
+    border:3px solid var(--black); background:var(--surface);
+    box-shadow:8px 8px 0 var(--orange);
+    padding:24px 26px;
+  }
+  .footer-top{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; border-bottom:2px dashed var(--muted); padding-bottom:16px; }
+  .footer-top .ft-title{ font-family:'Anton',sans-serif; font-size:38px; color:var(--cream); }
+  .footer-top .ft-title b{ color:var(--orange); }
+  .footer-top .ft-meta{ font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:.16em; text-transform:uppercase; }
+  .tokens{ width:100%; border-collapse:collapse; margin-top:14px; }
+  .tokens th, .tokens td{
+    text-align:left; padding:8px 10px; border-bottom:1px dotted var(--hair);
+    font-family:'Space Mono',monospace; font-size:12px; color:var(--cream);
+  }
+  .tokens th{ color:var(--orange); text-transform:uppercase; letter-spacing:.14em; font-weight:400; }
+  .tokens td.var{ color:var(--blue); }
+  .tokens .swatch-dot{ display:inline-block; width:16px; height:16px; border:2px solid var(--black); vertical-align:middle; margin-right:8px; }
+
+  .colophon{
+    margin-top:18px; display:flex; justify-content:space-between; align-items:center;
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.18em; color:var(--muted); text-transform:uppercase;
+  }
+  .colophon em{ color:var(--orange); font-style:normal; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============================ PREAMBLE ============================ -->
+  <section class="intro">
+    <div class="masthead">
+      <span>The Recipe Manager — <em>Style Showcase</em></span>
+      <span>NO. 01 / RISO EDITION — DARK MODE</span>
+    </div>
+    <h1 class="misreg-o">RISO ZINE</h1>
+    <p class="concept">
+      A photocopied punk cookbook — every screen is a <b>two-ink risograph print</b>: fluorescent orange
+      over riso blue on ink-black paper, with halftone grain, off-register titles, dashed borders and
+      stamp-print chips. Raw, loud, and crafted.
+    </p>
+
+    <div class="palette">
+      <div class="sw" style="background:var(--bg)"><span>BG</span><i style="background:var(--bg)"></i><small>#141414</small></div>
+      <div class="sw" style="background:var(--surface)"><span>SURFACE</span><i style="background:var(--surface)"></i><small>#1c1c1c</small></div>
+      <div class="sw" style="background:var(--orange)"><span>ORANGE</span><i style="background:var(--orange)"></i><small>#ff5c2b</small></div>
+      <div class="sw" style="background:var(--blue)"><span>BLUE</span><i style="background:var(--blue)"></i><small>#2b6cff</small></div>
+      <div class="sw" style="background:var(--cream)"><span>CREAM</span><i style="background:var(--cream)"></i><small>#f4ede0</small></div>
+      <div class="sw" style="background:var(--muted)"><span>MUTED</span><i style="background:var(--muted)"></i><small>#9a8f80</small></div>
+    </div>
+
+    <div class="specimen">
+      <div>
+        <span class="sp-label">Display — Anton (condensed grotesque, all-caps)</span>
+        <div class="sp-display misreg-c">MANGIA!</div>
+      </div>
+      <div>
+        <span class="sp-label">Body — Roboto Slab · Mono accents — Space Mono</span>
+        <div class="sp-body">Layer espresso-soaked ladyfingers with mascarpone cream. <em>— set in 15px slab serif.</em></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 01 · HEADER ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">01</span>
+      <h2 class="sect-title">Header Bar</h2>
+      <span class="sect-note">Top app chrome — logo, search, <b>open</b> add &amp; sort menus, view toggle, theme + settings.</span>
+    </div>
+
+    <div class="topbar">
+      <div class="logo"><b>RECIPE</b>MGR.</div>
+
+      <label class="search" aria-label="Search">
+        <span class="glyph" aria-hidden="true">⌕</span>
+        <input type="search" placeholder="Search recipes, ingredients, steps…">
+      </label>
+
+      <!-- Add recipe dropdown (OPEN) -->
+      <div class="dd">
+        <button class="dd-btn is-open">+ Add recipe <span class="caret">▾</span></button>
+        <div class="dd-menu" role="menu">
+          <div class="dd-item"><span class="ic" aria-hidden="true">✶</span> New recipe</div>
+          <div class="dd-item"><span class="ic" aria-hidden="true">↗</span> Import from URL</div>
+        </div>
+      </div>
+
+      <!-- Sort dropdown (OPEN) -->
+      <div class="dd">
+        <button class="dd-btn is-open">Sort <span class="caret">▾</span></button>
+        <div class="dd-menu" role="menu">
+          <div class="dd-item">Name A → Z</div>
+          <div class="dd-item">Name Z → A</div>
+          <div class="dd-item is-active">Date added (New → Old) <span class="check">✓</span></div>
+          <div class="dd-item">Date added (Old → New)</div>
+          <div class="dd-item">Stars 0 → 5</div>
+          <div class="dd-item">Stars 5 → 0</div>
+        </div>
+      </div>
+
+      <div class="view-toggle" role="group" aria-label="View mode">
+        <button class="icon-btn is-active" aria-label="Card view" title="Card view">▦</button>
+        <button class="icon-btn" aria-label="List view" title="List view">≡</button>
+      </div>
+      <button class="icon-btn" aria-label="Toggle theme" title="Theme">☾</button>
+      <button class="icon-btn" aria-label="Settings" title="Settings">⚙</button>
+    </div>
+  </section>
+
+  <!-- ============================ 02 · BUTTONS ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">02</span>
+      <h2 class="sect-title">Buttons</h2>
+      <span class="sect-note">Full family — primary, default, danger, ghost, stepper, favorite, link. <b>Hover = drop-shadow collapses inward.</b></span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary">Save</button>
+      <button class="btn btn-default">Edit</button>
+      <button class="btn btn-danger">Delete</button>
+      <button class="btn btn-ghost" aria-label="Settings">⚙</button>
+      <div style="display:flex; gap:6px;">
+        <button class="btn step-btn" aria-label="Decrease servings">−</button>
+        <button class="btn step-btn" aria-label="Increase servings">+</button>
+      </div>
+      <button class="btn fav-btn" aria-label="Favorite, off">♡</button>
+      <button class="btn fav-btn fav-filled" aria-label="Favorite, on">♥</button>
+      <button class="btn-link">Original ↗</button>
+      <div class="btn-note">
+        Default = hard 3px black border, flat offset shadow in the opposite ink.
+        Hover/focus collapses the shadow (<b>translate 3,3</b>) — like pressing a stamp.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 03 · FORM CONTROLS ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">03</span>
+      <h2 class="sect-title">Form Controls</h2>
+      <span class="sect-note">Inputs wear 3px black borders; focus lights an <b>orange 4×4 shadow</b>. Custom check uses ✕.</span>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="f-title">Title</label>
+        <input id="f-title" type="text" value="Classic Tiramisu">
+      </div>
+      <div class="field">
+        <label for="f-search">Search</label>
+        <input id="f-search" type="search" placeholder="Find an ingredient…">
+      </div>
+      <div class="field">
+        <label for="f-email">Email <span class="req">*</span></label>
+        <input id="f-email" type="email" value="cook@kitchen.zine">
+      </div>
+      <div class="field">
+        <label for="f-pass">Password <span class="req">*</span></label>
+        <input id="f-pass" type="password" value="••••••••">
+      </div>
+      <div class="field full">
+        <label for="f-desc">Description</label>
+        <textarea id="f-desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea>
+      </div>
+      <div class="field">
+        <label for="f-serv">Servings</label>
+        <input id="f-serv" type="number" value="4">
+      </div>
+      <div class="field">
+        <label for="f-rate">Rating</label>
+        <select id="f-rate">
+          <option>0 stars</option>
+          <option>1 star</option>
+          <option>2 stars</option>
+          <option>3 stars</option>
+          <option selected>4 stars</option>
+          <option>5 stars</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label for="f-img">Image</label>
+        <input id="f-img" type="file">
+      </div>
+      <div class="field full">
+        <label>Shopping checklist</label>
+        <div style="display:flex; gap:22px; flex-wrap:wrap;">
+          <label class="check-line checked"><input type="checkbox" checked> ¾ cup white sugar <em>(bought)</em></label>
+          <label class="check-line"><input type="checkbox"> 1 package ladyfingers</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 04 · TAG EDITOR ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">04</span>
+      <h2 class="sect-title">Tag Chips Input</h2>
+      <span class="sect-note">Removable chips with <b>dashed orange</b> edge; suggestions open while typing “qui”.</span>
+    </div>
+
+    <div style="max-width:560px;">
+      <div class="tag-editor">
+        <span class="chip">dessert <span class="x">✕</span></span>
+        <span class="chip">italian <span class="x">✕</span></span>
+        <span class="chip">chocolate <span class="x">✕</span></span>
+        <input type="text" value="qui" aria-label="Add tag">
+      </div>
+      <div class="suggestions">
+        <div class="s-head">Suggestions</div>
+        <div class="s-item"><mark>qui</mark>ck</div>
+        <div class="s-item"><mark>Qui</mark>che</div>
+        <div class="s-item"><mark>qui</mark>noinoa</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 05 · FILTER CHIPS ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">05</span>
+      <h2 class="sect-title">Filter Chips</h2>
+      <span class="sect-note">Stamp-print chips, each nudged off-axis; active = solid orange or blue.</span>
+    </div>
+
+    <div class="chip-groups">
+      <div class="chip-group">
+        <span class="glabel">Tags →</span>
+        <span class="stamp is-active">all</span>
+        <span class="stamp">dessert</span>
+        <span class="stamp">italian</span>
+        <span class="stamp">quick</span>
+        <span class="stamp">vegetarian</span>
+        <span class="stamp">soup</span>
+        <span class="stamp">chocolate</span>
+        <span class="stamp">french</span>
+        <span class="stamp">dinner</span>
+        <span class="stamp">baking</span>
+      </div>
+      <div class="chip-group">
+        <span class="glabel">Source →</span>
+        <span class="stamp blue-active">marmiton</span>
+        <span class="stamp">750g</span>
+        <span class="stamp">allrecipes</span>
+        <span class="stamp">bbc good food</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 06 · RECIPE GRID ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">06</span>
+      <h2 class="sect-title">Recipe Grid</h2>
+      <span class="sect-note">Six cards. <b>Molten Chocolate Lava Cake</b> = selected (corner ✕ + orange ring). Tart = no image.</span>
+    </div>
+
+    <div class="grid">
+      <!-- 1 Tiramisu -->
+      <article class="card">
+        <div class="media"><img src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu"></div>
+        <div class="body">
+          <div class="src">marmiton.org</div>
+          <h3>Classic Tiramisu</h3>
+          <div class="rating">★★★★★</div>
+          <div class="tags"><span class="tag-mini">dessert</span><span class="tag-mini">italian</span></div>
+        </div>
+      </article>
+
+      <!-- 2 Spaghetti Bolognese -->
+      <article class="card">
+        <div class="media halftone"><img src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600" alt="Spaghetti Bolognese"></div>
+        <div class="body">
+          <div class="src">bbcgoodfood.com</div>
+          <h3>Spaghetti Bolognese</h3>
+          <div class="rating">★★★★<span class="empty">★</span></div>
+          <div class="tags"><span class="tag-mini">italian</span><span class="tag-mini">dinner</span></div>
+        </div>
+      </article>
+
+      <!-- 3 Turkey Burgers -->
+      <article class="card">
+        <div class="media"><img src="https://images.unsplash.com/photo-1528908510736-5258199bc7dd?w=600" alt="Spinach and Feta Turkey Burgers"></div>
+        <div class="body">
+          <div class="src">allrecipes.com</div>
+          <h3>Spinach &amp; Feta Turkey Burgers</h3>
+          <div class="rating">★★★<span class="empty">★★</span></div>
+          <div class="tags"><span class="tag-mini">dinner</span><span class="tag-mini">quick</span></div>
+        </div>
+      </article>
+
+      <!-- 4 Lava Cake (SELECTED) -->
+      <article class="card selected">
+        <div class="sel-corner" aria-label="Selected">✕</div>
+        <div class="media halftone halftone-orange"><img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Molten Chocolate Lava Cake"></div>
+        <div class="body">
+          <div class="src">allrecipes.com</div>
+          <h3 class="misreg-o">Molten Chocolate Lava Cake</h3>
+          <div class="rating">★★★★★</div>
+          <div class="tags"><span class="tag-mini">dessert</span><span class="tag-mini">chocolate</span><span class="tag-mini">baking</span></div>
+        </div>
+      </article>
+
+      <!-- 5 Soupe à l'Oignon -->
+      <article class="card">
+        <div class="media"><img src="https://images.unsplash.com/photo-1547592166-23ac45744ffd?w=600" alt="Soupe à l'Oignon"></div>
+        <div class="body">
+          <div class="src">750g.com</div>
+          <h3>Soupe à l'Oignon</h3>
+          <div class="rating">★★★★<span class="empty">★</span></div>
+          <div class="tags"><span class="tag-mini">soup</span><span class="tag-mini">french</span></div>
+        </div>
+      </article>
+
+      <!-- 6 Apple Tart (NO IMAGE) -->
+      <article class="card">
+        <div class="no-stamp">MANUAL</div>
+        <div class="media">
+          <div class="noimg">
+            <span class="stamp-tape">NO SCAN</span>
+          </div>
+        </div>
+        <div class="body">
+          <div class="src">manual</div>
+          <h3>Grandma's Apple Tart</h3>
+          <div class="rating">★★★★★</div>
+          <div class="tags"><span class="tag-mini">dessert</span><span class="tag-mini">baking</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================ 07 · RECIPE LIST ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">07</span>
+      <h2 class="sect-title">Recipe List</h2>
+      <span class="sect-note">Compact rows — thumbnail, title, source, inline rating + tags, trailing select box.</span>
+    </div>
+
+    <div class="list">
+      <div class="row">
+        <div class="thumb"><img src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt=""></div>
+        <div class="meta"><div class="t">Classic Tiramisu</div><div class="s">marmiton.org</div></div>
+        <div class="rstars">★★★★★</div>
+        <div class="rtags"><span class="tag-mini">dessert</span><span class="tag-mini">italian</span></div>
+        <input class="rcheck" type="checkbox" aria-label="Select Classic Tiramisu">
+      </div>
+
+      <div class="row">
+        <div class="thumb halftone"><img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt=""></div>
+        <div class="meta"><div class="t">Molten Chocolate Lava Cake</div><div class="s">allrecipes.com</div></div>
+        <div class="rstars">★★★★★</div>
+        <div class="rtags"><span class="tag-mini">dessert</span><span class="tag-mini">chocolate</span><span class="tag-mini">baking</span></div>
+        <input class="rcheck" type="checkbox" checked aria-label="Select Molten Chocolate Lava Cake">
+      </div>
+
+      <div class="row">
+        <div class="thumb ph" aria-hidden="true"></div>
+        <div class="meta"><div class="t">Grandma's Apple Tart</div><div class="s">manual</div></div>
+        <div class="rstars">★★★★★</div>
+        <div class="rtags"><span class="tag-mini">dessert</span><span class="tag-mini">baking</span></div>
+        <input class="rcheck" type="checkbox" aria-label="Select Grandma's Apple Tart">
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 08 · COOK VIEW ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">08</span>
+      <h2 class="sect-title">Recipe Cook View</h2>
+      <span class="sect-note">Classic Tiramisu — hero with <b>halftone photo</b>, ingredients checklist, step 2 of 6 in progress.</span>
+    </div>
+
+    <div class="cook">
+      <a class="back-link" href="#">← Recipes</a>
+
+      <div class="cook-hero">
+        <div class="photo halftone halftone-orange">
+          <span class="corner-no">PLATE NO. 01</span>
+          <img src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu plated">
+        </div>
+        <div class="info">
+          <div class="src">marmiton.org</div>
+          <h2 class="misreg-c">Classic Tiramisu</h2>
+          <div class="stars" aria-label="4 out of 5 stars">★★★★<span class="empty">★</span></div>
+          <p class="desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</p>
+          <div class="tags">
+            <span class="tag-mini">dessert</span>
+            <span class="tag-mini">italian</span>
+            <span class="tag-mini">no-bake</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cook-cols">
+        <!-- Ingredients -->
+        <div class="panel">
+          <div class="panel-h">Ingredients <span class="pn">— COLUMN A</span></div>
+          <div class="scaler">
+            <span class="sclabel">Servings</span>
+            <button class="btn step-btn" aria-label="Decrease servings">−</button>
+            <input type="text" value="4" aria-label="Servings">
+            <button class="btn step-btn" aria-label="Increase servings">+</button>
+            <button class="btn btn-default" style="margin-left:auto;">Reset</button>
+          </div>
+          <div class="ingr">
+            <label class="iline"><input type="checkbox"> 6 egg yolks</label>
+            <label class="iline done"><input type="checkbox" checked> ¾ cup white sugar</label>
+            <label class="iline done"><input type="checkbox" checked> 1⅔ cups heavy cream</label>
+            <label class="iline"><input type="checkbox"> 1 package (around 30) ladyfingers</label>
+            <label class="iline done"><input type="checkbox" checked> 1¾ cups strong brewed espresso, cooled</label>
+            <label class="iline"><input type="checkbox"> 2 tbsp unsweetened cocoa powder</label>
+          </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="panel blue-shadow">
+          <div class="panel-h">Steps <span class="pn">— COLUMN B / COOK MODE</span></div>
+          <div class="progress">
+            <span class="lbl">Step <b>2</b> of 6</span>
+            <div class="bar"><i></i></div>
+            <div class="nav">
+              <button class="btn btn-default">Prev</button>
+              <button class="btn btn-primary">Next</button>
+            </div>
+          </div>
+          <ol class="steps">
+            <li>Whisk egg yolks and sugar until thick and pale.</li>
+            <li class="current">Fold in mascarpone until smooth.</li>
+            <li>Whip cream to soft peaks and fold in.</li>
+            <li>Combine espresso and a splash of liqueur in a shallow dish.</li>
+            <li>Dip each ladyfinger briefly and layer in a dish.</li>
+            <li>Spread cream, dust with cocoa, chill 4+ hours.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p>Best made a day ahead. Don't oversoak the ladyfingers or the layers turn to paste.</p>
+      </div>
+
+      <div class="cook-footer">
+        <button class="btn-link">Original ↗</button>
+        <div class="sp">
+          <button class="btn btn-default">Edit</button>
+          <button class="btn btn-danger">Delete</button>
+          <button class="btn btn-default">Print</button>
+          <button class="btn fav-btn fav-filled" aria-label="Favorite">♥</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 09 · EDIT FORM ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">09</span>
+      <h2 class="sect-title">Edit Form Excerpt</h2>
+      <span class="sect-note">Condensed recipe editor — title, description, rating, tags, image paste hint, source, save row.</span>
+    </div>
+
+    <div class="form-grid" style="grid-template-columns:1fr;">
+      <div class="field">
+        <label for="e-title">Title</label>
+        <input id="e-title" type="text" value="Classic Tiramisu">
+      </div>
+      <div class="field">
+        <label for="e-desc">Description</label>
+        <textarea id="e-desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 2fr; gap:18px;">
+        <div class="field">
+          <label for="e-rate">Rating</label>
+          <select id="e-rate">
+            <option>0 stars</option><option>1 star</option><option>2 stars</option>
+            <option>3 stars</option><option selected>4 stars</option><option>5 stars</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="e-tags">Tags</label>
+          <div class="tag-editor" id="e-tags">
+            <span class="chip">dessert <span class="x">✕</span></span>
+            <span class="chip">italian <span class="x">✕</span></span>
+            <span class="chip">no-bake <span class="x">✕</span></span>
+            <input type="text" placeholder="Add a tag…" aria-label="Add tag">
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="e-img">Image</label>
+        <input id="e-img" type="file">
+        <span class="hint" style="font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:.06em;">— or paste an image here (Ctrl+V)</span>
+      </div>
+      <div class="field">
+        <label for="e-src">Source URL</label>
+        <input id="e-src" type="text" value="https://www.marmiton.org/recettes/recette_tiramisu.aspx">
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; border-top:2px dashed var(--muted); padding-top:14px;">
+        <button class="btn btn-default">Cancel</button>
+        <button class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 10 · SETTINGS ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">10</span>
+      <h2 class="sect-title">Settings Cards</h2>
+      <span class="sect-note">Four stacked cards — Export, Import, About, Sign out.</span>
+    </div>
+
+    <div class="settings">
+      <div class="scard">
+        <div>
+          <h3>Export</h3>
+          <div class="desc">Take your library off-site in one click.</div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-default">JSON</button>
+          <button class="btn btn-default">Markdown zip</button>
+          <button class="btn btn-primary">PDF</button>
+          <button class="btn btn-default">JSON-LD zip</button>
+        </div>
+      </div>
+
+      <div class="scard alt">
+        <div>
+          <h3>Import</h3>
+          <div class="hint">Max 50 MB. JSON, Markdown or JSON-LD accepted.</div>
+        </div>
+        <div class="actions">
+          <input type="file" style="font-family:'Space Mono',monospace; font-size:12px; color:var(--cream); background:var(--bg); border:3px solid var(--black); padding:6px;">
+          <button class="btn btn-primary">Preview import</button>
+        </div>
+      </div>
+
+      <div class="scard">
+        <div class="about-line">
+          <div class="about-logo"><b>R</b>M.</div>
+          <div>
+            <h3>Recipe Manager</h3>
+            <div class="ver">VERSION 2.3.0 · SELF-HOSTED</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn-link">GitHub ↗</button>
+        </div>
+      </div>
+
+      <div class="scard alt">
+        <div>
+          <h3>Sign out</h3>
+          <div class="desc">End the current session on this device.</div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-danger">Log out</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 11 · AUTH ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">11</span>
+      <h2 class="sect-title">Auth Form</h2>
+      <span class="sect-note">Centered Sign-in card with off-kilter error banner.</span>
+    </div>
+
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <h2 class="misreg-o">Sign in</h2>
+        <div class="sub">Members only — show your badge</div>
+        <div class="auth-err">⚠ Invalid email or password.</div>
+        <div class="field">
+          <label for="a-email">Email</label>
+          <input id="a-email" type="email" value="cook@kitchen.zine">
+        </div>
+        <div class="field">
+          <label for="a-pass">Password</label>
+          <input id="a-pass" type="password" value="••••••••">
+        </div>
+        <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:4px;">Sign in</button>
+        <div class="auth-links">
+          <a href="#">Forgot your password?</a>
+          <a href="#">Create an account</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 12 · FEEDBACK ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">12</span>
+      <h2 class="sect-title">Feedback Components</h2>
+      <span class="sect-note">Toast, bulk-action bar, skeleton, spinner, empty state, error banner.</span>
+    </div>
+
+    <div class="fb-cluster">
+      <div class="mini-row">
+        <div class="toast">
+          <div class="dot">✓</div>
+          <div class="msg">
+            <div class="t">Recipe imported</div>
+            <div class="s">Classic Tiramisu · marmiton.org</div>
+          </div>
+          <button class="btn btn-default" style="padding:7px 12px;">View</button>
+          <span class="x" role="button" aria-label="Dismiss">✕</span>
+        </div>
+        <div class="spinner" aria-label="Loading"></div>
+      </div>
+
+      <div class="bulk-bar">
+        <div class="count"><b>3</b> selected</div>
+        <button class="btn btn-danger" style="background:var(--orange); color:var(--black); box-shadow:3px 3px 0 var(--black);">Delete</button>
+        <div class="sp">
+          <button class="btn btn-default" style="background:transparent; color:var(--cream); border-color:var(--cream);">Cancel</button>
+        </div>
+      </div>
+
+      <div class="mini-row" style="align-items:flex-start; gap:24px;">
+        <div class="skeleton" style="width:280px;">
+          <div class="sk block"></div>
+          <div class="sk line-lg"></div>
+          <div class="sk line-md"></div>
+          <div class="sk line-sm"></div>
+        </div>
+
+        <div class="empty-state">
+          <div class="e-glyph">✛</div>
+          <h3>No recipes yet</h3>
+          <p>Your library is a blank page. Import your first recipe to start the zine.</p>
+          <button class="btn btn-primary">Import from URL</button>
+        </div>
+
+        <div class="err-banner">
+          <div class="stamp-no">NO GO</div>
+          <div>
+            <div class="et">We couldn't extract a recipe</div>
+            <div class="ed">No recipe markup was found on that page. Paste the ingredients and steps manually, or try another URL.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 13 · STARS / MICRO ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">13</span>
+      <h2 class="sect-title">Star Rating + Micro-interactions</h2>
+      <span class="sect-note">Four states at display size; signature interaction noted below.</span>
+    </div>
+
+    <div class="star-states">
+      <div class="star-state">
+        <div class="big"><span class="empty">★★★★★</span></div>
+        <div class="cap"><b>0</b> stars</div>
+      </div>
+      <div class="star-state">
+        <div class="big">★★<span class="empty">★★★</span></div>
+        <div class="cap"><b>2</b> stars</div>
+      </div>
+      <div class="star-state">
+        <div class="big">★★★★<span class="empty">★</span></div>
+        <div class="cap"><b>4</b> stars</div>
+      </div>
+      <div class="star-state">
+        <div class="big">★★★★★</div>
+        <div class="cap"><b>5</b> stars</div>
+      </div>
+    </div>
+
+    <div class="micro-note">
+      <b>Signature interaction:</b> hovering a star <b>“inks” it in orange with a blue ghost-shadow</b>
+      (the same misregistration as the titles), and the filled portion snaps with a quick stamp-thud
+      transform — like pressing a rubber stamp onto the page.
+    </div>
+  </section>
+
+  <!-- ============================ 14 · FOOTER / TOKENS ============================ -->
+  <section class="sect">
+    <div class="sect-head">
+      <span class="sect-no">14</span>
+      <h2 class="sect-title">Footer / Token Reference</h2>
+      <span class="sect-note">Design language made explicit &amp; reusable.</span>
+    </div>
+
+    <div class="footer">
+      <div class="footer-top">
+        <div class="ft-title"><b>RECIPE</b>MGR. — RISO ZINE EDITION</div>
+        <div class="ft-meta">Two inks · halftone grain · stamp chips · ✛ register marks</div>
+      </div>
+
+      <table class="tokens">
+        <thead>
+          <tr><th>Token</th><th>Variable</th><th>Value</th><th>Swatch</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Background</td><td class="var">--bg</td><td>#141414</td><td><span class="swatch-dot" style="background:#141414"></span>ink black</td></tr>
+          <tr><td>Surface</td><td class="var">--surface</td><td>#1c1c1c</td><td><span class="swatch-dot" style="background:#1c1c1c"></span>paper shade</td></tr>
+          <tr><td>Text</td><td class="var">--cream</td><td>#f4ede0</td><td><span class="swatch-dot" style="background:#f4ede0"></span>cream</td></tr>
+          <tr><td>Muted</td><td class="var">--muted</td><td>#9a8f80</td><td><span class="swatch-dot" style="background:#9a8f80"></span>faded ink</td></tr>
+          <tr><td>Accent (orange ink)</td><td class="var">--orange</td><td>#ff5c2b</td><td><span class="swatch-dot" style="background:#ff5c2b"></span>riso orange</td></tr>
+          <tr><td>Accent 2 (blue ink)</td><td class="var">--blue</td><td>#2b6cff</td><td><span class="swatch-dot" style="background:#2b6cff"></span>riso blue</td></tr>
+          <tr><td>Border</td><td class="var">--black</td><td>#0a0a0a · 3px solid / 2px dashed</td><td><span class="swatch-dot" style="background:#0a0a0a"></span>keyline</td></tr>
+          <tr><td>Radius</td><td class="var">--radius</td><td>0px (rough)</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <div class="colophon">
+        <span>✛ <em>End of zine</em> — printed on a two-color risograph, dark stock</span>
+        <span>NO. 14 / FIN.</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

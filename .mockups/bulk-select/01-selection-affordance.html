@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulk Select — How to enter selection mode</title>
+<style>
+  :root {
+    --color-bg: #f1f1ef;
+    --color-surface: #ffffff;
+    --color-text: #1a1a1a;
+    --color-muted: #888888;
+    --color-accent: #5a7a4f;
+    --color-border: #d8d8d4;
+    --color-danger: #ef4444;
+    --radius-card: 4px;
+  }
+  [data-theme="dark"] {
+    --color-bg: #161617;
+    --color-surface: #2d2d33;
+    --color-text: #e8e8e6;
+    --color-muted: #8a8a8a;
+    --color-accent: #94b386;
+    --color-border: #3a3a40;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: -apple-system, BlinkMacFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    transition: background-color .3s ease, color .3s ease;
+  }
+
+  /* ---- page chrome ---- */
+  .page-bar {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.6rem 1.2rem;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .page-bar h1 { font-size: 0.95rem; font-weight: 600; }
+  .page-bar .spacer { flex: 1; }
+  .page-bar .pill {
+    font-size: 0.72rem; color: var(--color-muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .theme-btn {
+    border: 1px solid var(--color-border); background: var(--color-surface);
+    color: var(--color-text); border-radius: var(--radius-card);
+    padding: 0.3rem 0.6rem; cursor: pointer; font-size: 0.85rem;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 2rem 1.2rem 6rem; }
+  .intro { margin-bottom: 2.5rem; }
+  .intro h2 { font-size: 1.4rem; margin-bottom: 0.4rem; }
+  .intro p { color: var(--color-muted); max-width: 60ch; }
+
+  .approach { margin-bottom: 3.5rem; }
+  .approach-head { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.3rem; }
+  .approach-head .tag-letter {
+    background: var(--color-accent); color: #fff; font-weight: 700;
+    width: 1.6rem; height: 1.6rem; border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem;
+  }
+  .approach-head h3 { font-size: 1.15rem; }
+  .approach .blurb { color: var(--color-muted); margin-bottom: 1rem; max-width: 65ch; }
+  .approach .rec {
+    display: inline-block; font-size: 0.72rem; font-weight: 600;
+    color: var(--color-accent); border: 1px solid var(--color-accent);
+    padding: 0.1rem 0.5rem; border-radius: 999px; margin-left: 0.5rem; vertical-align: middle;
+  }
+
+  .state-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 760px) { .state-row { grid-template-columns: 1fr; } }
+  .state-label {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--color-muted); margin-bottom: 0.5rem; font-weight: 600;
+  }
+
+  /* ---- app header mock ---- */
+  .mock-frame {
+    border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden;
+    background: var(--color-bg);
+  }
+  .app-header {
+    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    padding: 0.6rem 0.8rem; background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .app-logo { font-weight: 600; font-size: 0.95rem; }
+  .app-search {
+    flex: 1; min-width: 120px;
+    padding: 0.32rem 0.6rem; border: 1px solid var(--color-border);
+    border-radius: var(--radius-card); background: var(--color-bg); color: var(--color-muted);
+    font-size: 0.8rem;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.32rem 0.6rem; border: 1px solid var(--color-border);
+    border-radius: var(--radius-card); background: var(--color-surface);
+    color: var(--color-text); font-size: 0.8rem; font-weight: 500; cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn--primary { background: var(--color-accent); color: #fff; border-color: transparent; }
+  .btn--danger { color: var(--color-danger); }
+  .btn--danger:hover { border-color: var(--color-danger); }
+  .ghost { background: transparent; border-color: transparent; color: var(--color-muted); }
+  .select-btn { color: var(--color-accent); border-color: var(--color-accent); }
+  .select-btn.active { background: var(--color-accent); color: #fff; }
+
+  .tag-bar { padding: 0.5rem 0.8rem; display: flex; gap: 0.4rem; flex-wrap: wrap; border-bottom: 1px solid var(--color-border); }
+  .tag-bar .chip {
+    font-size: 0.7rem; padding: 0.15rem 0.5rem; border: 1px solid var(--color-border);
+    border-radius: 999px; color: var(--color-text);
+  }
+
+  /* ---- grid + cards (match real app) ---- */
+  .grid {
+    padding: 0.8rem;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.8rem;
+  }
+  .card-wrap { position: relative; }
+  .card {
+    display: flex; flex-direction: column; border: 1px solid var(--color-border);
+    border-radius: var(--radius-card); background: var(--color-surface); overflow: hidden;
+    text-decoration: none; color: var(--color-text); cursor: pointer; position: relative;
+  }
+  .card:hover { border-color: var(--color-accent); }
+  .card-img {
+    height: 90px; background: linear-gradient(135deg, #c9b, #d8b);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.6); font-size: 1.6rem;
+  }
+  .card-img.b { background: linear-gradient(135deg, #b69, #957); }
+  .card-img.c { background: linear-gradient(135deg, #7a8, #5a7a4f); }
+  .card-img.d { background: linear-gradient(135deg, #d97, #c65); }
+  .card-body { padding: 0.5rem; }
+  .card-title { font-weight: 500; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-meta { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--color-muted); margin-top: 0.2rem; }
+  .fav-btn {
+    position: absolute; top: 0.35rem; right: 0.35rem; z-index: 2;
+    width: 1.5rem; height: 1.5rem; border: none; border-radius: 999px;
+    background: rgba(0,0,0,.45); color: #fff; font-size: 1rem; line-height: 1; cursor: pointer;
+  }
+
+  /* ---- selection affordances ---- */
+  /* selected card highlight (shared) */
+  .card-wrap.is-selected .card {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent);
+  }
+
+  /* circle checkbox (Approach A & B) */
+  .check {
+    position: absolute; top: 0.4rem; left: 0.4rem; z-index: 3;
+    width: 1.4rem; height: 1.4rem; border-radius: 999px;
+    border: 2px solid #fff; background: rgba(0,0,0,.4); color: #fff;
+    display: none; align-items: center; justify-content: center; font-size: 0.8rem;
+    cursor: pointer;
+  }
+  /* Approach A: show on hover when idle */
+  #approach-a .card-wrap:hover .check { display: flex; }
+  /* when selection mode active, always show */
+  .selecting .check { display: flex; }
+  .check.on { background: var(--color-accent); border-color: var(--color-accent); }
+
+  /* Approach C: always-visible corner checkbox */
+  #approach-c .check { display: flex; background: var(--color-surface); border-color: var(--color-border); color: transparent; }
+  #approach-c .check.on { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+  #approach-c .card-wrap:hover .check { border-color: var(--color-accent); }
+
+  /* dim non-card clicks in selecting mode */
+  .selecting .card { cursor: default; }
+
+  /* ---- bulk action bar ---- */
+  .actionbar {
+    margin: 0; padding: 0.55rem 0.8rem; background: var(--color-surface);
+    border-top: 1px solid var(--color-border); display: none;
+    align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .mock-frame.selecting .actionbar { display: flex; }
+  .actionbar .count { font-weight: 600; font-size: 0.85rem; }
+  .actionbar .count .n { color: var(--color-accent); }
+  .actionbar .spacer { flex: 1; }
+
+  /* floating variant (Approach B) */
+  .actionbar-floating {
+    position: relative; margin-top: -3.2rem; margin-left: auto; margin-right: 0.8rem;
+    width: max-content; background: var(--color-text); color: var(--color-bg);
+    border-radius: 999px; padding: 0.4rem 0.6rem; display: none;
+    align-items: center; gap: 0.5rem; box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  }
+  .mock-frame.selecting .actionbar-floating { display: flex; }
+  .actionbar-floating .btn { background: transparent; color: inherit; border-color: rgba(255,255,255,.25); }
+  .actionbar-floating .btn--danger { color: #ff8a8a; }
+
+  .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1rem; }
+  @media (max-width: 560px) { .pros-cons { grid-template-columns: 1fr; } }
+  .pros, .cons {
+    border: 1px solid var(--color-border); border-radius: 6px; padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  .pros h4 { color: var(--color-accent); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .cons h4 { color: var(--color-danger); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .pros ul, .cons ul { padding-left: 1.1rem; color: var(--color-muted); }
+  .pros li, .cons li { margin-bottom: 0.15rem; }
+
+  .hint {
+    margin-top: 0.8rem; font-size: 0.78rem; color: var(--color-muted);
+    font-style: italic;
+  }
+  .kbd {
+    font-family: ui-monospace, monospace; font-size: 0.72rem;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: 4px; padding: 0.05rem 0.35rem;
+  }
+
+  .note { font-size: 0.8rem; color: var(--color-muted); margin-top: 0.6rem; }
+</style>
+</head>
+<body>
+
+<div class="page-bar">
+  <h1>Bulk select — Question 1 of N: How should selection work?</h1>
+  <span class="spacer"></span>
+  <span class="pill">Toggle theme ↓</span>
+  <button class="theme-btn" onclick="toggleTheme()">◐ Light / Dark</button>
+</div>
+
+<div class="wrap">
+  <div class="intro">
+    <h2>How do you want to select recipes?</h2>
+    <p>
+      Your cards are currently one big link — clicking opens the recipe. Bulk selection needs an
+      affordance that doesn't fight that. Below are three approaches, each shown in its
+      <strong>idle</strong> state (nothing selected) and its <strong>active</strong> state
+      (selecting). All use your real theme. Hover the cards in approach A to see the reveal.
+    </p>
+  </div>
+
+  <!-- ============ APPROACH A ============ -->
+  <div class="approach" id="approach-a">
+    <div class="approach-head">
+      <span class="tag-letter">A</span>
+      <h3>Hover-reveal checkbox + "Select" toolbar button <span class="rec">recommended</span></h3>
+    </div>
+    <p class="blurb">
+      Nothing shows until you interact. On desktop, hovering a card reveals a small circular
+      check in its corner — click it to enter selection mode. A permanent <em>Select</em> button
+      in the header gives an explicit, discoverable entry point that also works on touch devices.
+    </p>
+
+    <div class="state-row">
+      <!-- IDLE -->
+      <div>
+        <div class="state-label">Idle — nothing extra visible</div>
+        <div class="mock-frame" id="a-idle">
+          <div class="app-header">
+            <span class="app-logo">recipes</span>
+            <span class="app-search">Search recipes, ingredients…</span>
+            <button class="btn btn--primary">+ Add</button>
+            <button class="btn select-btn" onclick="enterMode('a-idle')">Select</button>
+          </div>
+          <div class="tag-bar"><span class="chip">all</span><span class="chip">dessert</span><span class="chip">italian</span><span class="chip">quick</span></div>
+          <div class="grid">
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img">🍰</div><div class="card-body"><div class="card-title">Classic Tiramisu</div><div class="card-meta"><span>marmiton</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♥</button><a class="card"><div class="card-img b">🍝</div><div class="card-body"><div class="card-title">Spaghetti Bolognese</div><div class="card-meta"><span>bbcgood</span><span>★★★★☆</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img c">🥗</div><div class="card-body"><div class="card-title">Ratatouille</div><div class="card-meta"><span>750g</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img d">🍫</div><div class="card-body"><div class="card-title">Molten Lava Cake</div><div class="card-meta"><span>allrecipes</span><span>★★★★★</span></div></div></a></div>
+          </div>
+          <div class="actionbar"><span class="count"><span class="n">0</span> selected</span><span class="spacer"></span><button class="btn ghost">Select all</button><button class="btn btn--danger">Delete</button><button class="btn ghost">Cancel</button></div>
+        </div>
+        <p class="hint">Hover a card → a check appears in the corner. Or click <span class="kbd">Select</span>.</p>
+      </div>
+
+      <!-- ACTIVE -->
+      <div>
+        <div class="state-label">Active — 2 selected, action bar shown</div>
+        <div class="mock-frame selecting" id="a-active">
+          <div class="app-header">
+            <span class="app-logo">recipes</span>
+            <span class="app-search">Search recipes, ingredients…</span>
+            <button class="btn btn--primary">+ Add</button>
+            <button class="btn select-btn active" onclick="exitMode('a-active')">Select</button>
+          </div>
+          <div class="tag-bar"><span class="chip">all</span><span class="chip">dessert</span><span class="chip">italian</span><span class="chip">quick</span></div>
+          <div class="grid">
+            <div class="card-wrap is-selected"><span class="check on" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img">🍰</div><div class="card-body"><div class="card-title">Classic Tiramisu</div><div class="card-meta"><span>marmiton</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♥</button><a class="card"><div class="card-img b">🍝</div><div class="card-body"><div class="card-title">Spaghetti Bolognese</div><div class="card-meta"><span>bbcgood</span><span>★★★★☆</span></div></div></a></div>
+            <div class="card-wrap is-selected"><span class="check on" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img c">🥗</div><div class="card-body"><div class="card-title">Ratatouille</div><div class="card-meta"><span>750g</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img d">🍫</div><div class="card-body"><div class="card-title">Molten Lava Cake</div><div class="card-meta"><span>allrecipes</span><span>★★★★★</span></div></div></a></div>
+          </div>
+          <div class="actionbar"><span class="count"><span class="n">2</span> selected</span><span class="spacer"></span><button class="btn ghost">Select all</button><button class="btn btn--danger">Delete</button><button class="btn ghost" onclick="exitMode('a-active')">Cancel</button></div>
+        </div>
+        <p class="hint">Clicking a card now toggles selection instead of opening it.</p>
+      </div>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pros"><h4>Pros</h4><ul>
+        <li>Zero clutter at rest — fully unobtrusive</li>
+        <li>"Select" button is discoverable &amp; touch-friendly</li>
+        <li>Familiar (Gmail / Drive / Files-style)</li>
+      </ul></div>
+      <div class="cons"><h4>Cons</h4><ul>
+        <li>Hover-reveal is desktop-only (offset by the button)</li>
+        <li>Two entry paths to keep in sync</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- ============ APPROACH B ============ -->
+  <div class="approach" id="approach-b">
+    <div class="approach-head">
+      <span class="tag-letter">B</span>
+      <h3>Long-press / right-click to enter mode</h3>
+    </div>
+    <p class="blurb">
+      The cleanest at rest — absolutely no extra UI. Press and hold a card (or right-click on
+      desktop) to enter selection mode with that card pre-selected. A floating pill bar appears.
+      Most native-feeling on mobile; least discoverable on desktop.
+    </p>
+
+    <div class="state-row">
+      <div>
+        <div class="state-label">Idle — truly nothing extra</div>
+        <div class="mock-frame" id="b-idle">
+          <div class="app-header">
+            <span class="app-logo">recipes</span>
+            <span class="app-search">Search recipes, ingredients…</span>
+            <button class="btn btn--primary">+ Add</button>
+            <button class="ghost btn" onclick="enterMode('b-idle')">⌗</button>
+          </div>
+          <div class="tag-bar"><span class="chip">all</span><span class="chip">dessert</span><span class="chip">italian</span><span class="chip">quick</span></div>
+          <div class="grid">
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img">🍰</div><div class="card-body"><div class="card-title">Classic Tiramisu</div><div class="card-meta"><span>marmiton</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♥</button><a class="card"><div class="card-img b">🍝</div><div class="card-body"><div class="card-title">Spaghetti Bolognese</div><div class="card-meta"><span>bbcgood</span><span>★★★★☆</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img c">🥗</div><div class="card-body"><div class="card-title">Ratatouille</div><div class="card-meta"><span>750g</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img d">🍫</div><div class="card-body"><div class="card-title">Molten Lava Cake</div><div class="card-meta"><span>allrecipes</span><span>★★★★★</span></div></div></a></div>
+          </div>
+          <div class="actionbar-floating"><span class="count"><span class="n">0</span></span><button class="btn btn--danger">Delete</button><button class="btn ghost">✕</button></div>
+        </div>
+        <p class="hint">Long-press any card (mobile) or right-click (desktop). <span class="kbd">⌗</span> icon also works.</p>
+      </div>
+
+      <div>
+        <div class="state-label">Active — 1 pre-selected, floating bar</div>
+        <div class="mock-frame selecting" id="b-active">
+          <div class="app-header">
+            <span class="app-logo">recipes</span>
+            <span class="app-search">Search recipes, ingredients…</span>
+            <button class="btn btn--primary">+ Add</button>
+            <button class="ghost btn">⌗</button>
+          </div>
+          <div class="tag-bar"><span class="chip">all</span><span class="chip">dessert</span><span class="chip">italian</span><span class="chip">quick</span></div>
+          <div class="grid">
+            <div class="card-wrap is-selected"><span class="check on" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img">🍰</div><div class="card-body"><div class="card-title">Classic Tiramisu</div><div class="card-meta"><span>marmiton</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♥</button><a class="card"><div class="card-img b">🍝</div><div class="card-body"><div class="card-title">Spaghetti Bolognese</div><div class="card-meta"><span>bbcgood</span><span>★★★★☆</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img c">🥗</div><div class="card-body"><div class="card-title">Ratatouille</div><div class="card-meta"><span>750g</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img d">🍫</div><div class="card-body"><div class="card-title">Molten Lava Cake</div><div class="card-meta"><span>allrecipes</span><span>★★★★★</span></div></div></a></div>
+          </div>
+          <div class="actionbar-floating"><span class="count"><span class="n">1</span> selected</span><button class="btn ghost">Select all</button><button class="btn btn--danger">Delete</button><button class="btn ghost" onclick="exitMode('b-active')">✕</button></div>
+        </div>
+        <p class="hint">Bar floats over content; tap ✕ to exit.</p>
+      </div>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pros"><h4>Pros</h4><ul>
+        <li>Most minimal at rest — nothing to clutter the grid</li>
+        <li>Feels native on mobile (Android/PWA share app)</li>
+      </ul></div>
+      <div class="cons"><h4>Cons</h4><ul>
+        <li>Hidden gesture — desktop users may never find it</li>
+        <li>Right-click conflicts with browser context menu</li>
+        <li>Needs a visible escape hatch icon anyway</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- ============ APPROACH C ============ -->
+  <div class="approach" id="approach-c">
+    <div class="approach-head">
+      <span class="tag-letter">C</span>
+      <h3>Always-visible corner checkbox</h3>
+    </div>
+    <p class="blurb">
+      A small checkbox lives permanently in each card's corner. Checking any one reveals the
+      action bar. Maximum discoverability — but it adds a persistent visual element to every card,
+      which works against the "unobtrusive" goal.
+    </p>
+
+    <div class="state-row">
+      <div>
+        <div class="state-label">Idle — checkbox always present</div>
+        <div class="mock-frame" id="c-idle">
+          <div class="app-header">
+            <span class="app-logo">recipes</span>
+            <span class="app-search">Search recipes, ingredients…</span>
+            <button class="btn btn--primary">+ Add</button>
+          </div>
+          <div class="tag-bar"><span class="chip">all</span><span class="chip">dessert</span><span class="chip">italian</span><span class="chip">quick</span></div>
+          <div class="grid">
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img">🍰</div><div class="card-body"><div class="card-title">Classic Tiramisu</div><div class="card-meta"><span>marmiton</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♥</button><a class="card"><div class="card-img b">🍝</div><div class="card-body"><div class="card-title">Spaghetti Bolognese</div><div class="card-meta"><span>bbcgood</span><span>★★★★☆</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img c">🥗</div><div class="card-body"><div class="card-title">Ratatouille</div><div class="card-meta"><span>750g</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img d">🍫</div><div class="card-body"><div class="card-title">Molten Lava Cake</div><div class="card-meta"><span>allrecipes</span><span>★★★★★</span></div></div></a></div>
+          </div>
+          <div class="actionbar"><span class="count"><span class="n">0</span> selected</span><span class="spacer"></span><button class="btn ghost">Select all</button><button class="btn btn--danger">Delete</button><button class="btn ghost">Cancel</button></div>
+        </div>
+        <p class="hint">Always there — on every card, in both grid &amp; list views.</p>
+      </div>
+
+      <div>
+        <div class="state-label">Active — 3 selected</div>
+        <div class="mock-frame selecting" id="c-active">
+          <div class="app-header">
+            <span class="app-logo">recipes</span>
+            <span class="app-search">Search recipes, ingredients…</span>
+            <button class="btn btn--primary">+ Add</button>
+          </div>
+          <div class="tag-bar"><span class="chip">all</span><span class="chip">dessert</span><span class="chip">italian</span><span class="chip">quick</span></div>
+          <div class="grid">
+            <div class="card-wrap is-selected"><span class="check on" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img">🍰</div><div class="card-body"><div class="card-title">Classic Tiramisu</div><div class="card-meta"><span>marmiton</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap"><span class="check" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♥</button><a class="card"><div class="card-img b">🍝</div><div class="card-body"><div class="card-title">Spaghetti Bolognese</div><div class="card-meta"><span>bbcgood</span><span>★★★★☆</span></div></div></a></div>
+            <div class="card-wrap is-selected"><span class="check on" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img c">🥗</div><div class="card-body"><div class="card-title">Ratatouille</div><div class="card-meta"><span>750g</span><span>★★★★★</span></div></div></a></div>
+            <div class="card-wrap is-selected"><span class="check on" onclick="toggleCheck(this,event)">✓</span><button class="fav-btn">♡</button><a class="card"><div class="card-img d">🍫</div><div class="card-body"><div class="card-title">Molten Lava Cake</div><div class="card-meta"><span>allrecipes</span><span>★★★★★</span></div></div></a></div>
+          </div>
+          <div class="actionbar"><span class="count"><span class="n">3</span> selected</span><span class="spacer"></span><button class="btn ghost">Select all</button><button class="btn btn--danger">Delete</button><button class="btn ghost" onclick="exitMode('c-active')">Cancel</button></div>
+        </div>
+        <p class="hint">Obvious, but note the permanent corner dots in the idle state.</p>
+      </div>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pros"><h4>Pros</h4><ul>
+        <li>Instantly discoverable — zero hidden state</li>
+        <li>Simplest to implement &amp; reason about</li>
+      </ul></div>
+      <div class="cons"><h4>Cons</h4><ul>
+        <li>Permanent visual noise on every card</li>
+        <li>Competes with the existing favorite heart</li>
+        <li>Least "slick" of the three</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <p class="note">
+    Note: these mockups are interactive — click <span class="kbd">Select</span> or any checkbox to
+    toggle the active state. The real implementation will also need to handle the fact that your
+    grid is re-rendered by HTMX on every search/filter — we'll cover that in the next question.
+  </p>
+</div>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+  function enterMode(id) { document.getElementById(id).classList.add('selecting'); }
+  function exitMode(id) { document.getElementById(id).classList.remove('selecting'); }
+  function toggleCheck(el, e) {
+    e.preventDefault(); e.stopPropagation();
+    el.closest('.mock-frame').classList.add('selecting');
+    el.closest('.card-wrap').classList.toggle('is-selected');
+    el.classList.toggle('on');
+  }
+</script>
+</body>
+</html>

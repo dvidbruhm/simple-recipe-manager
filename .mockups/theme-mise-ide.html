@@ -1,0 +1,1520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Recipe Manager — Mise en Place: IDE · UI Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* core 11 tokens (VS Code Dark+ palette) */
+    --bg:        #1e1e1e;
+    --surface:   #252526;
+    --elevated:  #2d2d2d;
+    --border:    #3c3c3c;
+    --text:      #d4d4d4;
+    --muted:     #858585;
+    --accent:    #007acc;
+    --keyword:   #c586c0;
+    --string:    #ce9178;
+    --comment:   #6a9955;
+    --error:     #f44747;
+    /* supplementary syntax-highlight tokens */
+    --fn:        #dcdcaa;   /* function yellow  */
+    --type:      #4ec9b0;   /* type cyan        */
+    --num:       #b5cea8;   /* number green     */
+    --var:       #9cdcfe;   /* variable blue    */
+    --punct:     #808080;   /* punctuation      */
+    /* chrome-specific */
+    --titlebar:  #323233;
+    --activity:  #333333;
+    --tab-active:#1e1e1e;
+    --tab-inact: #2d2d2d;
+    --status:    #007acc;
+    --warn:      #cca700;
+    --r:   3px;
+    --r-sm:2px;
+    --mono:'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(0,122,204,0.45); }
+
+  /* ---------- Page ---------- */
+  .page { max-width: 1180px; margin: 0 auto; padding: 40px 28px 120px; }
+
+  /* ---------- Section label (looks like a code comment / file path) ---------- */
+  .section { margin-top: 52px; }
+  .section__label {
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 0; margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section__num {
+    font-family: var(--mono); font-size: 12px; font-weight: 700;
+    color: var(--comment);
+    background: rgba(106,153,85,0.10);
+    border: 1px solid rgba(106,153,85,0.35);
+    padding: 1px 7px; border-radius: var(--r-sm);
+  }
+  .section__title {
+    font-family: var(--mono); font-size: 14px; font-weight: 600;
+    margin: 0; letter-spacing: 0.02em; text-transform: uppercase; color: var(--text);
+  }
+  .section__note { font-family: var(--mono); font-size: 11px; color: var(--comment); margin-left: auto; }
+  .section__note::before { content: "// "; }
+
+  /* ---------- Preamble ---------- */
+  .preamble { margin-bottom: 24px; }
+  .preamble__eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--var); background: var(--surface); border: 1px solid var(--border);
+    padding: 4px 10px; border-radius: var(--r-sm);
+  }
+  .preamble__eyebrow::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+  .preamble h1 {
+    font-family: var(--mono); font-size: 40px; font-weight: 700;
+    letter-spacing: -0.02em; margin: 16px 0 8px; line-height: 1.05;
+  }
+  .preamble h1 .kw { color: var(--keyword); }
+  .preamble h1 .fn { color: var(--fn); }
+  .preamble h1 .str { color: var(--string); }
+  .preamble h1 .pun { color: var(--punct); }
+  .preamble__concept { color: var(--muted); font-family: var(--sans); font-size: 14px; max-width: 680px; margin: 0 0 26px; }
+
+  .preamble__panels { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; }
+  .panel__title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--comment); margin: 0 0 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel__title::before { content:"//"; color: var(--comment); }
+  .panel__title::after { content:""; flex:1; height:1px; background: var(--border); }
+
+  .swatches { display: grid; grid-template-columns: repeat(6,1fr); gap: 7px; }
+  .swatch { border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; }
+  .swatch__chip { height: 36px; }
+  .swatch__meta { padding: 5px 7px; background: var(--elevated); }
+  .swatch__name { display:block; font-size: 10px; color: var(--text); }
+  .swatch__hex { font-size: 9px; color: var(--muted); }
+
+  .specimen__row { display: flex; align-items: baseline; gap: 14px; padding: 7px 0; border-bottom: 1px dashed var(--border); }
+  .specimen__row:last-child { border-bottom: 0; }
+  .specimen__label { font-family: var(--mono); font-size: 10px; color: var(--comment); width: 104px; flex-shrink: 0; }
+  .specimen__mono { font-family: var(--mono); font-size: 16px; color: var(--var); }
+  .specimen__sans { font-family: var(--sans); font-size: 16px; font-weight: 500; color: var(--text); }
+
+  /* ---------- IDE chrome primitives ---------- */
+  .titlebar {
+    height: 30px; background: var(--titlebar);
+    border: 1px solid var(--border); border-bottom: 0;
+    display: flex; align-items: center; padding: 0 8px;
+    font-family: var(--sans); font-size: 12px; color: var(--text);
+  }
+  .titlebar__logo { display: inline-flex; align-items: center; gap: 6px; margin-right: 14px; font-weight: 600; }
+  .titlebar__logo .mark {
+    width:16px; height:16px; border-radius:3px;
+    background: linear-gradient(135deg,var(--accent),var(--keyword));
+    display:inline-grid; place-items:center;
+    font-family:var(--mono); font-weight:700; font-size:10px; color:#fff;
+  }
+  .titlebar__menu { display: flex; gap: 1px; }
+  .titlebar__menu span { padding: 2px 7px; border-radius: var(--r-sm); color: var(--text); font-size: 12px; cursor: default; }
+  .titlebar__menu span:hover { background: rgba(255,255,255,0.08); }
+  .titlebar__spacer { flex: 1; }
+  .titlebar__ctrls { display: inline-flex; gap: 0; }
+  .titlebar__ctrls span { width: 30px; height: 22px; display: grid; place-items: center; color: var(--muted); font-size: 11px; }
+  .titlebar__ctrls span:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  .titlebar__ctrls .close:hover { background: var(--error); color: #fff; }
+
+  .activity {
+    width: 48px; background: var(--activity); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 2px;
+  }
+  .activity__logo {
+    width:28px; height:28px; margin-bottom:10px; display:grid; place-items:center;
+    border-radius:4px; background: linear-gradient(135deg,var(--accent),var(--keyword));
+    color:#fff; font-family:var(--mono); font-weight:700; font-size:13px;
+  }
+  .activity__btn { width:48px; height:48px; display:grid; place-items:center; color:var(--muted); position:relative; cursor:pointer; }
+  .activity__btn:hover { color: var(--text); }
+  .activity__btn--active { color: #fff; }
+  .activity__btn--active::before { content:""; position:absolute; left:0; top:8px; bottom:8px; width:2px; background:#fff; }
+  .activity__btn svg { width: 22px; height: 22px; }
+  .activity__spacer { flex: 1; }
+
+  .explorer {
+    width: 232px; background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; font-size: 13px;
+  }
+  .explorer__head {
+    padding: 8px 12px 6px; font-family: var(--sans); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .explorer__head .dots { margin-left: auto; color: var(--muted); }
+  .explorer__sec { padding: 4px 12px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .tree { padding: 2px 0 12px; }
+  .tree__row {
+    display: flex; align-items: center; gap: 4px; padding: 1px 12px; height: 22px;
+    color: var(--text); cursor: pointer; position: relative; line-height: 1; white-space: nowrap;
+  }
+  .tree__row:hover { background: rgba(255,255,255,0.04); }
+  .tree__row--active { background: rgba(204,204,204,0.10); }
+  .tree__row--active::before { content:""; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--text); }
+  .tree__chev { width:12px; flex-shrink:0; color:var(--muted); display:inline-grid; place-items:center; }
+  .tree__chev.open svg { transform: rotate(90deg); }
+  .tree__chev svg { width:10px; height:10px; transition: transform .1s; }
+  .tree__icon { width:14px; flex-shrink:0; display:inline-grid; place-items:center; }
+  .tree__icon svg { width:14px; height:14px; }
+  .ic-folder { color: #dcb67a; }
+  .ic-file-md { color: #519aba; }
+  .tree__name { font-size: 13px; }
+  .tree__name--dim { color: var(--muted); }
+  .tree--indent .tree__row { padding-left: 28px; }
+  .tree__badge { margin-left:auto; font-family:var(--mono); font-size:9px; color:var(--muted); background:var(--elevated); border:1px solid var(--border); padding:0 4px; border-radius:2px; }
+  .tree__badge--git { color: var(--comment); border:0; background:transparent; }
+
+  .tabsbar { display: flex; align-items: stretch; background: var(--surface); border-bottom: 1px solid var(--border); overflow: hidden; }
+  .tab {
+    display: inline-flex; align-items: center; gap: 7px; padding: 0 12px 0 14px; height: 35px;
+    background: var(--tab-inact); color: var(--muted); border-right: 1px solid var(--border);
+    font-family: var(--sans); font-size: 12px; cursor: pointer; position: relative; white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab--active { background: var(--tab-active); color: var(--text); }
+  .tab--active::before { content:""; position:absolute; top:0; left:0; right:0; height:1px; background:var(--accent); }
+  .tab__ic { width:14px; height:14px; color:#519aba; flex-shrink:0; }
+  .tab__x { width:16px; height:16px; display:grid; place-items:center; border-radius:3px; color:var(--muted); font-size:13px; line-height:1; margin-left:2px; }
+  .tab__x:hover { background: rgba(255,255,255,0.10); color: var(--text); }
+  .tab--add { padding: 0 12px; color: var(--muted); }
+
+  .editor-bar {
+    height: 28px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px; padding: 0 14px; background: var(--bg);
+    font-family: var(--sans); font-size: 12px;
+  }
+  .crumbs { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+  .crumbs .sep { color: var(--border); }
+  .crumbs .cur { color: var(--text); }
+  .crumbs .seg:hover { color: var(--text); }
+
+  .statusbar {
+    height: 22px; background: var(--status); color: #fff;
+    display: flex; align-items: center; gap: 14px; padding: 0 8px;
+    font-family: var(--sans); font-size: 11px;
+    border: 1px solid var(--border); border-top: 0;
+  }
+  .statusbar__left, .statusbar__right { display: inline-flex; align-items: center; gap: 12px; }
+  .statusbar__right { margin-left: auto; }
+  .statusbar span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .statusbar svg { width: 13px; height: 13px; }
+  .statusbar .mut { opacity: 0.85; }
+
+  .ide { border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; background: var(--bg); display: flex; flex-direction: column; }
+  .ide__body { display: flex; min-height: 560px; }
+  .ide--cook .ide__body { min-height: 720px; }
+  .ide__main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .ide__content { padding: 0; overflow: auto; flex: 1; }
+  .ide__inspector { width: 260px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: auto; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--sans); font-size: 12px; font-weight: 400;
+    padding: 4px 13px; border-radius: var(--r-sm);
+    border: 1px solid var(--border); background: var(--elevated);
+    color: var(--text); cursor: pointer; line-height: 1.4;
+  }
+  .btn:hover { background: #3a3a3a; }
+  .btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn--primary:hover { background: #1f80c8; }
+  .btn--danger { color: #f48771; border-color: rgba(244,71,71,0.4); background: rgba(244,71,71,0.10); }
+  .btn--danger:hover { background: rgba(244,71,71,0.20); }
+  .btn--ghost { background: transparent; border-color: transparent; color: var(--muted); }
+  .btn--ghost:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+  .btn--sm { padding: 2px 9px; font-size: 11px; }
+  .btn--icon { padding: 4px; }
+  .btn--link { background: transparent; border: 0; color: var(--accent); padding: 0; }
+  .btn--link:hover { text-decoration: underline; color: #2aa3ff; }
+
+  .step-btn {
+    width: 24px; height: 22px; display: grid; place-items: center;
+    background: var(--elevated); border: 1px solid var(--border); border-radius: var(--r-sm);
+    color: var(--text); cursor: pointer; font-size: 14px; line-height: 1;
+  }
+  .step-btn:hover { background: #3a3a3a; }
+  .scaler { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 2px; background: var(--bg); }
+  .scaler__input { width: 38px; text-align: center; background: transparent; border: 0; color: var(--num); font-family: var(--mono); font-size: 13px; font-weight: 600; outline: 0; }
+  .fav-btn { width: 28px; height: 26px; display: grid; place-items: center; background: var(--elevated); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--muted); cursor: pointer; }
+  .fav-btn--active { color: #f48771; border-color: rgba(244,71,71,0.4); background: rgba(244,71,71,0.10); }
+
+  .btn-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .btn-row + .btn-row { margin-top: 10px; }
+  .btn-row__note { font-family: var(--mono); font-size: 11px; color: var(--comment); margin-left: 4px; }
+  .btn-row__note::before { content: "// "; }
+
+  /* ---------- Menus ---------- */
+  .menu-wrap { position: relative; display: inline-block; }
+  .menu {
+    position: absolute; top: calc(100% + 4px); left: 0; min-width: 220px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 4px; z-index: 6; box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+  }
+  .menu--right { left: auto; right: 0; }
+  .menu__item { display: flex; align-items: center; gap: 8px; padding: 5px 10px; border-radius: var(--r-sm); font-family: var(--sans); font-size: 12px; color: var(--text); cursor: pointer; }
+  .menu__item:hover { background: var(--accent); color: #fff; }
+  .menu__item:hover .menu__hint { color: rgba(255,255,255,0.85); }
+  .menu__item--active { background: rgba(0,122,204,0.20); }
+  .menu__item .check { margin-left: auto; opacity: 0; color: var(--text); }
+  .menu__item--active .check { opacity: 1; }
+  .menu__hint { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .menu__sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* ---------- Forms ---------- */
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 13px; }
+  .field__label { font-family: var(--mono); font-size: 11px; color: var(--var); display: flex; align-items: center; gap: 5px; }
+  .input, .textarea, .select {
+    background: var(--elevated); border: 1px solid var(--border); border-radius: var(--r-sm);
+    color: var(--text); padding: 6px 9px; font-family: var(--mono); font-size: 12px; width: 100%; outline: none;
+  }
+  .input--sans { font-family: var(--sans); }
+  .input:focus, .textarea:focus, .select:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .input::placeholder { color: var(--muted); }
+  .textarea { min-height: 66px; resize: vertical; line-height: 1.5; }
+  .field__hint { font-family: var(--mono); font-size: 11px; color: var(--comment); }
+  .field__hint::before { content:"// "; }
+  .field__hint kbd { background: var(--surface); border: 1px solid var(--border); padding: 1px 5px; border-radius: 2px; font-size: 10px; color: var(--text); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  .form-grid--single { grid-template-columns: 1fr; }
+
+  .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 2px 0; }
+  .check-box { width:15px; height:15px; border:1px solid var(--border); border-radius:2px; background:var(--bg); display:grid; place-items:center; flex-shrink:0; }
+  .check-box--on { background: var(--accent); border-color: var(--accent); }
+  .check-box--on::after { content:""; width:8px; height:5px; border-left:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(-45deg) translate(1px,-1px); }
+  .check-row--struck { color: var(--muted); }
+  .check-row--struck .check-text { text-decoration: line-through; }
+
+  .file-drop { border: 1px dashed var(--border); border-radius: var(--r-sm); padding: 16px; text-align: center; background: var(--bg); color: var(--muted); font-family: var(--mono); font-size: 12px; }
+  .file-drop strong { color: var(--accent); }
+
+  /* ---------- Chips / tokens ---------- */
+  .chip { display: inline-flex; align-items: center; gap: 3px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: 2px 7px; border-radius: var(--r-sm); font-family: var(--mono); font-size: 11px; line-height: 1.5; }
+  .chip--tag { color: var(--keyword); border-color: rgba(197,134,192,0.30); background: rgba(197,134,192,0.08); }
+  .chip--tag::before { content:"#"; color: var(--punct); }
+  .chip--tag .x { color: var(--muted); cursor: pointer; margin-left: 2px; }
+  .chip--tag .x:hover { color: var(--error); }
+  .chip--source { color: var(--string); border-color: rgba(206,145,120,0.30); background: rgba(206,145,120,0.08); }
+  .chip--source::before { content:"\\\""; color: var(--punct); }
+  .chip--source::after  { content:"\\\""; color: var(--punct); }
+
+  .chip-filter { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: var(--r-sm); font-family: var(--mono); font-size: 12px; background: var(--elevated); border: 1px solid var(--border); color: var(--muted); cursor: pointer; }
+  .chip-filter:hover { color: var(--text); border-color: var(--muted); }
+  .chip-filter--active { background: rgba(0,122,204,0.16); border-color: var(--accent); color: var(--var); }
+  .chip-filter__count { font-size: 10px; opacity: 0.7; color: var(--num); }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .chip-group__label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--comment); margin-right: 4px; display: inline-flex; align-items: center; gap: 4px; }
+  .chip-group__label::before { content:"//"; }
+
+  .tag-editor { border: 1px solid var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--bg); border-radius: var(--r-sm); padding: 5px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .tag-editor__input { background: transparent; border: 0; outline: 0; color: var(--text); font-family: var(--mono); font-size: 12px; padding: 3px; min-width: 80px; flex: 1; }
+
+  /* ---------- Editor-pane wrapper ---------- */
+  .pane { border: 1px solid var(--border); border-radius: var(--r); background: var(--bg); overflow: hidden; }
+  .pane__tabs { display: flex; align-items: stretch; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .pane__body { padding: 14px; }
+
+  /* ---------- Cards ---------- */
+  .cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; position: relative; cursor: pointer; }
+  .card:hover { border-color: var(--muted); }
+  .card__img { width:100%; height:124px; object-fit:cover; display:block; background:var(--elevated); }
+  .card__placeholder { width:100%; height:124px; display:grid; place-items:center; background:repeating-linear-gradient(45deg, var(--elevated) 0 10px, var(--surface) 10px 20px); color:var(--muted); font-family:var(--mono); font-size:11px; border-bottom:1px solid var(--border); }
+  .card__placeholder svg { width:26px; height:26px; opacity:0.5; margin-bottom:4px; }
+  .card__body { padding: 9px 11px; }
+  .card__title { font-family:var(--mono); font-size:13px; font-weight:600; color:var(--fn); margin:0 0 4px; line-height:1.3; }
+  .card__path { font-family:var(--mono); font-size:10px; color:var(--comment); margin:0 0 6px; word-break:break-all; }
+  .card__meta { display:flex; align-items:center; gap:7px; margin-bottom:7px; font-family:var(--mono); font-size:11px; color:var(--muted); }
+  .card__tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .card--selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .card__check { position:absolute; top:8px; left:8px; width:20px; height:20px; background:var(--accent); border-radius:2px; display:grid; place-items:center; border:2px solid var(--bg); }
+  .card__check::after { content:""; width:9px; height:5px; border-left:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(-45deg) translate(1px,-1px); }
+  .card__index { position:absolute; top:8px; right:8px; font-family:var(--mono); font-size:10px; color:var(--text); background:rgba(30,30,30,0.85); border:1px solid var(--border); padding:1px 6px; border-radius:2px; }
+
+  /* ---------- Stars ---------- */
+  .stars { display: inline-flex; align-items: center; gap: 1px; color: var(--warn); font-size: 13px; letter-spacing: 1px; }
+  .stars .empty { color: #5a5a5a; }
+  .stars--lg { font-size: 22px; gap: 4px; }
+
+  /* ---------- List rows ---------- */
+  .list { border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+  .list__head { background:var(--surface); border-bottom:1px solid var(--border); font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--comment); padding:7px 12px; display:grid; grid-template-columns:24px 50px 1fr 120px 80px 170px; gap:12px; align-items:center; }
+  .list__row { display:grid; align-items:center; grid-template-columns:24px 50px 1fr 120px 80px 170px; gap:12px; padding:7px 12px; border-bottom:1px solid var(--border); font-size:13px; }
+  .list__row:last-child { border-bottom: 0; }
+  .list__row:hover { background: var(--surface); }
+  .list__thumb { width:50px; height:36px; border-radius:2px; object-fit:cover; background:var(--elevated); border:1px solid var(--border); }
+  .list__thumb--placeholder { display:grid; place-items:center; color:var(--muted); background:repeating-linear-gradient(45deg, var(--elevated) 0 6px, var(--surface) 6px 12px); }
+  .list__title { font-family: var(--mono); font-weight: 500; color: var(--fn); }
+  .list__source { font-family: var(--mono); font-size: 12px; color: var(--string); }
+  .list__tags { display: flex; gap: 4px; }
+
+  /* ---------- Cook view ---------- */
+  .cook-header { display: grid; grid-template-columns: 280px 1fr; gap: 18px; margin: 0 0 16px; }
+  .cook-header__img { width:100%; height:190px; object-fit:cover; border-radius:var(--r); border:1px solid var(--border); display:block; }
+  .cook-header__path { font-family:var(--mono); font-size:11px; color:var(--comment); margin:2px 0 2px; }
+  .cook-header__title { font-family:var(--mono); font-size:24px; font-weight:700; color:var(--fn); margin:4px 0 6px; letter-spacing:-0.01em; }
+  .cook-header__desc { color: var(--muted); font-family: var(--sans); font-size: 13px; margin: 8px 0 10px; }
+  .cook-header__tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .cook-grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 16px; }
+
+  .panel-box { border: 1px solid var(--border); border-radius: var(--r); background: var(--surface); overflow: hidden; }
+  .panel-box__head { padding:7px 12px; border-bottom:1px solid var(--border); background:var(--elevated); display:flex; align-items:center; gap:8px; }
+  .panel-box__title { font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--text); margin:0; }
+  .panel-box__title .fn-tok { color: var(--fn); }
+  .panel-box__title .pun { color: var(--punct); }
+  .panel-box__body { padding: 10px 12px; }
+
+  /* code-listing gutter for ingredients & steps */
+  .listing { font-family: var(--mono); font-size: 12.5px; }
+  .listing__row { display: grid; grid-template-columns: 40px 18px 1fr; align-items: start; gap: 0; min-height: 22px; position: relative; border-radius: 2px; }
+  .listing__row:hover { background: rgba(255,255,255,0.04); }
+  .listing__no { color: var(--muted); text-align: right; padding: 2px 12px 2px 0; user-select: none; font-variant-numeric: tabular-nums; }
+  .listing__gutter { display: grid; place-items: center; padding-top: 2px; }
+  .listing__content { padding: 2px 8px 2px 0; line-height: 1.55; }
+  .listing__row--current { background: rgba(204,204,204,0.07); }
+  .listing__row--current .listing__no { color: var(--fn); }
+  .listing__row--current::before { content:""; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--warn); }
+  .listing__row--current .listing__gutter::before { content:"\25B6"; color: var(--warn); font-size: 10px; }
+
+  .tok-num { color: var(--num); }
+  .tok-str { color: var(--string); }
+  .tok-kw  { color: var(--keyword); }
+  .tok-fn  { color: var(--fn); }
+  .tok-var { color: var(--var); }
+  .tok-type{ color: var(--type); }
+  .tok-com { color: var(--comment); }
+  .tok-pun { color: var(--punct); }
+  .tok-txt { color: var(--text); }
+
+  .ing-check { display: flex; align-items: center; gap: 7px; }
+  .ing-check .q { color: var(--num); }
+  .listing__row--done .ing-check { color: var(--muted); }
+  .listing__row--done .ing-check .q { color: var(--muted); }
+  .listing__row--done .ing-text { text-decoration: line-through; color: var(--muted); }
+
+  .progress { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .progress__bar { flex:1; height:5px; background:var(--elevated); border:1px solid var(--border); border-radius:999px; overflow:hidden; position:relative; }
+  .progress__fill { position:absolute; left:0; top:0; bottom:0; width:33.33%; background:var(--accent); }
+  .progress__label { font-family: var(--mono); font-size: 11px; color: var(--comment); }
+  .progress__label strong { color: var(--fn); }
+
+  .notes { background: rgba(106,153,85,0.07); border: 1px solid rgba(106,153,85,0.30); border-left: 3px solid var(--comment); border-radius: var(--r-sm); padding: 10px 13px; margin-top: 16px; font-family: var(--mono); font-size: 12.5px; color: var(--comment); }
+  .notes strong { display:block; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--comment); margin-bottom:3px; }
+  .notes strong::before { content:"// "; }
+
+  .cook-footer { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding-top:14px; margin-top:14px; border-top:1px solid var(--border); }
+
+  /* ---------- Inspector ---------- */
+  .insp { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .insp__head { height:28px; display:flex; align-items:center; font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--text); }
+  .insp__title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--fn); margin: 0; word-break: break-word; }
+  .insp__thumb { width:100%; height:110px; border-radius:var(--r-sm); background-size:cover; background-position:center; border:1px solid var(--border); }
+  .insp__h { font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--comment); margin: 4px 0 0; }
+  .insp__h::before { content:"// "; }
+  .yaml { font-family: var(--mono); font-size: 12px; line-height: 1.7; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 8px 10px; }
+  .insp__tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .insp__keys { font-family: var(--mono); font-size: 12px; display: flex; flex-direction: column; gap: 2px; }
+  .insp__keys .row { display: flex; justify-content: space-between; }
+  .insp__keys .k { color: var(--var); }
+  .insp__keys .v { color: var(--num); }
+
+  /* ---------- Settings cards ---------- */
+  .settings-stack { display: flex; flex-direction: column; gap: 12px; max-width: 720px; }
+  .settings-card { border:1px solid var(--border); border-radius:var(--r); background:var(--surface); padding:14px; }
+  .settings-card__head { display:flex; align-items:center; gap:10px; margin-bottom:5px; }
+  .settings-card__title { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--fn); margin:0; }
+  .settings-card__desc { color:var(--muted); font-family:var(--sans); font-size:12.5px; margin:0 0 11px; }
+  .settings-card__row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .icon-tile { width:30px; height:30px; display:grid; place-items:center; background:var(--elevated); border:1px solid var(--border); border-radius:var(--r-sm); color:var(--accent); }
+  .icon-tile svg { width:16px; height:16px; }
+
+  /* ---------- Auth ---------- */
+  .auth-wrap { display:grid; place-items:center; padding:16px 0; }
+  .auth-card { width:360px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:24px; }
+  .auth-card__title { font-family:var(--mono); font-size:20px; font-weight:700; color:var(--fn); margin:0 0 3px; }
+  .auth-card__sub { font-family:var(--mono); font-size:12px; color:var(--comment); margin:0 0 18px; }
+  .auth-card__sub::before { content:"// "; }
+  .error-banner { background:rgba(244,71,71,0.08); border:1px solid rgba(244,71,71,0.40); border-left:3px solid var(--error); border-radius:var(--r-sm); padding:7px 12px; font-family:var(--mono); font-size:12px; color:#f48771; display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .auth-links { display:flex; justify-content:space-between; margin-top:12px; font-size:12px; }
+
+  /* ---------- Feedback ---------- */
+  .toast { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:var(--r-sm); padding:9px 12px; display:flex; align-items:center; gap:10px; min-width:320px; box-shadow:0 8px 22px rgba(0,0,0,0.45); }
+  .toast__icon { width:20px; height:20px; display:grid; place-items:center; border-radius:50%; background:rgba(0,122,204,0.20); color:var(--accent); flex-shrink:0; }
+  .toast__msg { font-family:var(--mono); font-size:12.5px; flex:1; }
+  .toast__msg small { display:block; color:var(--comment); font-size:10px; }
+
+  .bulk-bar { background:var(--accent); color:#fff; border-radius:var(--r-sm); padding:7px 12px; display:flex; align-items:center; gap:12px; font-family:var(--mono); font-size:12.5px; box-shadow:0 4px 14px rgba(0,0,0,0.35); }
+  .bulk-bar .count { font-weight:700; }
+  .bulk-bar .btn { background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.30); color:#fff; }
+  .bulk-bar .btn:hover { background:rgba(255,255,255,0.25); }
+
+  .skeleton-card { border:1px solid var(--border); border-radius:var(--r); background:var(--surface); padding:10px; width:240px; overflow:hidden; }
+  .sk { background:linear-gradient(90deg, var(--elevated) 0%, var(--surface) 50%, var(--elevated) 100%); background-size:200% 100%; animation:shimmer 1.4s infinite linear; border-radius:2px; }
+  @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+  .sk--img { width:100%; height:100px; margin-bottom:8px; border-radius:var(--r-sm); }
+  .sk--line { height:9px; margin:6px 0; }
+  .sk--line.w-60 { width:60%; } .sk--line.w-40 { width:40%; } .sk--line.w-80 { width:80%; }
+
+  .spinner { width:22px; height:22px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; display:inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state { text-align:center; padding:24px; border:1px dashed var(--border); border-radius:var(--r); background:var(--surface); max-width:360px; }
+  .empty-state__icon { width:42px; height:42px; margin:0 auto 10px; display:grid; place-items:center; background:var(--elevated); border:1px solid var(--border); border-radius:var(--r-sm); color:var(--muted); }
+  .empty-state__title { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--fn); margin:0 0 4px; }
+  .empty-state__desc { color:var(--muted); font-family:var(--mono); font-size:12px; margin:0 0 13px; }
+
+  .draft-banner { background:rgba(244,71,71,0.07); border:1px solid rgba(244,71,71,0.30); border-left:3px solid var(--error); border-radius:var(--r-sm); padding:9px 12px; display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:12.5px; max-width:500px; }
+  .draft-banner__msg { flex:1; color:#f48771; }
+  .draft-banner__msg strong { display:block; color:var(--text); font-size:13px; }
+  .draft-banner__msg small { color:var(--comment); font-size:11px; }
+
+  .feedback-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; align-items:start; }
+  .feedback-cell { border:1px solid var(--border); border-radius:var(--r); padding:14px; background:var(--surface); min-height:160px; }
+  .feedback-cell__label { font-family:var(--mono); font-size:10px; letter-spacing:0.10em; text-transform:uppercase; color:var(--comment); margin-bottom:11px; display:block; }
+  .feedback-cell__label::before { content:"// "; }
+
+  /* ---------- Star showcase ---------- */
+  .star-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+  .star-cell { border:1px solid var(--border); border-radius:var(--r); padding:14px; text-align:center; background:var(--surface); }
+  .star-cell__count { font-family:var(--mono); font-size:11px; color:var(--comment); margin-bottom:8px; }
+  .star-cell__count::before { content:"// "; }
+
+  /* ---------- Footer tokens ---------- */
+  .tokens-table { width:100%; border-collapse:collapse; border:1px solid var(--border); border-radius:var(--r); overflow:hidden; background:var(--surface); font-size:12.5px; }
+  .tokens-table th, .tokens-table td { padding:7px 12px; text-align:left; border-bottom:1px solid var(--border); }
+  .tokens-table th { font-family:var(--mono); font-size:10px; letter-spacing:0.10em; text-transform:uppercase; color:var(--comment); background:var(--elevated); font-weight:500; }
+  .tokens-table th::before { content:"//"; color:var(--comment); margin-right:4px; }
+  .tokens-table td:first-child { font-family:var(--mono); color:var(--var); }
+  .tokens-table td:nth-child(2) { font-family:var(--mono); color:var(--num); }
+  .tokens-table td:last-child { font-family:var(--sans); color:var(--muted); }
+  .tokens-table tr:last-child td { border-bottom: 0; }
+  .swatch-dot { display:inline-block; width:13px; height:13px; border-radius:2px; vertical-align:-3px; margin-right:6px; border:1px solid var(--border); }
+
+  .footer-mark { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .footer-mark__logo { width:30px; height:30px; display:grid; place-items:center; border-radius:3px; background:linear-gradient(135deg,var(--accent),var(--keyword)); color:#fff; font-family:var(--mono); font-weight:700; }
+
+  /* ---------- Utility ---------- */
+  .flex { display:flex; } .items-center { align-items:center; }
+  .gap-2 { gap:8px; } .gap-3 { gap:12px; }
+  .mb-2 { margin-bottom:8px; }
+  .sans { font-family:var(--sans); }
+  .mono { font-family:var(--mono); }
+  .divider { height:1px; background:var(--border); margin:12px 0; }
+  .badge { display:inline-flex; align-items:center; gap:4px; font-family:var(--mono); font-size:10px; letter-spacing:0.04em; padding:1px 6px; border-radius:2px; text-transform:uppercase; border:1px solid var(--border); }
+  .badge--ok   { color:var(--comment); border-color:rgba(106,153,85,0.4); background:rgba(106,153,85,0.10); }
+  .badge--acc  { color:var(--var); border-color:rgba(0,122,204,0.4); background:rgba(0,122,204,0.10); }
+  .badge--kw   { color:var(--keyword); border-color:rgba(197,134,192,0.4); background:rgba(197,134,192,0.10); }
+  .badge--warn { color:var(--warn); border-color:rgba(204,167,0,0.4); background:rgba(204,167,0,0.10); }
+  kbd.k { font-family:var(--mono); font-size:11px; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:1px 5px; border-radius:2px; }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ============================ PREAMBLE ============================ -->
+  <header class="preamble">
+    <span class="preamble__eyebrow">style showcase · v1.0</span>
+    <h1>
+      <span class="kw">mise_en_place</span><span class="pun">.</span><span class="fn">ide</span><span class="pun">(</span><span class="str">"recipes"</span><span class="pun">)</span>
+    </h1>
+    <p class="preamble__concept">A full code-editor shell for your kitchen — recipes treated like source files. VS Code Dark+ palette, monospace-heavy, file-tree explorer, tabbed editor, gutter line numbers on every listing, a syntax-highlighted metadata inspector, and the iconic blue status bar. For cooks who think in commits.</p>
+
+    <div class="preamble__panels">
+      <div class="panel">
+        <p class="panel__title">Palette · 11 tokens · Dark+</p>
+        <div class="swatches">
+          <div class="swatch"><div class="swatch__chip" style="background:#1e1e1e"></div><div class="swatch__meta"><span class="swatch__name">bg</span><span class="swatch__hex">#1e1e1e</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#252526"></div><div class="swatch__meta"><span class="swatch__name">surface</span><span class="swatch__hex">#252526</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#2d2d2d"></div><div class="swatch__meta"><span class="swatch__name">elevated</span><span class="swatch__hex">#2d2d2d</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#3c3c3c"></div><div class="swatch__meta"><span class="swatch__name">border</span><span class="swatch__hex">#3c3c3c</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#d4d4d4"></div><div class="swatch__meta"><span class="swatch__name">text</span><span class="swatch__hex">#d4d4d4</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#858585"></div><div class="swatch__meta"><span class="swatch__name">muted</span><span class="swatch__hex">#858585</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#007acc"></div><div class="swatch__meta"><span class="swatch__name">accent</span><span class="swatch__hex">#007acc</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#c586c0"></div><div class="swatch__meta"><span class="swatch__name">keyword</span><span class="swatch__hex">#c586c0</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#ce9178"></div><div class="swatch__meta"><span class="swatch__name">string</span><span class="swatch__hex">#ce9178</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#6a9955"></div><div class="swatch__meta"><span class="swatch__name">comment</span><span class="swatch__hex">#6a9955</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#f44747"></div><div class="swatch__meta"><span class="swatch__name">error</span><span class="swatch__hex">#f44747</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:linear-gradient(135deg,#007acc,#c586c0)"></div><div class="swatch__meta"><span class="swatch__name">brand</span><span class="swatch__hex">gradient</span></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <p class="panel__title">Typography · JetBrains Mono dominant</p>
+        <div class="specimen__row"><span class="specimen__label">content / mono</span><span class="specimen__mono">whisk(yolks, sugar) // thick</span></div>
+        <div class="specimen__row"><span class="specimen__label">chrome / sans</span><span class="specimen__sans">The quick brown fox jumps</span></div>
+        <div class="specimen__row"><span class="specimen__label">scale (px)</span><span style="font-family:var(--mono);font-size:11px;color:var(--comment)">10 · 11 · 12 · 13 · 14 · 16 · 20 · 24 · 40</span></div>
+        <div class="specimen__row"><span class="specimen__label">radius</span><span style="font-family:var(--mono);font-size:12px;color:var(--num)">2 / 3 px · statusbar 0</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================ 01 HEADER ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">01</span>
+      <h2 class="section__title">Header bar</h2>
+      <span class="section__note">titlebar + toolbar · open menus shown</span>
+    </div>
+
+    <div class="pane">
+      <div class="titlebar">
+        <span class="titlebar__logo"><span class="mark">R</span> Recipe Manager</span>
+        <span class="titlebar__menu"><span>File</span><span>Edit</span><span>Selection</span><span>View</span><span>Go</span><span>Run</span><span>Terminal</span><span>Help</span></span>
+        <span class="titlebar__spacer"></span>
+        <span class="titlebar__ctrls"><span>–</span><span>▢</span><span class="close">✕</span></span>
+      </div>
+
+      <div style="background:var(--surface); border:1px solid var(--border); border-top:0; padding:8px 12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <span class="flex items-center gap-2" style="margin-right:6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color:var(--accent)"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          <strong class="mono" style="font-size:13px;color:var(--fn);">library</strong>
+          <span class="badge badge--kw">v2.3</span>
+        </span>
+
+        <div style="position:relative; flex:1; min-width:220px; max-width:380px;">
+          <svg style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--muted)" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="input" style="padding-left:30px;" placeholder="Search recipes, ingredients, steps…" aria-label="Search" />
+        </div>
+
+        <div class="menu-wrap">
+          <button class="btn btn--primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Add recipe
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="menu" style="min-width:220px;">
+            <div class="menu__item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color:var(--accent)"><path d="M12 5v14M5 12h14"/></svg>
+              New recipe <span class="menu__hint">⌘N</span>
+            </div>
+            <div class="menu__item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color:var(--accent)"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4M3 5v14a2 2 0 0 0 2 2h16v-5M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+              Import from URL <span class="menu__hint">⌘I</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-wrap">
+          <button class="btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 18V4"/></svg>
+            Sort
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="menu" style="min-width:248px;">
+            <div class="menu__item">Name A→Z <span class="check">✓</span></div>
+            <div class="menu__item">Name Z→A <span class="check">✓</span></div>
+            <div class="menu__item menu__item--active">Date added (New → Old) <span class="check">✓</span></div>
+            <div class="menu__item">Date added (Old → New) <span class="check">✓</span></div>
+            <div class="menu__sep"></div>
+            <div class="menu__item">Stars 0 → 5 <span class="check">✓</span></div>
+            <div class="menu__item">Stars 5 → 0 <span class="check">✓</span></div>
+          </div>
+        </div>
+
+        <div style="display:inline-flex; border:1px solid var(--border); border-radius:var(--r-sm); overflow:hidden;">
+          <button class="btn btn--ghost btn--icon" aria-label="Grid view" style="border-radius:0; background:var(--elevated); color:var(--text);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </button>
+          <button class="btn btn--ghost btn--icon" aria-label="List view" style="border-radius:0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          </button>
+        </div>
+
+        <button class="btn btn--ghost btn--icon" aria-label="Toggle theme">☾</button>
+        <button class="btn btn--ghost btn--icon" aria-label="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        </button>
+
+        <span style="margin-left:auto;" class="flex items-center gap-2">
+          <span class="mono" style="font-size:11px;color:var(--comment);">command palette</span>
+          <span class="chip"><kbd class="k">⌘</kbd><kbd class="k">K</kbd></span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 02 BUTTONS ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">02</span>
+      <h2 class="section__title">Buttons</h2>
+      <span class="section__note">2px radius · 1px border</span>
+    </div>
+    <div>
+      <div class="btn-row">
+        <button class="btn btn--primary">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          Save
+        </button>
+        <button class="btn">Edit</button>
+        <button class="btn btn--danger">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Delete
+        </button>
+        <button class="btn btn--ghost btn--icon" aria-label="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M5 5l2 2M17 17l2 2M2 12h3M19 12h3M5 19l2-2M17 7l2-2"/></svg>
+        </button>
+        <span class="scaler">
+          <button class="step-btn" aria-label="Decrement">−</button>
+          <input class="scaler__input" value="4" style="width:34px;" aria-label="Servings" />
+          <button class="step-btn" aria-label="Increment">+</button>
+        </span>
+        <button class="fav-btn" aria-label="Favorite">♡</button>
+        <button class="fav-btn fav-btn--active" aria-label="Favorited">♥</button>
+        <button class="btn btn--link">Original
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+        </button>
+      </div>
+      <div class="btn-row"><span class="btn-row__note">primary · default · danger · ghost · step · favorite(2 states) · link</span></div>
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="btn btn--primary" style="box-shadow:0 0 0 1px var(--accent); outline:1px solid var(--accent); outline-offset:1px;">Save</button>
+        <span class="btn-row__note">↑ focus ring · 1px accent outline</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 03 FORM CONTROLS ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">03</span>
+      <h2 class="section__title">Form controls</h2>
+      <span class="section__note">field · focus ring · mono inputs</span>
+    </div>
+    <div class="pane" style="max-width:700px;">
+      <div class="pane__tabs">
+        <span class="tab tab--active"><svg class="tab__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>meta.json<span class="tab__x">×</span></span>
+      </div>
+      <div class="pane__body">
+        <div class="form-grid">
+          <div class="field" style="grid-column:1/-1;">
+            <label class="field__label" for="f-title">"title"</label>
+            <input class="input input--sans" id="f-title" value="Classic Tiramisu" />
+          </div>
+          <div class="field">
+            <label class="field__label" for="f-search">search</label>
+            <input class="input" id="f-search" placeholder="Find an ingredient…" />
+          </div>
+          <div class="field" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start;">
+            <div class="field" style="margin:0;">
+              <label class="field__label" for="f-email">email</label>
+              <input class="input" id="f-email" type="email" value="chef@kitchen.io" />
+            </div>
+            <div class="field" style="margin:0;">
+              <label class="field__label" for="f-pass">password</label>
+              <input class="input" id="f-pass" type="password" value="•••••••••" />
+            </div>
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label class="field__label" for="f-desc">"description"</label>
+            <textarea class="textarea input--sans" id="f-desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea>
+          </div>
+          <div class="field">
+            <label class="field__label" for="f-serv">servings</label>
+            <input class="input" id="f-serv" type="number" value="4" style="width:90px;" />
+          </div>
+          <div class="field">
+            <label class="field__label" for="f-rating">rating</label>
+            <select class="select" id="f-rating">
+              <option>0 stars</option><option>1 star</option><option>2 stars</option>
+              <option>3 stars</option><option selected>4 stars</option><option>5 stars</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label class="field__label" for="f-img">image</label>
+            <input class="file-drop" id="f-img" type="file" style="padding:14px;" />
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <span class="field__label">// shopping_list</span>
+            <div style="display:flex; gap:22px; flex-wrap:wrap; margin-top:4px;">
+              <label class="check-row check-row--struck"><span class="check-box check-box--on"></span> <span class="check-text">¾ cup white sugar</span></label>
+              <label class="check-row"><span class="check-box"></span> <span class="check-text">6 egg yolks</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 04 TAG EDITOR ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">04</span>
+      <h2 class="section__title">Tags chips input</h2>
+      <span class="section__note">editor · open suggestions · tokens</span>
+    </div>
+    <div style="max-width:520px; position:relative;">
+      <span class="field__label" style="margin-bottom:6px; display:flex;">tags[]</span>
+      <div class="tag-editor">
+        <span class="chip chip--tag">dessert <span class="x">×</span></span>
+        <span class="chip chip--tag">italian <span class="x">×</span></span>
+        <span class="chip chip--tag">chocolate <span class="x">×</span></span>
+        <input class="tag-editor__input" value="qui" />
+        <span style="width:1px; height:14px; background:var(--accent); animation:blink 1s steps(2) infinite;"></span>
+      </div>
+      <div class="menu" style="position:relative; top:6px; left:0; width:100%; box-shadow:none;">
+        <div style="font-family:var(--mono); font-size:10px; letter-spacing:0.10em; text-transform:uppercase; color:var(--comment); padding:4px 10px;">// suggestions</div>
+        <div class="menu__item"><span class="chip chip--tag" style="font-size:10px; padding:1px 5px;">quick</span> <span class="menu__hint">↵ select</span></div>
+        <div class="menu__item"><span class="chip chip--tag" style="font-size:10px; padding:1px 5px;">quiche</span></div>
+        <div class="menu__item"><span class="chip chip--tag" style="font-size:10px; padding:1px 5px;">quininoa</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 05 FILTER CHIPS ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">05</span>
+      <h2 class="section__title">Filter chips</h2>
+      <span class="section__note">two groups · active vs inactive</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div>
+        <div class="chip-group__label" style="margin-bottom:6px;">tags</div>
+        <div class="chip-group">
+          <span class="chip-filter chip-filter--active">all <span class="chip-filter__count">42</span></span>
+          <span class="chip-filter">dessert <span class="chip-filter__count">14</span></span>
+          <span class="chip-filter">italian <span class="chip-filter__count">9</span></span>
+          <span class="chip-filter">quick <span class="chip-filter__count">11</span></span>
+          <span class="chip-filter">vegetarian <span class="chip-filter__count">7</span></span>
+          <span class="chip-filter">soup <span class="chip-filter__count">3</span></span>
+          <span class="chip-filter">chocolate <span class="chip-filter__count">5</span></span>
+          <span class="chip-filter">french <span class="chip-filter__count">6</span></span>
+          <span class="chip-filter">dinner <span class="chip-filter__count">18</span></span>
+          <span class="chip-filter">baking <span class="chip-filter__count">8</span></span>
+        </div>
+      </div>
+      <div>
+        <div class="chip-group__label" style="margin-bottom:6px;">source</div>
+        <div class="chip-group">
+          <span class="chip-filter chip-filter--active">marmiton</span>
+          <span class="chip-filter">750g</span>
+          <span class="chip-filter">allrecipes</span>
+          <span class="chip-filter">bbc good food</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 06 RECIPE GRID (in IDE chrome) ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">06</span>
+      <h2 class="section__title">Recipe grid — inside IDE chrome</h2>
+      <span class="section__note">activity + file-tree + tabs + status · selected card</span>
+    </div>
+
+    <div class="ide">
+      <div class="titlebar">
+        <span class="titlebar__logo"><span class="mark">R</span> Recipe Manager</span>
+        <span class="titlebar__menu"><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Run</span><span>Help</span></span>
+        <span class="titlebar__spacer"></span>
+        <span class="titlebar__ctrls"><span>–</span><span>▢</span><span class="close">✕</span></span>
+      </div>
+
+      <div class="ide__body">
+        <nav class="activity" aria-label="Primary">
+          <div class="activity__logo">R</div>
+          <button class="activity__btn activity__btn--active" title="Explorer" aria-label="Explorer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></button>
+          <button class="activity__btn" title="Search" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+          <button class="activity__btn" title="Source (git)" aria-label="Source"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5V14M12 14 6 17M12 14l6 3"/></svg></button>
+          <button class="activity__btn" title="Cook/Run" aria-label="Cook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m5 12 5 5L20 7"/></svg></button>
+          <button class="activity__btn" title="Tags" aria-label="Tags"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12.59 13.41 7 19l-5-5V4h10l6 6a2 2 0 0 1 0 2.83l-5.41.58Z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg></button>
+          <div class="activity__spacer"></div>
+          <button class="activity__btn" title="Account" aria-label="Account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></button>
+          <button class="activity__btn" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M5 5l2 2M17 17l2 2M2 12h3M19 12h3M5 19l2-2M17 7l2-2"/></svg></button>
+        </nav>
+
+        <aside class="explorer" aria-label="Recipe library explorer">
+          <div class="explorer__head">Explorer · Recipes<span class="dots">···</span></div>
+          <div class="explorer__sec">recipe-library</div>
+          <div class="tree">
+            <div class="tree__row"><span class="tree__chev open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></span><span class="tree__icon ic-folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg></span><span class="tree__name">dessert</span><span class="tree__badge tree__badge--git">M</span></div>
+            <div class="tree tree--indent">
+              <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon ic-file-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg></span><span class="tree__name">classic-tiramisu</span></div>
+              <div class="tree__row tree__row--active"><span class="tree__chev"></span><span class="tree__icon ic-file-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg></span><span class="tree__name">molten-lava-cake</span></div>
+              <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon ic-file-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg></span><span class="tree__name">grandmas-apple-tart</span></div>
+            </div>
+            <div class="tree__row"><span class="tree__chev open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></span><span class="tree__icon ic-folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg></span><span class="tree__name">dinner</span></div>
+            <div class="tree tree--indent">
+              <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon ic-file-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg></span><span class="tree__name">spaghetti-bolognese</span></div>
+              <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon ic-file-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg></span><span class="tree__name">turkey-burgers</span></div>
+            </div>
+            <div class="tree__row"><span class="tree__chev open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></span><span class="tree__icon ic-folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg></span><span class="tree__name">soup</span></div>
+            <div class="tree tree--indent">
+              <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon ic-file-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg></span><span class="tree__name">soupe-a-loignon</span></div>
+            </div>
+            <div class="tree__row"><span class="tree__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></span><span class="tree__icon ic-folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg></span><span class="tree__name tree__name--dim">italian</span></div>
+            <div class="tree__row"><span class="tree__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></span><span class="tree__icon ic-folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg></span><span class="tree__name tree__name--dim">french</span></div>
+            <div class="tree__row"><span class="tree__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></span><span class="tree__icon ic-folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg></span><span class="tree__name tree__name--dim">quick</span></div>
+          </div>
+        </aside>
+
+        <div class="ide__main">
+          <div class="tabsbar">
+            <span class="tab"><svg class="tab__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>classic-tiramisu.md <span class="tab__x">×</span></span>
+            <span class="tab tab--active"><svg class="tab__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>molten-lava-cake.md <span class="tab__x">×</span></span>
+            <span class="tab tab--add">+</span>
+          </div>
+          <div class="editor-bar">
+            <div class="crumbs">
+              <span class="seg">library</span><span class="sep">›</span>
+              <span class="seg">dessert</span><span class="sep">›</span>
+              <span class="cur">molten-lava-cake.md</span>
+            </div>
+            <span style="margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11px; color:var(--muted);">Search… <kbd class="k">⌘K</kbd></span>
+          </div>
+
+          <div class="ide__content" style="padding:16px;">
+            <div class="cards">
+              <article class="card">
+                <img class="card__img" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu" loading="lazy" />
+                <div class="card__index">L1</div>
+                <div class="card__body">
+                  <p class="card__path">dessert/classic-tiramisu.md</p>
+                  <h3 class="card__title">Classic Tiramisu</h3>
+                  <div class="card__meta"><span class="stars" aria-label="5 stars">★★★★★</span><span>·</span><span style="color:var(--string)">marmiton.org</span></div>
+                  <div class="card__tags"><span class="chip chip--tag">dessert</span><span class="chip chip--tag">italian</span></div>
+                </div>
+              </article>
+              <article class="card">
+                <img class="card__img" src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600" alt="Spaghetti Bolognese" loading="lazy" />
+                <div class="card__index">L2</div>
+                <div class="card__body">
+                  <p class="card__path">dinner/spaghetti-bolognese.md</p>
+                  <h3 class="card__title">Spaghetti Bolognese</h3>
+                  <div class="card__meta"><span class="stars" aria-label="4 stars">★★★★<span class="empty">★</span></span><span>·</span><span style="color:var(--string)">bbcgoodfood.com</span></div>
+                  <div class="card__tags"><span class="chip chip--tag">italian</span><span class="chip chip--tag">dinner</span></div>
+                </div>
+              </article>
+              <article class="card">
+                <img class="card__img" src="https://images.unsplash.com/photo-1528908510736-5258199bc7dd?w=600" alt="Spinach and Feta Turkey Burgers" loading="lazy" />
+                <div class="card__index">L3</div>
+                <div class="card__body">
+                  <p class="card__path">dinner/turkey-burgers.md</p>
+                  <h3 class="card__title">Spinach &amp; Feta Turkey Burgers</h3>
+                  <div class="card__meta"><span class="stars" aria-label="3 stars">★★★<span class="empty">★★</span></span><span>·</span><span style="color:var(--string)">allrecipes.com</span></div>
+                  <div class="card__tags"><span class="chip chip--tag">dinner</span><span class="chip chip--tag">quick</span></div>
+                </div>
+              </article>
+              <article class="card card--selected">
+                <div class="card__check" aria-label="Selected"></div>
+                <img class="card__img" src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Molten Chocolate Lava Cake" loading="lazy" />
+                <div class="card__index">L4</div>
+                <div class="card__body">
+                  <p class="card__path">dessert/molten-lava-cake.md</p>
+                  <h3 class="card__title">Molten Chocolate Lava Cake</h3>
+                  <div class="card__meta"><span class="stars" aria-label="5 stars">★★★★★</span><span>·</span><span style="color:var(--string)">allrecipes.com</span></div>
+                  <div class="card__tags"><span class="chip chip--tag">dessert</span><span class="chip chip--tag">chocolate</span><span class="chip chip--tag">baking</span></div>
+                </div>
+              </article>
+              <article class="card">
+                <img class="card__img" src="https://images.unsplash.com/photo-1547592166-23ac45744ffd?w=600" alt="Soupe à l'Oignon" loading="lazy" />
+                <div class="card__index">L5</div>
+                <div class="card__body">
+                  <p class="card__path">soup/soupe-a-loignon.md</p>
+                  <h3 class="card__title">Soupe à l'Oignon</h3>
+                  <div class="card__meta"><span class="stars" aria-label="4 stars">★★★★<span class="empty">★</span></span><span>·</span><span style="color:var(--string)">750g.com</span></div>
+                  <div class="card__tags"><span class="chip chip--tag">soup</span><span class="chip chip--tag">french</span></div>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card__placeholder" aria-label="No image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5a2 2 0 0 0-2.8 0L6 20"/></svg></div>
+                <div class="card__index">L6</div>
+                <div class="card__body">
+                  <p class="card__path">dessert/grandmas-apple-tart.md</p>
+                  <h3 class="card__title">Grandma's Apple Tart</h3>
+                  <div class="card__meta"><span class="stars" aria-label="5 stars">★★★★★</span><span>·</span><span style="color:var(--string)">manual</span></div>
+                  <div class="card__tags"><span class="chip chip--tag">dessert</span><span class="chip chip--tag">baking</span></div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <aside class="ide__inspector" aria-label="Recipe inspector">
+          <div class="insp">
+            <div class="insp__head">Outline · Metadata</div>
+            <h3 class="insp__title">molten-lava-cake.md</h3>
+            <div class="insp__thumb" style="background-image:url('https://images.unsplash.com/photo-1547592180-85f173990554?w=600');"></div>
+            <p class="insp__h">front-matter</p>
+            <div class="yaml">
+              <div><span class="tok-kw">source</span><span class="tok-pun">:</span> <span class="tok-str">"allrecipes.com"</span></div>
+              <div><span class="tok-kw">rating</span><span class="tok-pun">:</span> <span class="tok-num">5.0</span></div>
+              <div><span class="tok-kw">servings</span><span class="tok-pun">:</span> <span class="tok-num">2</span></div>
+              <div><span class="tok-kw">created</span><span class="tok-pun">:</span> <span class="tok-str">"2026-07-15"</span></div>
+              <div><span class="tok-kw">tags</span><span class="tok-pun">:</span> <span class="tok-pun">[</span><span class="tok-str">"dessert"</span><span class="tok-pun">,</span> <span class="tok-str">"chocolate"</span><span class="tok-pun">]</span></div>
+            </div>
+            <p class="insp__h">timeline</p>
+            <div class="insp__keys">
+              <div class="row"><span class="k">git</span><span class="v">3 commits</span></div>
+              <div class="row"><span class="k">modified</span><span class="v">2 days ago</span></div>
+              <div class="row"><span class="k">status</span><span class="v" style="color:var(--comment)">// clean</span></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="statusbar">
+        <div class="statusbar__left">
+          <span title="Branch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5V14M12 14 6 17M12 14l6 3"/></svg> main</span>
+          <span class="mut">↕ 0</span>
+          <span class="mut">⊹ 42 recipes</span>
+          <span class="mut">⊗ 6 shown</span>
+        </div>
+        <div class="statusbar__right">
+          <span class="mut">Ln 6, Col 1</span>
+          <span class="mut">Spaces: 2</span>
+          <span class="mut">UTF-8</span>
+          <span class="mut">Markdown</span>
+          <span>Recipe Manager</span>
+          <span class="mut">✓</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 07 RECIPE LIST ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">07</span>
+      <h2 class="section__title">Recipe list (rows)</h2>
+      <span class="section__note">dense · 3 rows · gutter check</span>
+    </div>
+    <div class="list">
+      <div class="list__head">
+        <span></span><span>thumb</span><span>name</span><span>source</span><span>rating</span><span>tags</span>
+      </div>
+      <label class="list__row">
+        <span class="check-box"></span>
+        <img class="list__thumb" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="" />
+        <span class="list__title">classic-tiramisu.md</span>
+        <span class="list__source">marmiton.org</span>
+        <span class="stars">★★★★★</span>
+        <span class="list__tags"><span class="chip chip--tag">dessert</span><span class="chip chip--tag">italian</span></span>
+      </label>
+      <label class="list__row">
+        <span class="check-box check-box--on"></span>
+        <img class="list__thumb" src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="" />
+        <span class="list__title">molten-lava-cake.md</span>
+        <span class="list__source">allrecipes.com</span>
+        <span class="stars">★★★★★</span>
+        <span class="list__tags"><span class="chip chip--tag">dessert</span><span class="chip chip--tag">chocolate</span></span>
+      </label>
+      <label class="list__row">
+        <span class="check-box"></span>
+        <span class="list__thumb list__thumb--placeholder" aria-label="No image"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5a2 2 0 0 0-2.8 0L6 20"/></svg></span>
+        <span class="list__title">grandmas-apple-tart.md</span>
+        <span class="list__source">manual</span>
+        <span class="stars">★★★★★</span>
+        <span class="list__tags"><span class="chip chip--tag">dessert</span><span class="chip chip--tag">baking</span></span>
+      </label>
+    </div>
+  </section>
+
+  <!-- ============================ 08 COOK VIEW (in IDE chrome) ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">08</span>
+      <h2 class="section__title">Recipe cook view — inside IDE chrome</h2>
+      <span class="section__note">gutter line numbers · step 2 current · status bar</span>
+    </div>
+
+    <div class="ide ide--cook">
+      <div class="titlebar">
+        <span class="titlebar__logo"><span class="mark">R</span> Recipe Manager</span>
+        <span class="titlebar__menu"><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Run</span><span>Help</span></span>
+        <span class="titlebar__spacer"></span>
+        <span class="titlebar__ctrls"><span>–</span><span>▢</span><span class="close">✕</span></span>
+      </div>
+
+      <div class="ide__body">
+        <nav class="activity" aria-label="Primary">
+          <div class="activity__logo">R</div>
+          <button class="activity__btn" title="Explorer" aria-label="Explorer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></button>
+          <button class="activity__btn" title="Search" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+          <button class="activity__btn" title="Source (git)" aria-label="Source"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5V14M12 14 6 17M12 14l6 3"/></svg></button>
+          <button class="activity__btn activity__btn--active" title="Cook/Run" aria-label="Cook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 12 5 5L20 7"/></svg></button>
+          <button class="activity__btn" title="Tags" aria-label="Tags"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12.59 13.41 7 19l-5-5V4h10l6 6a2 2 0 0 1 0 2.83l-5.41.58Z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg></button>
+          <div class="activity__spacer"></div>
+          <button class="activity__btn" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M5 5l2 2M17 17l2 2M2 12h3M19 12h3M5 19l2-2M17 7l2-2"/></svg></button>
+        </nav>
+
+        <aside class="explorer" aria-label="Recipe library explorer">
+          <div class="explorer__head">Explorer · Recipes<span class="dots">···</span></div>
+          <div class="explorer__sec">recipe-library</div>
+          <div class="tree">
+            <div class="tree__row"><span class="tree__chev open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></span><span class="tree__icon ic-folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg></span><span class="tree__name">dessert</span></div>
+            <div class="tree tree--indent">
+              <div class="tree__row tree__row--active"><span class="tree__chev"></span><span class="tree__icon ic-file-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg></span><span class="tree__name">classic-tiramisu</span></div>
+              <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon ic-file-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg></span><span class="tree__name">molten-lava-cake</span></div>
+              <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon ic-file-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg></span><span class="tree__name">grandmas-apple-tart</span></div>
+            </div>
+            <div class="tree__row"><span class="tree__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></span><span class="tree__icon ic-folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg></span><span class="tree__name tree__name--dim">dinner</span></div>
+            <div class="tree__row"><span class="tree__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></span><span class="tree__icon ic-folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg></span><span class="tree__name tree__name--dim">soup</span></div>
+            <div class="tree__row"><span class="tree__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></span><span class="tree__icon ic-folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg></span><span class="tree__name tree__name--dim">italian</span></div>
+            <div class="explorer__sec" style="margin-top:6px;">outline</div>
+            <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon" style="color:var(--keyword)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg></span><span class="tree__name" style="color:var(--var)">description</span></div>
+            <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon" style="color:var(--fn)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span><span class="tree__name" style="color:var(--fn)">ingredients[]</span></div>
+            <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon" style="color:var(--fn)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span><span class="tree__name" style="color:var(--fn)">steps[]</span></div>
+            <div class="tree__row"><span class="tree__chev"></span><span class="tree__icon" style="color:var(--comment)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg></span><span class="tree__name" style="color:var(--comment)">notes</span></div>
+          </div>
+        </aside>
+
+        <div class="ide__main">
+          <div class="tabsbar">
+            <span class="tab tab--active"><svg class="tab__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>classic-tiramisu.md<span class="tab__x">×</span></span>
+            <span class="tab tab--add">+</span>
+          </div>
+          <div class="editor-bar">
+            <div class="crumbs">
+              <span class="seg">← Recipes</span><span class="sep">›</span>
+              <span class="seg">dessert</span><span class="sep">›</span>
+              <span class="cur">classic-tiramisu.md</span>
+            </div>
+            <span class="badge badge--ok" style="margin-left:auto;">● cooking</span>
+            <span style="display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11px; color:var(--muted);">Jump <kbd class="k">⌘K</kbd></span>
+          </div>
+
+          <div class="ide__content" style="padding:18px;">
+            <div class="cook-header">
+              <img class="cook-header__img" src="https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600" alt="Classic Tiramisu plated" />
+              <div>
+                <p class="cook-header__path">dessert/classic-tiramisu.md</p>
+                <h2 class="cook-header__title">Classic Tiramisu</h2>
+                <div class="stars stars--lg" aria-label="4 out of 5 stars">★★★★<span class="empty">★</span></div>
+                <p class="cook-header__desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</p>
+                <div class="cook-header__tags">
+                  <span class="chip chip--tag">dessert</span>
+                  <span class="chip chip--tag">italian</span>
+                  <span class="chip chip--tag">no-bake</span>
+                  <span class="chip chip--source">marmiton.org</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="cook-grid">
+              <!-- INGREDIENTS as a code listing -->
+              <div class="panel-box">
+                <div class="panel-box__head">
+                  <h3 class="panel-box__title"><span class="tok-kw">function</span> <span class="fn-tok">ingredients</span><span class="pun">()</span></h3>
+                  <span class="badge badge--acc" style="margin-left:auto;">6 items</span>
+                </div>
+                <div class="panel-box__body">
+                  <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <span class="mono" style="font-size:11px; color:var(--comment);">// servings</span>
+                    <div class="scaler">
+                      <button class="step-btn" aria-label="Decrement">−</button>
+                      <input class="scaler__input" value="4" aria-label="Servings" />
+                      <button class="step-btn" aria-label="Increment">+</button>
+                    </div>
+                    <button class="btn btn--ghost btn--sm">Reset</button>
+                  </div>
+                  <div class="listing">
+                    <div class="listing__row"><span class="listing__no">1</span><span class="listing__gutter"></span><div class="listing__content ing-check"><span class="check-box"></span><span><span class="q tok-num">6</span> <span class="tok-txt">egg yolks</span></span></div></div>
+                    <div class="listing__row listing__row--done"><span class="listing__no">2</span><span class="listing__gutter"></span><div class="listing__content ing-check"><span class="check-box check-box--on"></span><span class="ing-text"><span class="q tok-num">¾</span> <span>cup white sugar</span></span></div></div>
+                    <div class="listing__row listing__row--done"><span class="listing__no">3</span><span class="listing__gutter"></span><div class="listing__content ing-check"><span class="check-box check-box--on"></span><span class="ing-text"><span class="q tok-num">1⅔</span> <span>cups heavy cream</span></span></div></div>
+                    <div class="listing__row"><span class="listing__no">4</span><span class="listing__gutter"></span><div class="listing__content ing-check"><span class="check-box"></span><span><span class="q tok-num">1</span> <span>package (around </span><span class="tok-num">30</span><span>) ladyfingers</span></span></div></div>
+                    <div class="listing__row listing__row--done"><span class="listing__no">5</span><span class="listing__gutter"></span><div class="listing__content ing-check"><span class="check-box check-box--on"></span><span class="ing-text"><span class="q tok-num">1¾</span> <span>cups strong brewed espresso, cooled</span></span></div></div>
+                    <div class="listing__row"><span class="listing__no">6</span><span class="listing__gutter"></span><div class="listing__content ing-check"><span class="check-box"></span><span><span class="q tok-num">2</span> <span>tbsp unsweetened cocoa powder</span></span></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEPS as a code listing with current-line -->
+              <div class="panel-box">
+                <div class="panel-box__head">
+                  <h3 class="panel-box__title"><span class="tok-kw">function</span> <span class="fn-tok">steps</span><span class="pun">()</span></h3>
+                  <span class="badge badge--warn" style="margin-left:auto;">▶ cook mode</span>
+                </div>
+                <div class="panel-box__body">
+                  <div class="progress">
+                    <button class="btn btn--sm">Prev</button>
+                    <div class="progress__bar"><div class="progress__fill"></div></div>
+                    <span class="progress__label"><strong>Step 2</strong> of 6</span>
+                    <button class="btn btn--sm btn--primary">Next</button>
+                  </div>
+                  <div class="listing">
+                    <div class="listing__row"><span class="listing__no">1</span><span class="listing__gutter"></span><div class="listing__content"><span class="tok-fn">whisk</span><span class="tok-pun">(</span><span class="tok-var">egg_yolks</span><span class="tok-pun">,</span> <span class="tok-var">sugar</span><span class="tok-pun">)</span> <span class="tok-com">// until thick and pale</span></div></div>
+                    <div class="listing__row listing__row--current"><span class="listing__no">2</span><span class="listing__gutter"></span><div class="listing__content"><span class="tok-fn">fold_in</span><span class="tok-pun">(</span><span class="tok-var">mascarpone</span><span class="tok-pun">)</span> <span class="tok-com">// until smooth</span></div></div>
+                    <div class="listing__row"><span class="listing__no">3</span><span class="listing__gutter"></span><div class="listing__content"><span class="tok-fn">whip</span><span class="tok-pun">(</span><span class="tok-var">cream</span><span class="tok-pun">)</span><span class="tok-com">.to(</span><span class="tok-str">"soft peaks"</span><span class="tok-com">) // fold in</span></div></div>
+                    <div class="listing__row"><span class="listing__no">4</span><span class="listing__gutter"></span><div class="listing__content"><span class="tok-fn">combine</span><span class="tok-pun">(</span><span class="tok-var">espresso</span><span class="tok-pun">,</span> <span class="tok-str">"splash of liqueur"</span><span class="tok-pun">)</span> <span class="tok-com">// shallow dish</span></div></div>
+                    <div class="listing__row"><span class="listing__no">5</span><span class="listing__gutter"></span><div class="listing__content"><span class="tok-fn">dip</span><span class="tok-pun">(</span><span class="tok-var">ladyfinger</span><span class="tok-pun">)</span><span class="tok-com">.briefly()</span> <span class="tok-com">// layer in a dish</span></div></div>
+                    <div class="listing__row"><span class="listing__no">6</span><span class="listing__gutter"></span><div class="listing__content"><span class="tok-fn">spread</span><span class="tok-pun">(</span><span class="tok-var">cream</span><span class="tok-pun">)</span><span class="tok-com">; dust(</span><span class="tok-str">"cocoa"</span><span class="tok-com">); chill(</span><span class="tok-num">4</span><span class="tok-com">+ hr)</span></div></div>
+                  </div>
+                  <p class="mono" style="font-size:11px;color:var(--comment);margin:8px 0 0;">// verbatim: Whisk egg yolks and sugar until thick and pale. Fold in mascarpone until smooth. Whip cream to soft peaks and fold in. Combine espresso and a splash of liqueur in a shallow dish. Dip each ladyfinger briefly and layer in a dish. Spread cream, dust with cocoa, chill 4+ hours.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="notes">
+              <strong>Notes</strong>
+              Best made a day ahead. Don't oversoak the ladyfingers or the layers turn to paste.
+            </div>
+
+            <div class="cook-footer">
+              <button class="btn btn--link">Original ↗</button>
+              <button class="btn btn--sm">Edit</button>
+              <button class="btn btn--sm btn--danger">Delete</button>
+              <button class="btn btn--sm btn--ghost">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+                Print
+              </button>
+              <button class="fav-btn fav-btn--active" style="margin-left:auto;">♥</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="ide__inspector" aria-label="Recipe inspector">
+          <div class="insp">
+            <div class="insp__head">Outline · Metadata</div>
+            <h3 class="insp__title">classic-tiramisu.md</h3>
+            <div class="insp__thumb" style="background-image:url('https://images.unsplash.com/photo-1571877227200-a0d98ea605ae?w=600');"></div>
+            <p class="insp__h">front-matter</p>
+            <div class="yaml">
+              <div><span class="tok-kw">source</span><span class="tok-pun">:</span> <span class="tok-str">"marmiton.org"</span></div>
+              <div><span class="tok-kw">rating</span><span class="tok-pun">:</span> <span class="tok-num">5.0</span></div>
+              <div><span class="tok-kw">servings</span><span class="tok-pun">:</span> <span class="tok-num">4</span></div>
+              <div><span class="tok-kw">created</span><span class="tok-pun">:</span> <span class="tok-str">"2026-06-02"</span></div>
+              <div><span class="tok-kw">tags</span><span class="tok-pun">:</span> <span class="tok-pun">[</span><span class="tok-str">"dessert"</span><span class="tok-pun">,</span> <span class="tok-str">"italian"</span><span class="tok-pun">,</span> <span class="tok-str">"no-bake"</span><span class="tok-pun">]</span></div>
+            </div>
+            <p class="insp__h">cook session</p>
+            <div class="insp__keys">
+              <div class="row"><span class="k">step</span><span class="v">2 / 6</span></div>
+              <div class="row"><span class="k">progress</span><span class="v" style="color:var(--comment)">33%</span></div>
+              <div class="row"><span class="k">ingredients</span><span class="v">3 / 6</span></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="statusbar">
+        <div class="statusbar__left">
+          <span title="Branch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5V14M12 14 6 17M12 14l6 3"/></svg> main</span>
+          <span class="mut">▶ running</span>
+          <span class="mut">⊛ step 2/6</span>
+        </div>
+        <div class="statusbar__right">
+          <span class="mut">Ln 6, Col 1</span>
+          <span class="mut">Spaces: 2</span>
+          <span class="mut">UTF-8</span>
+          <span class="mut">Markdown</span>
+          <span>Recipe Manager</span>
+          <span class="mut">✓</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 09 EDIT FORM ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">09</span>
+      <h2 class="section__title">Edit form excerpt</h2>
+      <span class="section__note">condensed · reuse chip input · unsaved dot</span>
+    </div>
+    <div class="pane" style="max-width:680px;">
+      <div class="pane__tabs">
+        <span class="tab tab--active"><svg class="tab__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>classic-tiramisu.md<span class="tab__mod" title="Unsaved"></span><span class="tab__x">×</span></span>
+      </div>
+      <div class="pane__body">
+        <div class="form-grid form-grid--single">
+          <div class="field">
+            <label class="field__label" for="e-title">"title"</label>
+            <input class="input input--sans" id="e-title" value="Classic Tiramisu" />
+          </div>
+          <div class="field">
+            <label class="field__label" for="e-desc">"description"</label>
+            <textarea class="textarea input--sans" id="e-desc">A classic Italian dessert of espresso-soaked ladyfingers layered with mascarpone cream and dusted with cocoa.</textarea>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label class="field__label" for="e-rating">rating</label>
+              <select class="select" id="e-rating"><option>0 stars</option><option>1 star</option><option>2 stars</option><option>3 stars</option><option selected>4 stars</option><option>5 stars</option></select>
+            </div>
+            <div class="field">
+              <label class="field__label" for="e-src">source_url</label>
+              <input class="input" id="e-src" value="https://www.marmiton.org/recettes/…" />
+            </div>
+          </div>
+          <div class="field">
+            <span class="field__label">tags[]</span>
+            <div class="tag-editor">
+              <span class="chip chip--tag">dessert <span class="x">×</span></span>
+              <span class="chip chip--tag">italian <span class="x">×</span></span>
+              <span class="chip chip--tag">no-bake <span class="x">×</span></span>
+              <input class="tag-editor__input" placeholder="add tag…" />
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="e-img">image</label>
+            <div class="file-drop">
+              <strong>Click to upload</strong> or paste an image here <kbd class="k">Ctrl+V</kbd>
+              <div style="margin-top:6px;font-size:10px;color:var(--comment);">// PNG, JPG, WEBP · max 5 MB</div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="btn-row" style="justify-content:flex-end;">
+            <button class="btn">Cancel</button>
+            <button class="btn btn--primary">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 10 SETTINGS ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">10</span>
+      <h2 class="section__title">Settings cards</h2>
+      <span class="section__note">four stacked · icon tiles</span>
+    </div>
+    <div class="settings-stack">
+      <div class="settings-card">
+        <div class="settings-card__head">
+          <span class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></svg></span>
+          <h3 class="settings-card__title">export()</h3>
+          <span class="badge badge--ok" style="margin-left:auto;">42 recipes</span>
+        </div>
+        <p class="settings-card__desc">Download your library in any of the supported formats.</p>
+        <div class="settings-card__row">
+          <button class="btn btn--sm">JSON</button>
+          <button class="btn btn--sm">Markdown zip</button>
+          <button class="btn btn--sm">PDF</button>
+          <button class="btn btn--sm">JSON-LD zip</button>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card__head">
+          <span class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></span>
+          <h3 class="settings-card__title">import()</h3>
+        </div>
+        <p class="settings-card__desc">Restore from a backup or migrate from another app.</p>
+        <div class="settings-card__row">
+          <input class="input" type="file" style="padding:5px 10px;flex:1;font-size:12px;" />
+          <button class="btn btn--primary btn--sm">Preview import</button>
+        </div>
+        <div class="settings-card__row" style="margin-top:8px;"><span class="field__hint">Max 50 MB · JSON, JSON-LD, or RecipeMD · <kbd class="k">⌘O</kbd> to browse</span></div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card__head">
+          <span class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>
+          <h3 class="settings-card__title">about</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <span class="footer-mark__logo" style="width:28px;height:28px;font-size:13px;">R</span>
+          <div>
+            <div class="mono" style="font-size:13px;font-weight:600;color:var(--fn);">Recipe Manager</div>
+            <div class="mono" style="font-size:11px;color:var(--comment);">// Version 2.3.0 · build 488</div>
+          </div>
+        </div>
+        <button class="btn btn--link btn--sm">GitHub ↗</button>
+      </div>
+
+      <div class="settings-card" style="border-color:rgba(244,71,71,0.3);">
+        <div class="settings-card__head">
+          <span class="icon-tile" style="color:var(--error);border-color:rgba(244,71,71,0.3);background:rgba(244,71,71,0.08)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg></span>
+          <h3 class="settings-card__title">sign_out()</h3>
+        </div>
+        <p class="settings-card__desc">End your session on this device.</p>
+        <button class="btn btn--danger btn--sm">Log out</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 11 AUTH ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">11</span>
+      <h2 class="section__title">Auth form</h2>
+      <span class="section__note">centered card · error state</span>
+    </div>
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="footer-mark" style="margin-bottom:16px;">
+          <span class="footer-mark__logo">R</span>
+          <strong class="mono" style="font-size:13px;color:var(--fn);">Recipe Manager</strong>
+        </div>
+        <h2 class="auth-card__title">sign_in()</h2>
+        <p class="auth-card__sub">Continue to your kitchen.</p>
+        <div class="error-banner">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          Invalid email or password.
+        </div>
+        <div class="field"><label class="field__label" for="a-email">email</label><input class="input" id="a-email" type="email" value="chef@kitchen.io" /></div>
+        <div class="field"><label class="field__label" for="a-pass">password</label><input class="input" id="a-pass" type="password" value="s3cr3tpass" /></div>
+        <button class="btn btn--primary" style="width:100%;justify-content:center;margin-top:4px;">Sign in</button>
+        <div class="auth-links">
+          <a class="btn btn--link" style="font-size:12px;">Forgot your password?</a>
+          <a class="btn btn--link" style="font-size:12px;">Create an account</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 12 FEEDBACK ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">12</span>
+      <h2 class="section__title">Feedback components</h2>
+      <span class="section__note">toast · bulk · skeleton · spinner · empty · banner</span>
+    </div>
+    <div class="feedback-grid">
+      <div class="feedback-cell">
+        <span class="feedback-cell__label">Toast</span>
+        <div class="toast">
+          <span class="toast__icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span class="toast__msg">Recipe imported<small>from marmiton.org · 2s ago</small></span>
+          <button class="btn btn--sm">View</button>
+          <button class="btn btn--ghost btn--icon" aria-label="Dismiss">×</button>
+        </div>
+        <div style="margin-top:16px;">
+          <span class="feedback-cell__label">Bulk-action bar</span>
+          <div class="bulk-bar">
+            <span class="check-box check-box--on" style="background:rgba(255,255,255,0.9);border-color:rgba(255,255,255,0.9);"></span>
+            <span class="count">3 selected</span>
+            <span style="opacity:0.6;">·</span>
+            <button class="btn btn--sm">Delete</button>
+            <button class="btn btn--sm">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="feedback-cell">
+        <span class="feedback-cell__label">Skeleton loader</span>
+        <div class="skeleton-card">
+          <div class="sk sk--img"></div>
+          <div class="sk sk--line w-80"></div>
+          <div class="sk sk--line w-60"></div>
+          <div class="sk sk--line w-40"></div>
+        </div>
+        <div style="margin-top:16px;display:flex;align-items:center;gap:10px;">
+          <span class="spinner"></span>
+          <span class="mono" style="font-size:12px;color:var(--comment);">// loading… 1.2s</span>
+        </div>
+      </div>
+
+      <div class="feedback-cell">
+        <span class="feedback-cell__label">Empty state</span>
+        <div class="empty-state" style="border:0;background:transparent;padding:0;">
+          <div class="empty-state__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></div>
+          <h4 class="empty-state__title">No recipes yet</h4>
+          <p class="empty-state__desc">// import your first recipe from a URL</p>
+          <button class="btn btn--primary btn--sm" style="width:100%;justify-content:center;">Import from URL</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <span class="feedback-cell__label">Error / draft banner</span>
+      <div class="draft-banner">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color:var(--error);flex-shrink:0;"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+        <div class="draft-banner__msg">
+          <strong>We couldn't extract a recipe from that page</strong>
+          <small>// marmiton blocked the scraper · saved as draft · open editor to finish</small>
+        </div>
+        <button class="btn btn--sm">Edit draft</button>
+        <button class="btn btn--ghost btn--icon" aria-label="Dismiss">×</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 13 STARS ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">13</span>
+      <h2 class="section__title">Star rating + micro-interactions</h2>
+      <span class="section__note">4 states · fill animation</span>
+    </div>
+    <div class="star-grid">
+      <div class="star-cell">
+        <div class="star-cell__count">0 / 5</div>
+        <div class="stars stars--lg"><span class="empty">★★★★★</span></div>
+      </div>
+      <div class="star-cell">
+        <div class="star-cell__count">2 / 5</div>
+        <div class="stars stars--lg">★★<span class="empty">★★★</span></div>
+      </div>
+      <div class="star-cell">
+        <div class="star-cell__count">4 / 5</div>
+        <div class="stars stars--lg">★★★★<span class="empty">★</span></div>
+      </div>
+      <div class="star-cell">
+        <div class="star-cell__count">5 / 5</div>
+        <div class="stars stars--lg" style="text-shadow:0 0 12px rgba(204,167,0,0.6);">★★★★★</div>
+      </div>
+    </div>
+    <p class="mono" style="font-size:12px;color:var(--comment);margin-top:14px;max-width:680px;">
+      // Signature micro-interaction: on hover each star fills left→right with a 40ms stagger and a warm amber glow (<span style="color:var(--warn)">text-shadow: 0 0 12px @warn/60%</span>); click locks the value with a 1px "compile" bounce and a faint blue focus ring — like saving a file.
+    </p>
+  </section>
+
+  <!-- ============================ 14 FOOTER / TOKENS ============================ -->
+  <section class="section">
+    <div class="section__label">
+      <span class="section__num">14</span>
+      <h2 class="section__title">Footer / token reference</h2>
+      <span class="section__note">design language · explicit</span>
+    </div>
+    <div class="footer-mark">
+      <span class="footer-mark__logo">R</span>
+      <div>
+        <strong class="mono" style="font-size:13px;color:var(--fn);">Recipe Manager</strong>
+        <div class="mono" style="font-size:11px;color:var(--comment);">// Mise en Place: IDE · design system v1.0</div>
+      </div>
+    </div>
+    <table class="tokens-table">
+      <thead><tr><th>token</th><th>value</th><th>usage</th></tr></thead>
+      <tbody>
+        <tr><td>--bg</td><td><span class="swatch-dot" style="background:#1e1e1e"></span>#1e1e1e</td><td>editor background</td></tr>
+        <tr><td>--surface</td><td><span class="swatch-dot" style="background:#252526"></span>#252526</td><td>sidebar, panels</td></tr>
+        <tr><td>--elevated</td><td><span class="swatch-dot" style="background:#2d2d2d"></span>#2d2d2d</td><td>inputs, inactive tabs</td></tr>
+        <tr><td>--border</td><td><span class="swatch-dot" style="background:#3c3c3c"></span>#3c3c3c</td><td>1px hairlines</td></tr>
+        <tr><td>--text</td><td><span class="swatch-dot" style="background:#d4d4d4"></span>#d4d4d4</td><td>primary foreground</td></tr>
+        <tr><td>--muted</td><td><span class="swatch-dot" style="background:#858585"></span>#858585</td><td>gutter, hints</td></tr>
+        <tr><td>--accent</td><td><span class="swatch-dot" style="background:#007acc"></span>#007acc</td><td>action, focus, status bar</td></tr>
+        <tr><td>--keyword</td><td><span class="swatch-dot" style="background:#c586c0"></span>#c586c0</td><td>tags, keywords</td></tr>
+        <tr><td>--string</td><td><span class="swatch-dot" style="background:#ce9178"></span>#ce9178</td><td>source, strings</td></tr>
+        <tr><td>--comment</td><td><span class="swatch-dot" style="background:#6a9955"></span>#6a9955</td><td>notes, labels</td></tr>
+        <tr><td>--error</td><td><span class="swatch-dot" style="background:#f44747"></span>#f44747</td><td>destructive, error</td></tr>
+        <tr><td>--r</td><td>3px</td><td>primary radius</td></tr>
+        <tr><td>--r-sm</td><td>2px</td><td>controls, inputs</td></tr>
+        <tr><td>--sans</td><td>Inter</td><td>app chrome, menus</td></tr>
+        <tr><td>--mono</td><td>JetBrains Mono</td><td>content, data, code</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+</body>
+</html>
