@@ -156,4 +156,36 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 			expect(res.status).toBe(404);
 		});
 	});
+
+	describe("base layout theme wiring", () => {
+		it("renders data-theme + data-mode on <html> and a theme-color meta", async () => {
+			const { app, cookie } = await setupApp();
+			const res = await app.request(
+				"/settings",
+				auth(cookie, { Cookie: `theme=aurora; mode=dark; session=${cookie}` }),
+			);
+			const body = await res.text();
+			expect(body).toContain('data-theme="aurora"');
+			expect(body).toContain('data-mode="dark"');
+			expect(body).toContain('name="theme-color"');
+		});
+
+		it("no longer renders the header theme-toggle form", async () => {
+			const { app } = await setupApp();
+			const res = await app.request("/login");
+			const body = await res.text();
+			expect(body).not.toContain('class="btn theme-toggle"');
+			expect(body).not.toContain('aria-label="Toggle theme"');
+		});
+
+		it("renders the active theme's font <link>", async () => {
+			const { app, cookie } = await setupApp();
+			const res = await app.request(
+				"/settings",
+				auth(cookie, { Cookie: `theme=hearth; mode=dark; session=${cookie}` }),
+			);
+			const body = await res.text();
+			expect(body).toContain('rel="stylesheet" href="https://fonts.googleapis.com/css2');
+		});
+	});
 });

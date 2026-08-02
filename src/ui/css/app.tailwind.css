@@ -72,13 +72,6 @@ body {
 	display: block;
 }
 
-.site-header .theme-form {
-	margin-left: auto;
-}
-.site-header .theme-toggle {
-	font-size: 1rem;
-	width: 2.5rem;
-}
 .site-header .settings-gear {
 	width: 2.5rem;
 	color: var(--color-text);
@@ -465,7 +458,6 @@ details[open] > div {
 
 @media print {
 	.site-header,
-	.theme-form,
 	.recipe-footer,
 	.toast {
 		display: none !important;
