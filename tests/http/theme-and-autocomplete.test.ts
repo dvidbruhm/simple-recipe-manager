@@ -1,34 +1,25 @@
 import { Database } from "bun:sqlite";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createSessionCookie } from "@/auth/session";
 import { migrate } from "@/db/migrate";
 import { RecipeRepository } from "@/recipes/repository";
 import { buildApp } from "@/server";
 import { TagRepository } from "@/tags/repository";
+import { createTestUser, freshDataDir, setupEnv, userCookie } from "../helpers/auth";
 
-const SECRET = "test-secret";
 const PNG_1x1 = Buffer.from(
 	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
 	"base64",
 );
 
-function freshDataDir(): string {
-	const dir = join(tmpdir(), `rmtest-${Math.random().toString(36).slice(2)}`);
-	mkdirSync(dir, { recursive: true });
-	return dir;
-}
-
 async function setupApp() {
-	process.env.APP_PASSWORD = "pw";
-	process.env.SESSION_SECRET = SECRET;
 	const dataDir = freshDataDir();
-	process.env.DATA_DIR = dataDir;
+	setupEnv(dataDir);
 	const db = new Database(`${dataDir}/recipes.db`);
 	migrate(db);
-	const recipes = new RecipeRepository(db);
-	const tags = new TagRepository(db);
+	const { userId } = createTestUser(db);
+	const recipes = new RecipeRepository(db, userId);
+	const tags = new TagRepository(db, userId);
 	const id1 = recipes.insert({ title: "Tiramisu", ingredients: ["mascarpone"], steps: ["layer"] });
 	const id2 = recipes.insert({ title: "Bolognese", ingredients: ["pasta"], steps: ["simmer"] });
 	tags.replaceForRecipe(id1, ["dessert", "italian"]);
@@ -37,7 +28,7 @@ async function setupApp() {
 	mkdirSync(join(dataDir, "images"), { recursive: true });
 	writeFileSync(join(dataDir, "images", "test.png"), PNG_1x1);
 	const app = buildApp();
-	const cookie = await createSessionCookie(SECRET, 3600);
+	const cookie = await userCookie(userId);
 	return { app, cookie, dataDir, id1, id2 };
 }
 
@@ -67,19 +58,18 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 		});
 
 		it("round-trips tag names with HTML-special characters as JSON data", async () => {
-			process.env.APP_PASSWORD = "pw";
-			process.env.SESSION_SECRET = SECRET;
 			const dataDir = freshDataDir();
-			process.env.DATA_DIR = dataDir;
+			setupEnv(dataDir);
 			const db = new Database(`${dataDir}/recipes.db`);
 			migrate(db);
-			const recipes = new RecipeRepository(db);
-			const tags = new TagRepository(db);
+			const { userId } = createTestUser(db);
+			const recipes = new RecipeRepository(db, userId);
+			const tags = new TagRepository(db, userId);
 			const id = recipes.insert({ title: "X", ingredients: [], steps: [] });
 			tags.replaceForRecipe(id, ["<b>bold</b>"]);
 			db.close();
 			const app = buildApp();
-			const cookie = await createSessionCookie(SECRET, 3600);
+			const cookie = await userCookie(userId);
 			const res = await app.request("/tags/autocomplete?q=%3Cb", auth(cookie));
 			expect(res.status).toBe(200);
 			expect(res.headers.get("Content-Type") ?? "").toContain("application/json");

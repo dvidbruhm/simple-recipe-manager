@@ -1,27 +1,9 @@
-import { mkdirSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { createSessionCookie } from "@/auth/session";
-import { buildApp } from "@/server";
-
-const SECRET = "test-secret";
-
-function freshDataDir(): string {
-	const dir = join(tmpdir(), `rmtest-${Math.random().toString(36).slice(2)}`);
-	mkdirSync(dir, { recursive: true });
-	return dir;
-}
-
-async function setupApp() {
-	process.env.APP_PASSWORD = "pw";
-	process.env.SESSION_SECRET = SECRET;
-	process.env.DATA_DIR = freshDataDir();
-	const app = buildApp();
-	const cookie = await createSessionCookie(SECRET, 3600);
-	return { app, cookie };
-}
+import { setupBareApp } from "../helpers/auth";
 
 describe("PWA endpoints", () => {
+	async function setupApp() {
+		return { app: setupBareApp() };
+	}
 	it("GET /manifest.webmanifest contains share_target", async () => {
 		const { app } = await setupApp();
 		const res = await app.request("/manifest.webmanifest");
@@ -66,5 +48,39 @@ describe("PWA endpoints", () => {
 		expect(body).toContain("/static/icons/192.png");
 		expect(body).toContain("/static/icons/512.png");
 		expect(body).toContain('purpose": "maskable');
+	});
+
+	it("GET /manifest.webmanifest does NOT lock orientation to portrait", async () => {
+		const { app } = await setupApp();
+		const res = await app.request("/manifest.webmanifest");
+		const body = await res.text();
+		expect(body).not.toContain('"orientation": "portrait"');
+	});
+
+	it("GET /manifest.webmanifest includes description, shortcuts, and lang", async () => {
+		const { app } = await setupApp();
+		const res = await app.request("/manifest.webmanifest");
+		const body = await res.text();
+		expect(body).toContain('"description":');
+		expect(body).toContain('"lang": "en"');
+		expect(body).toContain('"shortcuts":');
+		expect(body).toContain("/recipes/new");
+		expect(body).toContain("/import");
+	});
+
+	it("GET /sw.js includes a branded offline page with favicon", async () => {
+		const { app } = await setupApp();
+		const res = await app.request("/sw.js");
+		const body = await res.text();
+		expect(body).toContain("/static/favicon.svg");
+		expect(body).toContain("You're offline");
+		expect(body).toContain("Try again");
+	});
+
+	it("GET /sw.js posts a skip-waiting message handler", async () => {
+		const { app } = await setupApp();
+		const res = await app.request("/sw.js");
+		const body = await res.text();
+		expect(body).toContain("skip-waiting");
 	});
 });

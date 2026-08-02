@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="error-page max-w-xl mx-auto px-4 text-center py-12">
+  <div class="text-6xl font-bold text-[color:var(--color-muted)] mb-4">{{ status | default('Error') }}</div>
+  <h1 class="text-2xl font-bold text-[color:var(--color-text)] mb-2">{{ title_text | default('Something went wrong') }}</h1>
+  {% if message %}
+    <p class="text-[color:var(--color-muted)] mb-6">{{ message }}</p>
+  {% endif %}
+  <div class="flex justify-center gap-2">
+    <a href="/recipes" class="btn btn--primary">Back to recipes</a>
+    <button type="button" class="btn" onclick="history.back()">Go back</button>
+  </div>
+</section>
+{% endblock %}

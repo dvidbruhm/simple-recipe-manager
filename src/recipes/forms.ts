@@ -6,6 +6,7 @@ export interface RecipeInput {
 	notes?: string;
 	source_url?: string;
 	image_filename?: string | null;
+	base_servings?: number | null;
 	rating?: number;
 	favorite?: boolean;
 }

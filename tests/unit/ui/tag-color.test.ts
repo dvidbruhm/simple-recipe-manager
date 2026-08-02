@@ -11,8 +11,8 @@ describe("tagColor", () => {
 
 	it("distributes different names across palette entries", () => {
 		const colors = new Set(
-			["dessert", "italian", "dinner", "vegan", "soup", "breakfast", "lunch", "dessert"].map(
-				(n) => tagColor(n),
+			["dessert", "italian", "dinner", "vegan", "soup", "breakfast", "lunch", "dessert"].map((n) =>
+				tagColor(n),
 			),
 		);
 		// 7 distinct names + 1 duplicate -> at most 7 unique colors

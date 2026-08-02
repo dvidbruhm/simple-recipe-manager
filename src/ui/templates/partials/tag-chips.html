@@ -1,6 +1,6 @@
 {% for t in tags %}
   {% if t.name == "favorites" %}
-  <label class="tag-chip tag inline-flex items-center gap-1 px-3 py-1 rounded-full border text-sm cursor-pointer" style="--tag-color: #ff5a5a">
+  <label class="tag-chip tag inline-flex items-center gap-1 px-3 py-1 rounded-full border text-sm cursor-pointer" style="--tag-color: var(--color-favorite)">
     <input type="checkbox" name="tag" value="favorites" class="hidden" {% if "favorites" in active_tags %}checked{% endif %}
            hx-get="/recipes" hx-target="#grid" hx-trigger="change" hx-include="[name='q'],[name='tag']:checked,[name='sort']" hx-push-url="true" hx-indicator="#grid-spinner">
     ♥ Favorites <span id="fav-count" class="count opacity-70">{{ t.cnt }}</span>

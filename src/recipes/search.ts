@@ -5,6 +5,7 @@ export interface SearchParams {
 	q?: string;
 	tags?: string[];
 	favorite?: boolean;
+	ownerId: number;
 }
 
 function sanitizeFtsQuery(q: string): string {
@@ -22,6 +23,7 @@ export function searchRecipes(db: Database, params: SearchParams): Recipe[] {
 	const q = (params.q ?? "").trim();
 	const tags = (params.tags ?? []).map((t) => t.trim()).filter(Boolean);
 	const favOnly = params.favorite === true;
+	const ownerId = params.ownerId;
 
 	const hasQ = q.length > 0;
 	const hasTags = tags.length > 0;
@@ -32,7 +34,8 @@ export function searchRecipes(db: Database, params: SearchParams): Recipe[] {
 	const tagSubquery = `(
 	     SELECT rt.recipe_id FROM recipe_tags rt
 	     JOIN tags t ON t.id = rt.tag_id
-	     WHERE t.name COLLATE NOCASE IN (${placeholders})
+	     WHERE t.owner_id = ?
+	       AND t.name COLLATE NOCASE IN (${placeholders})
 	   )`;
 
 	let rows: Record<string, unknown>[];
@@ -47,12 +50,13 @@ export function searchRecipes(db: Database, params: SearchParams): Recipe[] {
 					`SELECT DISTINCT r.* FROM recipes r
 					 JOIN (SELECT rowid AS rid, rank FROM recipes_fts WHERE recipes_fts MATCH ?) f
 					   ON f.rid = r.id
-					 WHERE r.deleted_at IS NULL
+					 WHERE r.owner_id = ?
+					   AND r.deleted_at IS NULL
 					   AND r.id IN ${tagSubquery}
 					   ${favCond}
 					 ORDER BY f.rank`,
 				)
-				.all(match, ...tags) as Record<string, unknown>[];
+				.all(match, ownerId, ownerId, ...tags) as Record<string, unknown>[];
 		}
 	} else if (hasQ) {
 		const match = sanitizeFtsQuery(q);
@@ -64,31 +68,34 @@ export function searchRecipes(db: Database, params: SearchParams): Recipe[] {
 					`SELECT r.* FROM recipes r
 					 JOIN (SELECT rowid AS rid, rank FROM recipes_fts WHERE recipes_fts MATCH ?) f
 					   ON f.rid = r.id
-					 WHERE r.deleted_at IS NULL
+					 WHERE r.owner_id = ?
+					   AND r.deleted_at IS NULL
 					   ${favCond}
 					 ORDER BY f.rank`,
 				)
-				.all(match) as Record<string, unknown>[];
+				.all(match, ownerId) as Record<string, unknown>[];
 		}
 	} else if (hasTags) {
 		rows = db
 			.prepare(
 				`SELECT DISTINCT r.* FROM recipes r
-				 WHERE r.deleted_at IS NULL
+				 WHERE r.owner_id = ?
+				   AND r.deleted_at IS NULL
 				   AND r.id IN ${tagSubquery}
 				   ${favCond}
 				 ORDER BY r.created_at DESC`,
 			)
-			.all(...tags) as Record<string, unknown>[];
+			.all(ownerId, ownerId, ...tags) as Record<string, unknown>[];
 	} else if (hasFav) {
 		rows = db
 			.prepare(
 				`SELECT r.* FROM recipes r
-				 WHERE r.deleted_at IS NULL
+				 WHERE r.owner_id = ?
+				   AND r.deleted_at IS NULL
 				   AND r.favorite = 1
 				 ORDER BY r.created_at DESC`,
 			)
-			.all() as Record<string, unknown>[];
+			.all(ownerId) as Record<string, unknown>[];
 	} else {
 		rows = [];
 	}
@@ -107,6 +114,10 @@ export function sortRecipes(list: Recipe[], sort: string): Recipe[] {
 			return sorted.sort((a, b) => a.created_at.localeCompare(b.created_at));
 		case "date-new":
 			return sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
+		case "rating-asc":
+			return sorted.sort((a, b) => a.rating - b.rating);
+		case "rating-desc":
+			return sorted.sort((a, b) => b.rating - a.rating);
 		default:
 			return list;
 	}

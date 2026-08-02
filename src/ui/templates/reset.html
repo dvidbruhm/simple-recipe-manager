@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<form action="/reset" method="post" class="auth-form">
+  <h1 class="auth-form__title">Set a new password</h1>
+  {% if token_error %}
+    <p class="auth-error">{{ token_error }}</p>
+    <div class="auth-form__links">
+      <a href="/forgot">Request a new reset link</a>
+    </div>
+  {% else %}
+    {% if password_error %}<p class="auth-error">{{ password_error }}</p>{% endif %}
+    <input type="hidden" name="token" value="{{ token }}">
+    <label>New password
+      <input type="password" name="password" autocomplete="new-password" minlength="8" autofocus required>
+    </label>
+    <p class="auth-hint">At least 8 characters.</p>
+    <button type="submit" class="btn btn--primary auth-form__submit">Update password</button>
+  {% endif %}
+  <div class="auth-form__links">
+    <a href="/login">Back to sign in</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-form">
+  <h1 class="auth-form__title">Check your email</h1>
+  <p class="auth-hint">
+    If an account exists for that email, we've sent a link to reset your password.
+    The link is valid for 1 hour.
+  </p>
+  <p class="auth-hint">If you don't receive an email, check your spam folder or try again.</p>
+  <div class="auth-form__links">
+    <a href="/login">Back to sign in</a>
+  </div>
+</div>
+{% endblock %}

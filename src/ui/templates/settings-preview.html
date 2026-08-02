@@ -1,53 +1,71 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="settings-preview">
-  <h1>Import Preview</h1>
-  <p class="filename">{{ filename }} — {{ new_count }} new, {{ dup_count }} duplicates</p>
+<section class="settings-preview max-w-3xl mx-auto px-4">
+  <h1 class="text-2xl font-bold mb-2 text-[color:var(--color-text)]">Import Preview</h1>
+  <p class="text-sm text-[color:var(--color-muted)] mb-6">
+    <span class="filename">{{ filename }}</span> — {{ new_count }} new, {{ dup_count }} duplicates
+  </p>
 
   {% if recipes.length == 0 %}
-    <p>No recipes found in the file.</p>
-    <a href="/settings" class="btn">Try another file</a>
+    <div class="settings-card rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5 text-center">
+      <p class="text-[color:var(--color-muted)] mb-4">No recipes found in the file.</p>
+      <a href="/settings" class="btn">Try another file</a>
+    </div>
   {% else %}
 
-  <form action="/settings/import/commit" method="post">
+  <form action="/settings/import/commit" method="post" class="space-y-6">
     <input type="hidden" name="session" value="{{ session_id }}">
 
     {% if new_count > 0 %}
-    <h2>New (will be imported)</h2>
-    <ul class="recipe-list">
-      {% for r in recipes %}
-        {% if r.status.status == "new" %}
-        <li>
-          <input type="hidden" name="decision_{{ loop.index0 }}" value="import">
-          <strong>{{ r.title }}</strong>
-          {% if r.source_url %}<span class="meta">{{ r.source_url }}</span>{% endif %}
-        </li>
-        {% endif %}
-      {% endfor %}
-    </ul>
+    <div class="settings-card rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5">
+      <h2 class="text-lg font-semibold text-[color:var(--color-text)] mb-3">New (will be imported)</h2>
+      <ul class="import-list space-y-2">
+        {% for r in recipes %}
+          {% if r.status.status == "new" %}
+          <li class="import-list__row flex items-baseline gap-2">
+            <input type="hidden" name="decision_{{ loop.index0 }}" value="import">
+            <strong class="text-[color:var(--color-text)]">{{ r.title }}</strong>
+            {% if r.source_url %}<span class="text-xs text-[color:var(--color-muted)] truncate">{{ r.source_url }}</span>{% endif %}
+          </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
     {% endif %}
 
     {% if dup_count > 0 %}
-    <h2>Duplicates</h2>
-    <ul class="recipe-list">
-      {% for r in recipes %}
-        {% if r.status.status == "duplicate" %}
-        <li>
-          <strong>{{ r.title }}</strong>
-          <span class="meta">matches existing recipe #{{ r.status.existingId }} ({{ r.status.reason }})</span>
-          <fieldset>
-            <label><input type="radio" name="decision_{{ loop.index0 }}" value="skip" checked> Skip</label>
-            <label><input type="radio" name="decision_{{ loop.index0 }}" value="replace_{{ r.status.existingId }}"> Replace existing</label>
-          </fieldset>
-        </li>
-        {% endif %}
-      {% endfor %}
-    </ul>
+    <div class="settings-card rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5">
+      <h2 class="text-lg font-semibold text-[color:var(--color-text)] mb-3">Duplicates</h2>
+      <ul class="import-list space-y-3">
+        {% for r in recipes %}
+          {% if r.status.status == "duplicate" %}
+          <li class="import-list__row">
+            <div class="flex items-baseline gap-2 mb-1">
+              <strong class="text-[color:var(--color-text)]">{{ r.title }}</strong>
+              <span class="text-xs text-[color:var(--color-muted)]">matches recipe #{{ r.status.existingId }} ({{ r.status.reason }})</span>
+            </div>
+            <fieldset class="flex gap-4 text-sm text-[color:var(--color-text)]">
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name="decision_{{ loop.index0 }}" value="skip" checked>
+                Skip
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name="decision_{{ loop.index0 }}" value="replace_{{ r.status.existingId }}">
+                Replace existing
+              </label>
+            </fieldset>
+          </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
     {% endif %}
 
-    <button type="submit">Confirm import ({{ new_count }} new)</button>
-    <a href="/settings" class="btn-cancel">Cancel</a>
+    <div class="flex gap-3">
+      <button type="submit" class="btn btn--primary">Confirm import ({{ new_count }} new)</button>
+      <a href="/settings" class="btn">Cancel</a>
+    </div>
   </form>
 
   {% endif %}

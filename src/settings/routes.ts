@@ -3,20 +3,22 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Hono } from "hono";
+import type { App, Ctx } from "@/app";
 import { APP_VERSION, type Config, GITHUB_URL } from "@/config";
 import { detectDuplicates } from "@/import/duplicate-detector";
 import type { PartialRecipe } from "@/import/extractor";
 import { pickAdapter } from "@/import/file-importers";
 import { downloadImage } from "@/import/image";
 import { previewSessions } from "@/import/preview-session";
-import type { RecipeRepository } from "@/recipes/repository";
+import { RecipeRepository } from "@/recipes/repository";
 import { TagRepository } from "@/tags/repository";
 import { render } from "@/ui/nunjucks";
 import { themeVars } from "@/ui/theme";
 
-export function settingsRoutes(db: Database, config: Config, recipes: RecipeRepository): Hono {
-	const app = new Hono();
-	const tagRepo = new TagRepository(db);
+type UserIdFrom = (c: Ctx) => number;
+
+export function settingsRoutes(db: Database, config: Config, userIdFrom: UserIdFrom): App {
+	const app: App = new Hono();
 
 	app.get("/settings", (c) => {
 		return c.html(
@@ -30,6 +32,7 @@ export function settingsRoutes(db: Database, config: Config, recipes: RecipeRepo
 	});
 
 	app.post("/settings/import/preview", async (c) => {
+		const userId = userIdFrom(c);
 		const body = await c.req.parseBody();
 		const file = body.file;
 		if (!(file instanceof File)) {
@@ -44,7 +47,7 @@ export function settingsRoutes(db: Database, config: Config, recipes: RecipeRepo
 		const tempDir = mkdtempSync(join(tmpdir(), "rm-import-"));
 		try {
 			const parsedRecipes = await adapter.parse(buf, { tempDir });
-			const detections = detectDuplicates(db, parsedRecipes);
+			const detections = detectDuplicates(db, parsedRecipes, userId);
 
 			const sessionId = previewSessions.create({
 				recipes: parsedRecipes,
@@ -73,6 +76,9 @@ export function settingsRoutes(db: Database, config: Config, recipes: RecipeRepo
 	});
 
 	app.post("/settings/import/commit", async (c) => {
+		const userId = userIdFrom(c);
+		const recipes = new RecipeRepository(db, userId);
+		const tagRepo = new TagRepository(db, userId);
 		const body = await c.req.parseBody();
 		const sessionId = String(body.session ?? "");
 		const session = previewSessions.get(sessionId);

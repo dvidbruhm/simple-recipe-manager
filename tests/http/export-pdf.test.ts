@@ -1,35 +1,30 @@
 import { Database } from "bun:sqlite";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createSessionCookie } from "@/auth/session";
 import { migrate } from "@/db/migrate";
 import { RecipeRepository } from "@/recipes/repository";
 import { buildApp } from "@/server";
-
-const SECRET = "test-secret";
+import { createTestUser, freshDataDir, setupEnv, userCookie } from "../helpers/auth";
 
 const PNG_VALID = Buffer.from(
 	"iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAEUlEQVQImWM4kWKEFTEMpAQAV7NBoa8Fc1IAAAAASUVORK5CYII=",
 	"base64",
 );
 
-function freshDataDir(): string {
-	const dir = join(tmpdir(), `rmtest-${Math.random().toString(36).slice(2)}`);
-	mkdirSync(dir, { recursive: true });
+function freshDataDirWithImages(): string {
+	const dir = freshDataDir();
 	mkdirSync(join(dir, "images"), { recursive: true });
 	return dir;
 }
 
 async function setupApp() {
-	process.env.APP_PASSWORD = "pw";
-	process.env.SESSION_SECRET = SECRET;
-	const dataDir = freshDataDir();
-	process.env.DATA_DIR = dataDir;
+	const dataDir = freshDataDirWithImages();
+	setupEnv(dataDir);
 
 	const db = new Database(join(dataDir, "recipes.db"));
 	migrate(db);
-	const recipes = new RecipeRepository(db);
+	const { userId } = createTestUser(db);
+	const recipes = new RecipeRepository(db, userId);
 
 	writeFileSync(join(dataDir, "images", "abc123.png"), PNG_VALID);
 	recipes.insert({
@@ -46,7 +41,7 @@ async function setupApp() {
 	db.close();
 
 	const app = buildApp();
-	const cookie = await createSessionCookie(SECRET, 3600);
+	const cookie = await userCookie(userId);
 	return { app, cookie };
 }
 

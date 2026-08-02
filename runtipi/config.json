@@ -3,15 +3,15 @@
   "id": "simple-recipe-manager",
   "available": true,
   "short_desc": "Self-hosted recipe library with URL import",
-  "description": "A minimal recipe manager with URL import from major French and English recipe sites, full-text search, tagging, and Android share-to-import via PWA.",
+  "description": "A minimal recipe manager with per-user accounts, URL import from major French and English recipe sites, full-text search, tagging, and Android share-to-import via PWA.",
   "author": "dvidbruhm",
   "source": "https://github.com/dvidbruhm/simple-recipe-manager",
   "port": 3000,
   "categories": [
     "utilities"
   ],
-  "version": "1.0.3",
-  "tipi_version": 1,
+  "version": "2.0.0",
+  "tipi_version": 2,
   "exposable": true,
   "dynamic_config": true,
   "supported_architectures": [
@@ -22,15 +22,51 @@
   "form_fields": [
     {
       "type": "password",
-      "label": "App password (shared by all family users)",
+      "label": "Session secret (used to sign login cookies)",
       "required": true,
-      "env_variable": "APP_PASSWORD"
+      "env_variable": "SESSION_SECRET"
     },
     {
       "type": "text",
-      "label": "Session secret (optional, defaults to APP_PASSWORD)",
+      "label": "Public base URL (used in password-reset emails, e.g. https://recipes.example.com)",
+      "required": true,
+      "env_variable": "APP_BASE_URL"
+    },
+    {
+      "type": "text",
+      "label": "SMTP server hostname (for password-reset emails)",
+      "required": true,
+      "env_variable": "SMTP_HOST"
+    },
+    {
+      "type": "text",
+      "label": "SMTP From address (e.g. 'Recipe Manager <noreply@example.com>')",
+      "required": true,
+      "env_variable": "SMTP_FROM"
+    },
+    {
+      "type": "number",
+      "label": "SMTP port (optional; defaults to 587, or 465 if SMTP_SECURE=true)",
       "required": false,
-      "env_variable": "SESSION_SECRET"
+      "env_variable": "SMTP_PORT"
+    },
+    {
+      "type": "text",
+      "label": "SMTP username (optional; enables SMTP AUTH when set with SMTP_PASS)",
+      "required": false,
+      "env_variable": "SMTP_USER"
+    },
+    {
+      "type": "password",
+      "label": "SMTP password (optional)",
+      "required": false,
+      "env_variable": "SMTP_PASS"
+    },
+    {
+      "type": "boolean",
+      "label": "SMTP implicit TLS (use port 465; otherwise opportunistic STARTTLS)",
+      "required": false,
+      "env_variable": "SMTP_SECURE"
     }
   ]
 }

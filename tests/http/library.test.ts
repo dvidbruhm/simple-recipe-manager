@@ -1,30 +1,18 @@
 import { Database } from "bun:sqlite";
-import { mkdirSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { createSessionCookie } from "@/auth/session";
 import { migrate } from "@/db/migrate";
 import { RecipeRepository } from "@/recipes/repository";
 import { buildApp } from "@/server";
 import { TagRepository } from "@/tags/repository";
-
-const SECRET = "test-secret";
-
-function freshDataDir(): string {
-	const dir = join(tmpdir(), `rmtest-${Math.random().toString(36).slice(2)}`);
-	mkdirSync(dir, { recursive: true });
-	return dir;
-}
+import { createTestUser, freshDataDir, setupEnv, userCookie } from "../helpers/auth";
 
 async function setupApp() {
-	process.env.APP_PASSWORD = "pw";
-	process.env.SESSION_SECRET = SECRET;
 	const dataDir = freshDataDir();
-	process.env.DATA_DIR = dataDir;
+	setupEnv(dataDir);
 	const db = new Database(`${dataDir}/recipes.db`);
 	migrate(db);
-	const recipes = new RecipeRepository(db);
-	const tags = new TagRepository(db);
+	const { userId } = createTestUser(db);
+	const recipes = new RecipeRepository(db, userId);
+	const tags = new TagRepository(db, userId);
 	const id1 = recipes.insert({
 		title: "Tiramisu",
 		ingredients: ["flour", "egg"],
@@ -40,7 +28,7 @@ async function setupApp() {
 	tags.replaceForRecipe(id2, ["italian", "dinner"]);
 	db.close();
 	const app = buildApp();
-	const cookie = await createSessionCookie(SECRET, 3600);
+	const cookie = await userCookie(userId);
 	return { app, cookie };
 }
 
@@ -84,11 +72,14 @@ describe("library page", () => {
 	});
 
 	it("shows a friendly empty state when there are no recipes", async () => {
-		process.env.APP_PASSWORD = "pw";
-		process.env.SESSION_SECRET = SECRET;
-		process.env.DATA_DIR = freshDataDir();
+		const dataDir = freshDataDir();
+		setupEnv(dataDir);
+		const db = new Database(`${dataDir}/recipes.db`);
+		migrate(db);
+		const { userId } = createTestUser(db);
+		db.close();
 		const app = buildApp();
-		const cookie = await createSessionCookie(SECRET, 3600);
+		const cookie = await userCookie(userId);
 		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
 		const body = await res.text();
 		expect(body).toContain("Your recipe book is empty");
@@ -159,5 +150,113 @@ describe("library page", () => {
 		expect(body).toContain("data-bulk-delete");
 		expect(body).toContain('hx-post="/recipes/bulk-delete"');
 		expect(body).toContain("Cancel");
+	});
+
+	it("renders the search form with hx-sync to drop stale requests", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
+		const body = await res.text();
+		expect(body).toContain('hx-sync="this:replace"');
+	});
+
+	it("renders the grid skeleton placeholders for loading", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
+		const body = await res.text();
+		expect(body).toContain('id="grid-skeletons"');
+		expect(body).toContain("skeleton-card");
+	});
+
+	it("renders a Load more button when there are more than 60 recipes", async () => {
+		const dataDir = freshDataDir();
+		setupEnv(dataDir);
+		const db = new Database(`${dataDir}/recipes.db`);
+		migrate(db);
+		const { userId } = createTestUser(db);
+		const recipes = new RecipeRepository(db, userId);
+		for (let i = 0; i < 65; i++) {
+			recipes.insert({ title: `Recipe ${String(i).padStart(3, "0")}` });
+		}
+		db.close();
+		const app = buildApp();
+		const cookie = await userCookie(userId);
+		const res = await app.request("/recipes?sort=name-asc", {
+			headers: { Cookie: `session=${cookie}` },
+		});
+		const body = await res.text();
+		expect(body).toContain("load-more-btn");
+		expect(body).not.toContain("Recipe 060");
+		const htmxRes = await app.request("/recipes?sort=name-asc&page=2", {
+			headers: { Cookie: `session=${cookie}`, "HX-Request": "true" },
+		});
+		const htmxBody = await htmxRes.text();
+		expect(htmxBody).toContain("Recipe 060");
+	});
+
+	it("does not render Load more when total recipes fit on one page", async () => {
+		const dataDir = freshDataDir();
+		setupEnv(dataDir);
+		const db = new Database(`${dataDir}/recipes.db`);
+		migrate(db);
+		const { userId } = createTestUser(db);
+		const recipes = new RecipeRepository(db, userId);
+		recipes.insert({ title: "Only One" });
+		db.close();
+		const app = buildApp();
+		const cookie = await userCookie(userId);
+		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
+		const body = await res.text();
+		expect(body).not.toContain("load-more-btn");
+	});
+
+	it("renders results count and updates via htmx", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
+		const body = await res.text();
+		expect(body).toContain("results-count");
+		expect(body).toMatch(/2 recipes/);
+		const htmxRes = await app.request("/recipes?q=tiramisu", {
+			headers: { Cookie: `session=${cookie}`, "HX-Request": "true" },
+		});
+		const htmxBody = await htmxRes.text();
+		expect(htmxBody).toContain("1 recipe");
+	});
+
+	it("renders active-filter chips and Clear all when filtering", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes?q=flour&tag=dessert", {
+			headers: { Cookie: `session=${cookie}` },
+		});
+		const body = await res.text();
+		expect(body).toContain("filter-chip");
+		expect(body).toContain("Clear all");
+		expect(body).toContain("Search:");
+		expect(body).toContain("flour");
+		expect(body).toContain("dessert");
+	});
+
+	it("does not render active-filter chips when not filtering", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
+		const body = await res.text();
+		expect(body).not.toContain("Clear all");
+	});
+
+	it("sort button shows the current sort label", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes?sort=name-asc", {
+			headers: { Cookie: `session=${cookie}` },
+		});
+		const body = await res.text();
+		expect(body).toContain("sort-label");
+		expect(body).toContain("Name (A");
+	});
+
+	it("back-link affordance is present on recipe view (covered elsewhere) and search uses flexible width", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
+		const body = await res.text();
+		expect(body).toContain("search-form");
+		expect(body).toContain("max-w-96");
 	});
 });

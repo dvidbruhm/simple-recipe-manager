@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ZipArchive } from "archiver";
 import { Hono } from "hono";
+import type { App, Ctx } from "@/app";
 import type { Config } from "@/config";
 import { RecipeRepository } from "@/recipes/repository";
 import { TagRepository } from "@/tags/repository";
@@ -11,12 +12,15 @@ import { jsonLdFilename, recipeToJsonLd } from "./jsonld";
 import { type RecipeWithTags, recipeFilename, renderRecipeMarkdown } from "./markdown";
 import { renderPdf } from "./pdf";
 
-export function exportRoutes(db: Database, config: Config): Hono {
-	const app = new Hono();
-	const recipes = new RecipeRepository(db);
-	const tagRepo = new TagRepository(db);
+type UserIdFrom = (c: Ctx) => number;
+
+export function exportRoutes(db: Database, config: Config, userIdFrom: UserIdFrom): App {
+	const app: App = new Hono();
 
 	app.get("/export/formats/:format", async (c) => {
+		const userId = userIdFrom(c);
+		const recipes = new RecipeRepository(db, userId);
+		const tagRepo = new TagRepository(db, userId);
 		const fmt = c.req.param("format");
 		const list = recipes.list();
 
@@ -91,21 +95,7 @@ export function exportRoutes(db: Database, config: Config): Hono {
 					}
 				}
 
-				const arrayBuf = await new Promise<ArrayBuffer>((resolve, reject) => {
-					const archive = new ZipArchive({ zlib: { level: 6 } });
-					const chunks: Buffer[] = [];
-					archive.on("data", (c: Buffer) => chunks.push(c));
-					archive.on("end", () => {
-						const full = Buffer.concat(chunks);
-						const ab = new ArrayBuffer(full.byteLength);
-						new Uint8Array(ab).set(full);
-						resolve(ab);
-					});
-					archive.on("error", reject);
-					archive.directory(tmpDir, false);
-					archive.finalize();
-				});
-
+				const arrayBuf = await zipToBuffer(tmpDir);
 				const today = new Date().toISOString().slice(0, 10);
 				c.header("Content-Type", "application/zip");
 				c.header("Content-Disposition", `attachment; filename="recipes-${today}.jsonld.zip"`);
@@ -160,21 +150,7 @@ export function exportRoutes(db: Database, config: Config): Hono {
 				}
 			}
 
-			const arrayBuf = await new Promise<ArrayBuffer>((resolve, reject) => {
-				const archive = new ZipArchive({ zlib: { level: 6 } });
-				const chunks: Buffer[] = [];
-				archive.on("data", (c: Buffer) => chunks.push(c));
-				archive.on("end", () => {
-					const full = Buffer.concat(chunks);
-					const ab = new ArrayBuffer(full.byteLength);
-					new Uint8Array(ab).set(full);
-					resolve(ab);
-				});
-				archive.on("error", reject);
-				archive.directory(tmpDir, false);
-				archive.finalize();
-			});
-
+			const arrayBuf = await zipToBuffer(tmpDir);
 			const today = new Date().toISOString().slice(0, 10);
 			c.header("Content-Type", "application/zip");
 			c.header("Content-Disposition", `attachment; filename="recipes-${today}.md.zip"`);
@@ -185,4 +161,21 @@ export function exportRoutes(db: Database, config: Config): Hono {
 	});
 
 	return app;
+}
+
+function zipToBuffer(tmpDir: string): Promise<ArrayBuffer> {
+	return new Promise<ArrayBuffer>((resolve, reject) => {
+		const archive = new ZipArchive({ zlib: { level: 6 } });
+		const chunks: Buffer[] = [];
+		archive.on("data", (c: Buffer) => chunks.push(c));
+		archive.on("end", () => {
+			const full = Buffer.concat(chunks);
+			const ab = new ArrayBuffer(full.byteLength);
+			new Uint8Array(ab).set(full);
+			resolve(ab);
+		});
+		archive.on("error", reject);
+		archive.directory(tmpDir, false);
+		archive.finalize();
+	});
 }

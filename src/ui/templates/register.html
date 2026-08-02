@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<form action="/register" method="post" class="auth-form">
+  <h1 class="auth-form__title">Create your account</h1>
+  {% if error %}<p class="auth-error">{{ error }}</p>{% endif %}
+  <label>Email
+    <input type="email" name="email" value="{{ email | default('') }}" autocomplete="email" autofocus required>
+  </label>
+  <label>Password
+    <input type="password" name="password" autocomplete="new-password" minlength="8" required>
+  </label>
+  <p class="auth-hint">At least 8 characters.</p>
+  <button type="submit" class="btn btn--primary auth-form__submit">Create account</button>
+  <div class="auth-form__links">
+    <a href="/login">Already have an account? Sign in</a>
+  </div>
+</form>
+{% endblock %}

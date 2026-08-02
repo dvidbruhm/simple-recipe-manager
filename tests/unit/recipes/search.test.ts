@@ -4,6 +4,7 @@ import { sortRecipes } from "@/recipes/search";
 function make(id: number, title: string, createdAt: string): Recipe {
 	return {
 		id,
+		owner_id: 1,
 		title,
 		description: "",
 		ingredients: [],
@@ -11,6 +12,7 @@ function make(id: number, title: string, createdAt: string): Recipe {
 		notes: "",
 		source_url: "",
 		image_filename: null,
+		base_servings: null,
 		rating: 0,
 		favorite: false,
 		created_at: createdAt,

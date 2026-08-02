@@ -1,20 +1,8 @@
-import { mkdirSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { buildApp } from "@/server";
-
-function freshDataDir(): string {
-	const dir = join(tmpdir(), `rmtest-${Math.random().toString(36).slice(2)}`);
-	mkdirSync(dir, { recursive: true });
-	return dir;
-}
+import { setupBareApp } from "../helpers/auth";
 
 describe("static files", () => {
 	function setup() {
-		process.env.APP_PASSWORD = "pw";
-		const dataDir = freshDataDir();
-		process.env.DATA_DIR = dataDir;
-		return buildApp();
+		return setupBareApp();
 	}
 
 	it("GET /static/app.css returns CSS content", async () => {

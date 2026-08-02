@@ -18,29 +18,49 @@ async function hmac(secret: string, msg: string): Promise<ArrayBuffer> {
 	return crypto.subtle.sign("HMAC", key, new TextEncoder().encode(msg));
 }
 
-export async function createSessionCookie(secret: string, ttlSec: number): Promise<string> {
+async function constantTimeEqual(a: string, b: string): Promise<boolean> {
+	if (a.length !== b.length) return false;
+	let diff = 0;
+	for (let i = 0; i < a.length; i++) {
+		diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+	}
+	return diff === 0;
+}
+
+export async function createSessionCookie(
+	secret: string,
+	ttlSec: number,
+	userId: number,
+): Promise<string> {
 	const exp = Math.floor(Date.now() / 1000) + ttlSec;
-	const payload = `${exp}`;
+	const payload = `${exp}.${userId}`;
 	const sig = base64url(await hmac(secret, payload));
 	return `${payload}.${sig}`;
 }
 
-export async function verifySessionCookie(cookie: string, secret: string): Promise<boolean> {
+export interface VerifiedSession {
+	userId: number;
+	exp: number;
+}
+
+export async function verifySessionCookie(
+	cookie: string,
+	secret: string,
+): Promise<VerifiedSession | null> {
 	const parts = cookie.split(".");
-	if (parts.length !== 2) return false;
-	const payload = parts[0];
-	const sig = parts[1];
-	if (payload === undefined || sig === undefined) return false;
+	if (parts.length !== 3) return null;
+	const expStr = parts[0];
+	const userIdStr = parts[1];
+	const sig = parts[2];
+	if (expStr === undefined || userIdStr === undefined || sig === undefined) return null;
+	const payload = `${expStr}.${userIdStr}`;
 	const expected = base64url(await hmac(secret, payload));
-	if (expected.length !== sig.length) return false;
-	let diff = 0;
-	for (let i = 0; i < expected.length; i++) {
-		diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
-	}
-	if (diff !== 0) return false;
-	const exp = Number(payload);
-	if (!Number.isFinite(exp)) return false;
-	return exp > Math.floor(Date.now() / 1000);
+	if (!(await constantTimeEqual(expected, sig))) return null;
+	const exp = Number(expStr);
+	const userId = Number(userIdStr);
+	if (!Number.isFinite(exp) || !Number.isFinite(userId)) return null;
+	if (exp <= Math.floor(Date.now() / 1000)) return null;
+	return { userId, exp };
 }
 
 export const SESSION_COOKIE_NAME = COOKIE_NAME;

@@ -15,7 +15,7 @@ Built for a homelab: single Bun process, one SQLite file, ~40-80 MB RAM. Designe
 - **Import from file** — JSON-LD files, RecipeSage exports, and this app's own export zips, with duplicate detection (skip/replace).
 - **PWA** — installable to your Android home screen. Tap the browser Share button → "Recipe Manager" to import a URL directly.
 - **Themes** — neutral minimalist with a light/dark toggle.
-- **Auth** — single shared password for the whole household. No per-user accounts.
+- **Auth** — per-user accounts (register with email + password), with a "forgot password" reset flow that emails a single-use, 1-hour link via SMTP. Each user's recipe library is strictly isolated.
 
 ## Tech stack
 
@@ -25,8 +25,14 @@ Bun · TypeScript (strict) · Hono · Nunjucks · Tailwind CSS v4 · HTMX · SQL
 
 | Env var | Required | Default | Purpose |
 |---|---|---|---|
-| `APP_PASSWORD` | yes | — | Shared login password. App refuses to boot if unset. |
-| `SESSION_SECRET` | no | `APP_PASSWORD` | HMAC key for signing session cookies. |
+| `SESSION_SECRET` | yes | — | HMAC key for signing session cookies. |
+| `APP_BASE_URL` | yes | — | Public base URL, used to build absolute links in reset emails (e.g. `http://recipes.lan:3000`). |
+| `SMTP_HOST` | yes | — | SMTP server hostname for sending password-reset emails. |
+| `SMTP_FROM` | yes | — | `From:` header for outgoing mail, e.g. `Recipe Manager <noreply@example.com>`. |
+| `SMTP_PORT` | no | `587` (or `465` if `SMTP_SECURE=true`) | SMTP server port. |
+| `SMTP_USER` | no | — | Username for SMTP AUTH. Enables AUTH when set with `SMTP_PASS`. |
+| `SMTP_PASS` | no | — | Password for SMTP AUTH. |
+| `SMTP_SECURE` | no | `false` | Use implicit TLS (typically on port 465). When `false`, opportunistic STARTTLS is used. |
 | `PORT` | no | `3000` | HTTP listen port. |
 | `DATA_DIR` | no | `/data` | Directory for `recipes.db` and `images/`. |
 
@@ -35,13 +41,13 @@ Bun · TypeScript (strict) · Hono · Nunjucks · Tailwind CSS v4 · HTMX · SQL
 ```bash
 bun install
 bun run build:css        # compile Tailwind
-APP_PASSWORD=dev bun run dev
+SESSION_SECRET=dev APP_BASE_URL=http://localhost:3000 SMTP_HOST=127.0.0.1 SMTP_FROM=noreply@localhost bun run dev
 ```
 
 Then open http://localhost:3000.
 
 ```bash
-bun test                 # 121 tests
+bun test                 # 223 tests
 bun run typecheck
 bun run lint
 ```
@@ -50,12 +56,21 @@ bun run lint
 
 ```bash
 docker build -t recipe-manager .
-docker run -e APP_PASSWORD=changeme -v recipe-data:/data -p 3000:3000 recipe-manager
+docker run \
+  -e SESSION_SECRET=changeme \
+  -e APP_BASE_URL=http://localhost:3000 \
+  -e SMTP_HOST=smtp.example.com \
+  -e SMTP_FROM='Recipe Manager <noreply@example.com>' \
+  -v recipe-data:/data -p 3000:3000 recipe-manager
 ```
 
 ## Self-hosting on Runtipi
 
-This repo includes a Runtipi app definition under `runtipi/`. Add it to your app store, set `APP_PASSWORD` in the Runtipi UI, and install. A tagged release (`v*.*.*`) publishes a multi-arch image to GHCR via GitHub Actions.
+This repo includes a Runtipi app definition under `runtipi/`. Add it to your app store, set `SESSION_SECRET`, `APP_BASE_URL`, `SMTP_HOST`, `SMTP_FROM` (and optionally `SMTP_USER`/`SMTP_PASS`) in the Runtipi UI, and install. A tagged release (`v*.*.*`) publishes a multi-arch image to GHCR via GitHub Actions.
+
+## Upgrading from v1 (shared-password auth)
+
+The v2 release replaces the single `APP_PASSWORD` model with per-user accounts. The migration is **destructive**: existing recipes are wiped on first boot, because every recipe now belongs to a registered user. Take a backup of `recipes.db` before upgrading if you want to preserve the data — re-import via Settings → Import after creating your new account.
 
 ## License
 

@@ -1,17 +1,56 @@
-{% for r in recipes %}
-  {% if view == "list" %}{% include "partials/recipe-list.html" %}{% else %}{% include "partials/recipe-card.html" %}{% endif %}
+{% if not append %}
+<div id="library-meta" hx-swap-oob="true">{% include "partials/library-meta.html" %}</div>
+<span id="sort-label" class="sort-label" hx-swap-oob="true">{{ sort_label | default('Newest') }}</span>
+{% endif %}
+{% if append %}
+  {% for r in recipes %}
+    {% if view == "list" %}{% include "partials/recipe-list.html" %}{% else %}{% include "partials/recipe-card.html" %}{% endif %}
+  {% endfor %}
+  {% if has_more %}
+  <button type="button"
+          class="btn load-more-btn col-span-full"
+          data-load-more
+          hx-get="/recipes"
+          hx-target="this"
+          hx-swap="outerHTML"
+          hx-include="[name='q'], #current-sort, [name='tag']:checked"
+          hx-vals='{"page": {{ (page or 1) + 1 }}'
+          hx-disabled-elt="this"
+          hx-indicator="#grid-spinner">
+    Load more (page {{ (page or 1) + 1 }} of {{ total_pages or 1 }})
+  </button>
+  {% endif %}
 {% else %}
-  <div class="empty-state col-span-full text-center py-16">
-    {% if has_any %}
-      <p class="text-[color:var(--color-muted)]">No recipes match your search or filters.</p>
-    {% else %}
-      <img src="/static/placeholder.svg" alt="" class="h-24 w-auto mx-auto mb-4 opacity-60">
-      <h2 class="text-xl font-semibold text-[color:var(--color-text)] mb-1">Your recipe book is empty</h2>
-      <p class="text-[color:var(--color-muted)] mb-4">Add your first recipe or import one from a URL.</p>
-      <div class="flex justify-center gap-2">
-        <a href="/recipes/new" class="btn btn--primary">New recipe</a>
-        <a href="/import" class="btn">Import from URL</a>
-      </div>
-    {% endif %}
-  </div>
-{% endfor %}
+  {% for r in recipes %}
+    {% if view == "list" %}{% include "partials/recipe-list.html" %}{% else %}{% include "partials/recipe-card.html" %}{% endif %}
+  {% else %}
+    <div class="empty-state col-span-full text-center py-16">
+      {% if has_any %}
+        <p class="text-[color:var(--color-muted)]">No recipes match your search or filters.</p>
+        <p class="mt-2"><a class="filter-chip filter-chip--clear" href="{{ clear_url }}" hx-get="{{ clear_url }}" hx-target="#grid" hx-push-url="true" hx-indicator="#grid-spinner" role="button">Clear filters</a></p>
+      {% else %}
+        <img src="/static/placeholder.svg" alt="" class="h-24 w-auto mx-auto mb-4 opacity-60">
+        <h2 class="text-xl font-semibold text-[color:var(--color-text)] mb-1">Your recipe book is empty</h2>
+        <p class="text-[color:var(--color-muted)] mb-4">Add your first recipe or import one from a URL.</p>
+        <div class="flex justify-center gap-2">
+          <a href="/recipes/new" class="btn btn--primary">New recipe</a>
+          <a href="/import" class="btn">Import from URL</a>
+        </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+  {% if has_more %}
+  <button type="button"
+          class="btn load-more-btn col-span-full"
+          data-load-more
+          hx-get="/recipes"
+          hx-target="this"
+          hx-swap="outerHTML"
+          hx-include="[name='q'], #current-sort, [name='tag']:checked"
+          hx-vals='{"page": {{ (page or 1) + 1 }}'
+          hx-disabled-elt="this"
+          hx-indicator="#grid-spinner">
+    Load more (page {{ (page or 1) + 1 }} of {{ total_pages or 1 }})
+  </button>
+  {% endif %}
+{% endif %}

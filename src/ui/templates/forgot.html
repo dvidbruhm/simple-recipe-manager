@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<form action="/forgot" method="post" class="auth-form">
+  <h1 class="auth-form__title">Reset your password</h1>
+  <p class="auth-hint">Enter your email and we'll send you a link to set a new password.</p>
+  <label>Email
+    <input type="email" name="email" value="{{ email | default('') }}" autocomplete="email" autofocus required>
+  </label>
+  <button type="submit" class="btn btn--primary auth-form__submit">Send reset link</button>
+  <div class="auth-form__links">
+    <a href="/login">Back to sign in</a>
+  </div>
+</form>
+{% endblock %}

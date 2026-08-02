@@ -1,4 +1,5 @@
-import { type Context, Hono } from "hono";
+import { Hono } from "hono";
+import type { App, Ctx } from "@/app";
 import type { Config } from "@/config";
 import type { RecipeRepository } from "@/recipes/repository";
 import { render } from "@/ui/nunjucks";
@@ -7,19 +8,16 @@ import { extractRecipe, type PartialRecipe } from "./extractor";
 import { fetchHtml } from "./fetcher";
 import { downloadImage } from "./image";
 
-export function importRoutes(config: Config, recipes: RecipeRepository): Hono {
-	const app = new Hono();
+type RecipeProvider = (c: Ctx) => RecipeRepository;
+
+export function importRoutes(config: Config, recipesFor: RecipeProvider): App {
+	const app: App = new Hono();
 
 	app.get("/import", (c) => {
 		return c.html(render("import.html", { title: "Import a recipe", ...themeVars(c) }));
 	});
 
-	async function downloadImageIfNeeded(recipeId: number, image: string) {
-		const filename = await downloadImage(config.dataDir, image);
-		if (filename) recipes.update(recipeId, { image_filename: filename });
-	}
-
-	async function runImport(c: Context, url: string): Promise<Response> {
+	async function runImport(c: Ctx, url: string): Promise<Response> {
 		if (!url) return c.redirect("/import");
 
 		const fetched = await fetchHtml(url, config.fetchProxy);
@@ -28,10 +26,12 @@ export function importRoutes(config: Config, recipes: RecipeRepository): Hono {
 		}
 
 		const outcome = await extractRecipe(url, fetched.html);
+		const recipes = recipesFor(c);
 		if (outcome.kind === "structured" || outcome.kind === "readability") {
 			const id = recipes.insert(toInput(outcome.recipe, url));
 			if (outcome.recipe.image) {
-				await downloadImageIfNeeded(id, outcome.recipe.image);
+				const filename = await downloadImage(config.dataDir, outcome.recipe.image);
+				if (filename) recipes.update(id, { image_filename: filename });
 			}
 			return c.redirect(`/recipes/${id}/edit`);
 		}
@@ -55,8 +55,8 @@ export function importRoutes(config: Config, recipes: RecipeRepository): Hono {
 		const body = await c.req.parseBody();
 		const html = String(body.html ?? "");
 		const recipeId = Number(body.recipe_id);
-		const existing =
-			Number.isFinite(recipeId) && recipeId > 0 ? recipes.getById(recipeId) : null;
+		const recipes = recipesFor(c);
+		const existing = Number.isFinite(recipeId) && recipeId > 0 ? recipes.getById(recipeId) : null;
 		const hasExisting = existing != null;
 		const url = existing?.source_url || String(body.url ?? "");
 		const backToPaste = `/recipes/new?import=paste_html&url=${encodeURIComponent(url)}`;
@@ -70,13 +70,15 @@ export function importRoutes(config: Config, recipes: RecipeRepository): Hono {
 			if (hasExisting) {
 				recipes.update(recipeId, toInput(outcome.recipe, url));
 				if (outcome.recipe.image) {
-					await downloadImageIfNeeded(recipeId, outcome.recipe.image);
+					const filename = await downloadImage(config.dataDir, outcome.recipe.image);
+					if (filename) recipes.update(recipeId, { image_filename: filename });
 				}
 				return c.redirect(`/recipes/${recipeId}/edit`);
 			}
 			const id = recipes.insert(toInput(outcome.recipe, url));
 			if (outcome.recipe.image) {
-				await downloadImageIfNeeded(id, outcome.recipe.image);
+				const filename = await downloadImage(config.dataDir, outcome.recipe.image);
+				if (filename) recipes.update(id, { image_filename: filename });
 			}
 			return c.redirect(`/recipes/${id}/edit`);
 		}

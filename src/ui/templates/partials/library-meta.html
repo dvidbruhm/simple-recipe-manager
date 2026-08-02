@@ -1,0 +1,25 @@
+<div class="library-meta">
+  {% if total is number %}
+    <span class="results-count text-sm text-[color:var(--color-muted)]">
+      {{ total }} recipe{{ "s" if total != 1 else "" }}{% if is_filtered %} match{{ "es" if total != 1 else "" }}{% endif %}
+    </span>
+  {% endif %}
+  {% if active_filters and active_filters.length %}
+    <span class="active-filters flex flex-wrap gap-1.5 items-center">
+      {% for f in active_filters %}
+      <button type="button"
+              class="filter-chip"
+              hx-get="{{ f.removeUrl }}"
+              hx-target="#grid"
+              hx-push-url="true"
+              hx-indicator="#grid-spinner">{{ f.label }} <span aria-hidden="true">×</span></button>
+      {% endfor %}
+      <a class="filter-chip filter-chip--clear"
+         href="{{ clear_url }}"
+         hx-get="{{ clear_url }}"
+         hx-target="#grid"
+         hx-push-url="true"
+         hx-indicator="#grid-spinner">Clear all</a>
+    </span>
+  {% endif %}
+</div>

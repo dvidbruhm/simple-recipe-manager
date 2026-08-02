@@ -1,30 +1,18 @@
 import { Database } from "bun:sqlite";
-import { mkdirSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { createSessionCookie } from "@/auth/session";
 import { migrate } from "@/db/migrate";
 import { RecipeRepository } from "@/recipes/repository";
 import { buildApp } from "@/server";
 import { TagRepository } from "@/tags/repository";
-
-const SECRET = "test-secret";
-
-function freshDataDir(): string {
-	const dir = join(tmpdir(), `rmtest-${Math.random().toString(36).slice(2)}`);
-	mkdirSync(dir, { recursive: true });
-	return dir;
-}
+import { createTestUser, freshDataDir, setupEnv, userCookie } from "../helpers/auth";
 
 async function setupApp() {
-	process.env.APP_PASSWORD = "pw";
-	process.env.SESSION_SECRET = SECRET;
 	const dataDir = freshDataDir();
-	process.env.DATA_DIR = dataDir;
+	setupEnv(dataDir);
 	const db = new Database(`${dataDir}/recipes.db`);
 	migrate(db);
-	const recipes = new RecipeRepository(db);
-	const tags = new TagRepository(db);
+	const { userId } = createTestUser(db);
+	const recipes = new RecipeRepository(db, userId);
+	const tags = new TagRepository(db, userId);
 	const id1 = recipes.insert({
 		title: "Tiramisu",
 		description: "A layered coffee dessert",
@@ -43,7 +31,7 @@ async function setupApp() {
 	tags.replaceForRecipe(id2, ["italian", "dinner"]);
 	db.close();
 	const app = buildApp();
-	const cookie = await createSessionCookie(SECRET, 3600);
+	const cookie = await userCookie(userId);
 	return { app, cookie, id1, id2 };
 }
 
@@ -67,6 +55,81 @@ describe("recipe view & edit pages", () => {
 		const { app, cookie } = await setupApp();
 		const res = await app.request("/recipes/9999", auth(cookie));
 		expect(res.status).toBe(404);
+		const body = await res.text();
+		expect(body).toContain("Page not found");
+		expect(body).toContain("Back to recipes");
+	});
+
+	it("GET /recipes/:id renders cook-mode controls when steps exist", async () => {
+		const { app, cookie, id1 } = await setupApp();
+		const res = await app.request(`/recipes/${id1}`, auth(cookie));
+		expect(res.status).toBe(200);
+		const body = await res.text();
+		expect(body).toContain("data-cook-toggle");
+		expect(body).toContain("Start cooking");
+		expect(body).toContain('class="cook-step"');
+	});
+
+	it("GET /recipes/:id renders servings control when base_servings is set", async () => {
+		const { app, cookie, id1 } = await setupApp();
+		// set base_servings via a POST
+		const fd = new FormData();
+		fd.set("title", "Tiramisu");
+		fd.set("ingredients", "2 eggs\n1 cup sugar");
+		fd.set("steps", "bake");
+		fd.set("rating", "0");
+		fd.set("base_servings", "4");
+		await app.request(`/recipes/${id1}`, {
+			method: "POST",
+			body: fd,
+			headers: { Cookie: `session=${cookie}` },
+		});
+		const res = await app.request(`/recipes/${id1}`, auth(cookie));
+		const body = await res.text();
+		expect(body).toContain('data-base-servings="4"');
+		expect(body).toContain("servings-control");
+		expect(body).toContain('data-original="2 eggs"');
+	});
+
+	it("GET /recipes/:id/edit shows base_servings field", async () => {
+		const { app, cookie, id1 } = await setupApp();
+		const res = await app.request(`/recipes/${id1}/edit`, auth(cookie));
+		const body = await res.text();
+		expect(body).toContain('name="base_servings"');
+		expect(body).toContain('id="base_servings"');
+	});
+
+	it("POST /recipes/:id/delete no longer uses a confirm() dialog", async () => {
+		const { app, cookie, id1 } = await setupApp();
+		const res = await app.request(`/recipes/${id1}`, auth(cookie));
+		const body = await res.text();
+		expect(body).not.toContain("confirm(");
+		expect(body).toContain(`action="/recipes/${id1}/delete"`);
+	});
+
+	it("GET /recipes/:id renders a back-link affordance", async () => {
+		const { app, cookie, id1 } = await setupApp();
+		const res = await app.request(`/recipes/${id1}`, auth(cookie));
+		const body = await res.text();
+		expect(body).toContain("data-back-link");
+		expect(body).toContain("← Recipes");
+	});
+
+	it("GET /recipes/:id moves notes below the recipe body (no notes section before ingredients)", async () => {
+		const { app, cookie, id1 } = await setupApp();
+		const res = await app.request(`/recipes/${id1}`, auth(cookie));
+		const body = await res.text();
+		const notesIdx = body.indexOf(">Notes<");
+		const ingredientsIdx = body.indexOf(">Ingredients<");
+		expect(notesIdx).toBeGreaterThan(ingredientsIdx);
+	});
+
+	it("GET /recipes/:id uses responsive stacked header on mobile", async () => {
+		const { app, cookie, id1 } = await setupApp();
+		const res = await app.request(`/recipes/${id1}`, auth(cookie));
+		const body = await res.text();
+		expect(body).toContain("recipe-header");
+		expect(body).toContain("flex-col sm:flex-row");
 	});
 
 	it("GET /recipes/:id/edit returns 200 with all fields pre-filled", async () => {
@@ -279,7 +342,7 @@ describe("recipe view & edit pages", () => {
 	});
 
 	it("GET /recipes?tag=favorites lists only favorited recipes", async () => {
-		const { app, cookie, id1, id2 } = await setupApp();
+		const { app, cookie, id1 } = await setupApp();
 		// favorite id1 only
 		await app.request(`/recipes/${id1}/favorite`, {
 			method: "POST",

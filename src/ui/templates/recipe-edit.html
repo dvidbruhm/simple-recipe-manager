@@ -4,6 +4,16 @@
 <div class="recipe-edit max-w-3xl mx-auto px-4">
   <h1 class="text-2xl font-bold mb-4 text-[color:var(--color-text)]">{% if new_recipe %}New Recipe{% else %}Edit Recipe{% endif %}</h1>
 
+  {% if error == "extract_failed" %}
+    <div class="draft-banner border border-[color:var(--color-danger)] bg-[color:var(--color-surface)] rounded p-4 mb-4" role="alert">
+      <p class="text-[color:var(--color-text)]">We couldn't extract a recipe from that page. Try the paste-HTML fallback below or enter the details manually.</p>
+    </div>
+  {% elif error == "empty_html" %}
+    <div class="draft-banner border border-[color:var(--color-danger)] bg-[color:var(--color-surface)] rounded p-4 mb-4" role="alert">
+      <p class="text-[color:var(--color-text)]">The pasted HTML was empty. Paste the page's full HTML source and retry.</p>
+    </div>
+  {% endif %}
+
   {% if mode == "paste_html" %}
     <div class="draft-banner border border-[color:var(--color-accent)] bg-[color:var(--color-surface)] rounded p-4 mb-4">
       <p class="mb-2 text-[color:var(--color-text)]">URL fetch failed; paste the page's HTML to retry extraction</p>
@@ -49,6 +59,10 @@
       </select>
     </div>
     <div>
+      <label for="base_servings" class="block text-sm font-medium text-[color:var(--color-text)] mb-1">Base servings <span class="text-[color:var(--color-muted)] font-normal">(optional — enables scaling on the view page)</span></label>
+      <input type="number" id="base_servings" name="base_servings" min="1" step="1" inputmode="numeric" value="{{ r.base_servings if r.base_servings else '' }}" placeholder="e.g. 4" class="w-32 px-3 py-2 rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]">
+    </div>
+    <div>
       <label for="tags-field" class="block text-sm font-medium text-[color:var(--color-text)] mb-1">Tags</label>
       <div class="tags-input" data-tags-input>
         <ul class="tags-input__chips" data-tags-chips>
@@ -67,11 +81,11 @@
       </div>
     </div>
     <div>
-      <label class="block text-sm font-medium text-[color:var(--color-text)] mb-1">Image</label>
+      <label for="image" class="block text-sm font-medium text-[color:var(--color-text)] mb-1">Image</label>
       {% if r.image_filename %}
         <img src="/static/images/{{ r.image_filename }}" alt="" class="block mb-2 max-w-[300px] rounded">
       {% endif %}
-      <input type="file" name="image" accept="image/jpeg,image/png,image/webp" class="block mb-1">
+      <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp" class="block mb-1">
       <p class="text-sm text-[color:var(--color-muted)]">or paste an image here (Ctrl+V)</p>
     </div>
     <div>
@@ -84,7 +98,7 @@
     </div>
     <div class="flex gap-3">
       <button type="submit" class="btn btn--primary">Save</button>
-      <a href="{% if new_recipe %}/recipes{% else %}/recipes/{{ r.id }}{% endif %}" class="btn">Cancel</a>
+      <a href="{% if new_recipe %}/recipes{% else %}/recipes/{{ r.id }}{% endif %}" class="btn" data-back-link>Cancel</a>
     </div>
   </form>
 </div>

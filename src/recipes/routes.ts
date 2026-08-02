@@ -1,6 +1,7 @@
 import type { Database } from "bun:sqlite";
-import { type Context, Hono } from "hono";
+import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
+import type { App, Ctx } from "@/app";
 import type { Config } from "@/config";
 import { TagRepository } from "@/tags/repository";
 import { render } from "@/ui/nunjucks";
@@ -9,12 +10,51 @@ import { removeImage, saveUploadedImage } from "./image-upload";
 import { RecipeRepository } from "./repository";
 import { searchRecipes, sortRecipes } from "./search";
 
-export function recipeRoutes(db: Database, config: Config): Hono {
-	const app = new Hono();
-	const recipes = new RecipeRepository(db);
-	const tags = new TagRepository(db);
+export function recipeRoutes(db: Database, config: Config): App {
+	const app: App = new Hono();
 
-	function libraryList(c: Context, opts?: { q?: string; tags?: string[]; sort?: string }) {
+	function userIdFrom(c: Ctx): number {
+		const id = c.get("userId");
+		if (typeof id !== "number" || !Number.isFinite(id)) {
+			throw new Error("userId missing from context");
+		}
+		return id;
+	}
+
+	function repos(c: Ctx) {
+		const userId = userIdFrom(c);
+		return {
+			userId,
+			recipes: new RecipeRepository(db, userId),
+			tags: new TagRepository(db, userId),
+		};
+	}
+
+	const PAGE_SIZE = 60;
+	const DEFAULT_SORT = "date-new";
+	const SORT_LABELS: Record<string, string> = {
+		"name-asc": "Name (A → Z)",
+		"name-desc": "Name (Z → A)",
+		"date-new": "Newest",
+		"date-old": "Oldest",
+		"rating-asc": "Stars (0 → 5)",
+		"rating-desc": "Stars (5 → 0)",
+	};
+
+	function buildLibraryUrl(opts: { q?: string; tags?: string[]; sort?: string }): string {
+		const params = new URLSearchParams();
+		if (opts.q) params.set("q", opts.q);
+		for (const t of opts.tags ?? []) params.append("tag", t);
+		if (opts.sort && opts.sort !== DEFAULT_SORT) params.set("sort", opts.sort);
+		const s = params.toString();
+		return s ? `/recipes?${s}` : "/recipes";
+	}
+
+	function libraryList(
+		c: Ctx,
+		opts?: { q?: string; tags?: string[]; sort?: string; page?: number },
+	) {
+		const { recipes, tags, userId } = repos(c);
 		const q = opts?.q ?? c.req.query("q") ?? "";
 		const selTags = (opts?.tags ?? c.req.queries("tag") ?? []).filter(Boolean);
 		const favOnly = selTags.includes("favorites");
@@ -22,42 +62,89 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		const sort = opts?.sort ?? c.req.query("sort") ?? "";
 		const view = getCookie(c, "view") === "list" ? "list" : "cards";
 		const filtering = !!(q || normalTags.length || favOnly);
+		const rawPage = Number(c.req.query("page") ?? "1");
+		const page = Math.max(1, opts?.page ?? (Number.isFinite(rawPage) ? rawPage : 1));
 		let list = filtering
-			? searchRecipes(db, { q, tags: normalTags, favorite: favOnly })
+			? searchRecipes(db, { q, tags: normalTags, favorite: favOnly, ownerId: userId })
 			: recipes.list();
-		if (sort) list = sortRecipes(list, sort);
-		const tagMap = tags.listForRecipes(list.map((r) => r.id));
-		const recipesWithTags = list.map((r) => ({ ...r, tags: tagMap.get(r.id) ?? [] }));
+		const effectiveSort = sort || DEFAULT_SORT;
+		list = sortRecipes(list, effectiveSort);
+		const total = list.length;
+		const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+		const safePage = Math.min(page, totalPages);
+		const start = (safePage - 1) * PAGE_SIZE;
+		const paged = list.slice(start, start + PAGE_SIZE);
+		const tagMap = tags.listForRecipes(paged.map((r) => r.id));
+		const recipesWithTags = paged.map((r) => ({ ...r, tags: tagMap.get(r.id) ?? [] }));
+
+		const activeFilters: Array<{ label: string; removeUrl: string }> = [];
+		if (q) {
+			activeFilters.push({
+				label: `Search: "${q}"`,
+				removeUrl: buildLibraryUrl({ tags: selTags, sort: effectiveSort }),
+			});
+		}
+		for (const t of selTags) {
+			const remainingTags = selTags.filter((x) => x !== t);
+			activeFilters.push({
+				label: t === "favorites" ? "♥ Favorites" : t,
+				removeUrl: buildLibraryUrl({ q, tags: remainingTags, sort: effectiveSort }),
+			});
+		}
+		if (effectiveSort !== DEFAULT_SORT) {
+			activeFilters.push({
+				label: `Sort: ${SORT_LABELS[effectiveSort] ?? effectiveSort}`,
+				removeUrl: buildLibraryUrl({ q, tags: selTags }),
+			});
+		}
+
 		return {
 			q,
 			selTags,
-			sort,
+			sort: effectiveSort,
 			view,
 			filtering,
 			recipesWithTags,
 			hasAny: recipes.list().length > 0,
+			page: safePage,
+			totalPages,
+			hasMore: safePage < totalPages,
+			total,
+			activeFilters,
+			clearUrl: "/recipes",
+			sortLabel: SORT_LABELS[effectiveSort] ?? "Newest",
 		};
 	}
 
-	function libraryGridHtml(data: ReturnType<typeof libraryList>): string {
+	function libraryGridHtml(
+		data: ReturnType<typeof libraryList>,
+		opts?: { append?: boolean },
+	): string {
 		return render("partials/grid.html", {
 			recipes: data.recipesWithTags,
 			view: data.view,
 			has_any: data.hasAny,
 			is_filtered: data.filtering,
+			page: data.page,
+			total_pages: data.totalPages,
+			has_more: data.hasMore,
+			total: data.total,
+			active_filters: data.activeFilters,
+			clear_url: data.clearUrl,
+			sort_label: data.sortLabel,
+			append: opts?.append === true,
 		});
 	}
 
 	app.get("/recipes", (c) => {
 		const data = libraryList(c);
 		if (c.req.header("HX-Request") === "true") {
-			return c.html(libraryGridHtml(data));
+			const rawPage = Number(c.req.query("page") ?? "1") || 1;
+			const append = rawPage > 1;
+			return c.html(libraryGridHtml(data, { append }));
 		}
-		const favCount = (
-			db
-				.query("SELECT COUNT(*) AS c FROM recipes WHERE favorite = 1 AND deleted_at IS NULL")
-				.get() as { c: number }
-		).c;
+		const { tags, recipes: recipeRepo } = repos(c);
+		const favCount = recipeRepo.countFavorites();
 		const tagList = tags.listAllWithCounts();
 		tagList.unshift({ name: "favorites", cnt: favCount });
 		const toast = c.req.query("toast") ?? "";
@@ -68,10 +155,17 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 				tags: tagList,
 				q: data.q,
 				active_tags: data.selTags,
-				active_sort: data.sort || "date-new",
+				active_sort: data.sort,
+				sort_label: data.sortLabel,
 				view: data.view,
 				has_any: data.hasAny,
 				is_filtered: data.filtering,
+				page: data.page,
+				total_pages: data.totalPages,
+				has_more: data.hasMore,
+				total: data.total,
+				active_filters: data.activeFilters,
+				clear_url: data.clearUrl,
 				toast,
 				undo_url: undoUrl,
 				undo_ids: [],
@@ -84,6 +178,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	app.get("/recipes/new", (c) => {
 		const importMode = c.req.query("import") ?? "";
 		const url = c.req.query("url") ?? "";
+		const error = c.req.query("error") ?? "";
 		const blank = {
 			id: 0,
 			title: "",
@@ -93,6 +188,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 			notes: "",
 			source_url: url,
 			image_filename: null,
+			base_servings: null,
 			rating: 0,
 			favorite: false,
 			created_at: "",
@@ -106,6 +202,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 				ingredients_text: "",
 				steps_text: "",
 				mode: importMode,
+				error,
 				new_recipe: true,
 				title: "New recipe",
 				...themeVars(c),
@@ -114,6 +211,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	});
 
 	app.post("/recipes", async (c) => {
+		const { recipes, tags } = repos(c);
 		const form = await c.req.formData();
 		const title = String(form.get("title") ?? "");
 		if (!title.trim()) return c.body("title required", 400);
@@ -123,6 +221,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 			.getAll("tags")
 			.map((s) => String(s).trim())
 			.filter(Boolean);
+		const baseServings = parseServings(form.get("base_servings"));
 		const id = recipes.insert({
 			title,
 			description: String(form.get("description") ?? ""),
@@ -136,6 +235,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 				.filter(Boolean),
 			notes: String(form.get("notes") ?? ""),
 			source_url: String(form.get("source_url") ?? ""),
+			base_servings: baseServings,
 			rating: Number(form.get("rating") ?? 0) || 0,
 		});
 		tags.replaceForRecipe(id, tagsList);
@@ -167,7 +267,14 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 		};
 	}
 
+	function parseServings(raw: FormDataEntryValue | null): number | null {
+		const n = Number(String(raw ?? ""));
+		if (!Number.isFinite(n) || n <= 0) return null;
+		return Math.round(n);
+	}
+
 	app.post("/recipes/bulk-delete", async (c) => {
+		const { recipes } = repos(c);
 		const form = await c.req.formData();
 		const ids = parseIds(form.getAll("ids"));
 		if (ids.length === 0) return c.body("no ids", 400);
@@ -187,6 +294,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	});
 
 	app.post("/recipes/bulk-restore", async (c) => {
+		const { recipes } = repos(c);
 		const form = await c.req.formData();
 		const ids = parseIds(form.getAll("ids"));
 		if (ids.length === 0) return c.body("no ids", 400);
@@ -200,6 +308,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	});
 
 	app.get("/recipes/:id", (c) => {
+		const { recipes, tags } = repos(c);
 		const id = Number(c.req.param("id"));
 		const recipe = recipes.getById(id);
 		if (!recipe || recipe.deleted_at) return c.notFound();
@@ -215,11 +324,13 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	});
 
 	app.get("/recipes/:id/edit", (c) => {
+		const { recipes, tags } = repos(c);
 		const id = Number(c.req.param("id"));
 		const recipe = recipes.getById(id);
 		if (!recipe) return c.notFound();
 		const tagRows = tags.listForRecipe(id);
 		const mode = c.req.query("mode") ?? "";
+		const error = c.req.query("error") ?? "";
 		return c.html(
 			render("recipe-edit.html", {
 				r: recipe,
@@ -227,6 +338,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 				ingredients_text: recipe.ingredients.join("\n"),
 				steps_text: recipe.steps.join("\n"),
 				mode,
+				error,
 				title: `Edit ${recipe.title}`,
 				...themeVars(c),
 			}),
@@ -234,6 +346,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	});
 
 	app.post("/recipes/:id", async (c) => {
+		const { recipes, tags } = repos(c);
 		const id = Number(c.req.param("id"));
 		const existing = recipes.getById(id);
 		if (!existing) return c.notFound();
@@ -246,6 +359,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 			.getAll("tags")
 			.map((s) => String(s).trim())
 			.filter(Boolean);
+		const baseServings = parseServings(form.get("base_servings"));
 
 		recipes.update(id, {
 			title,
@@ -260,6 +374,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 				.filter(Boolean),
 			notes: String(form.get("notes") ?? ""),
 			source_url: String(form.get("source_url") ?? ""),
+			base_servings: baseServings,
 			rating: Number(form.get("rating") ?? 0) || 0,
 		});
 		tags.replaceForRecipe(id, tagsList);
@@ -279,6 +394,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	});
 
 	app.post("/recipes/:id/delete", (c) => {
+		const { recipes } = repos(c);
 		const id = Number(c.req.param("id"));
 		const recipe = recipes.getById(id);
 		if (!recipe) return c.notFound();
@@ -291,6 +407,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	});
 
 	app.post("/recipes/:id/restore", (c) => {
+		const { recipes } = repos(c);
 		const id = Number(c.req.param("id"));
 		const recipe = recipes.getById(id);
 		if (!recipe) return c.notFound();
@@ -299,6 +416,7 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	});
 
 	app.post("/recipes/:id/rating", async (c) => {
+		const { recipes } = repos(c);
 		const id = Number(c.req.param("id"));
 		const existing = recipes.getById(id);
 		if (!existing) return c.notFound();
@@ -311,15 +429,19 @@ export function recipeRoutes(db: Database, config: Config): Hono {
 	});
 
 	app.post("/recipes/:id/favorite", (c) => {
+		const { recipes } = repos(c);
 		const id = Number(c.req.param("id"));
 		const existing = recipes.getById(id);
 		if (!existing) return c.notFound();
 		recipes.update(id, { favorite: !existing.favorite });
 		const updated = recipes.getById(id);
+		if (!updated) return c.notFound();
 		const favCount = (
 			db
-				.query("SELECT COUNT(*) AS c FROM recipes WHERE favorite = 1 AND deleted_at IS NULL")
-				.get() as { c: number }
+				.query(
+					"SELECT COUNT(*) AS c FROM recipes WHERE favorite = 1 AND deleted_at IS NULL AND owner_id = ?",
+				)
+				.get(c.get("userId")) as { c: number }
 		).c;
 		const btn = render("partials/favorite-btn.html", { r: updated });
 		const oob = `<span id="fav-count" class="count opacity-70" hx-swap-oob="true">${favCount}</span>`;

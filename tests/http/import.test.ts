@@ -1,18 +1,12 @@
-import { mkdirSync, readFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { Database } from "bun:sqlite";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Hono } from "hono";
-import { createSessionCookie } from "@/auth/session";
+import type { App } from "@/app";
+import { migrate } from "@/db/migrate";
 import { buildApp } from "@/server";
+import { createTestUser, freshDataDir, setupEnv, userCookie } from "../helpers/auth";
 
-const SECRET = "test-secret";
 const FIXTURES = join(process.cwd(), "tests", "fixtures");
-
-function freshDataDir(): string {
-	const dir = join(tmpdir(), `rmtest-${Math.random().toString(36).slice(2)}`);
-	mkdirSync(dir, { recursive: true });
-	return dir;
-}
 
 function stubFetch(fixtureFile: string | null): () => void {
 	const original = globalThis.fetch;
@@ -34,18 +28,21 @@ function stubFetch(fixtureFile: string | null): () => void {
 }
 
 interface Setup {
-	app: Hono;
+	app: App;
 	cookie: string;
 	restore: () => void;
 }
 
 async function setupApp(fixture: string | null): Promise<Setup> {
-	process.env.APP_PASSWORD = "pw";
-	process.env.SESSION_SECRET = SECRET;
-	process.env.DATA_DIR = freshDataDir();
+	const dataDir = freshDataDir();
+	setupEnv(dataDir);
+	const db = new Database(join(dataDir, "recipes.db"));
+	migrate(db);
+	const { userId } = createTestUser(db);
+	db.close();
 	const restore = stubFetch(fixture);
 	const app = buildApp();
-	const cookie = await createSessionCookie(SECRET, 3600);
+	const cookie = await userCookie(userId);
 	return { app, cookie, restore };
 }
 
@@ -157,7 +154,8 @@ describe("import routes", () => {
 			headers: { ...auth(cookie).headers, "Content-Type": "application/x-www-form-urlencoded" },
 			body: `url=${encodeURIComponent(MARMITON_URL)}`,
 		});
-		const recipeId = (importRes.headers.get("Location") ?? "").match(/^\/recipes\/(\d+)\/edit/)?.[1] ?? "0";
+		const recipeId =
+			(importRes.headers.get("Location") ?? "").match(/^\/recipes\/(\d+)\/edit/)?.[1] ?? "0";
 
 		const html = readFileSync(join(FIXTURES, "marmiton.html"), "utf-8");
 		const res = await app.request("/recipes/import/html", {

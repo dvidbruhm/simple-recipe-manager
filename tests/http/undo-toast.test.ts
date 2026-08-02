@@ -1,32 +1,21 @@
 import { Database } from "bun:sqlite";
-import { mkdirSync } from "node:fs";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createSessionCookie } from "@/auth/session";
 import { migrate } from "@/db/migrate";
 import { RecipeRepository } from "@/recipes/repository";
 import { buildApp } from "@/server";
-
-const SECRET = "test-secret";
-
-function freshDataDir(): string {
-	const dir = join(tmpdir(), `rmtest-${Math.random().toString(36).slice(2)}`);
-	mkdirSync(dir, { recursive: true });
-	return dir;
-}
+import { createTestUser, freshDataDir, setupEnv, userCookie } from "../helpers/auth";
 
 async function setupApp() {
-	process.env.APP_PASSWORD = "pw";
-	process.env.SESSION_SECRET = SECRET;
 	const dataDir = freshDataDir();
-	process.env.DATA_DIR = dataDir;
-	const db = new Database(`${dataDir}/recipes.db`);
+	setupEnv(dataDir);
+	const db = new Database(join(dataDir, "recipes.db"));
 	migrate(db);
-	const recipes = new RecipeRepository(db);
+	const { userId } = createTestUser(db);
+	const recipes = new RecipeRepository(db, userId);
 	const id = recipes.insert({ title: "Tiramisu", ingredients: ["flour"] });
 	db.close();
 	const app = buildApp();
-	const cookie = await createSessionCookie(SECRET, 3600);
+	const cookie = await userCookie(userId);
 	return { app, cookie, id };
 }
 

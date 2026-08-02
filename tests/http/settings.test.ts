@@ -1,48 +1,45 @@
 import { Database } from "bun:sqlite";
 import { mkdirSync, readFileSync } from "node:fs";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { Hono } from "hono";
-import { createSessionCookie } from "@/auth/session";
+import type { App } from "@/app";
 import { migrate } from "@/db/migrate";
 import { RecipeRepository } from "@/recipes/repository";
 import { buildApp } from "@/server";
 import { TagRepository } from "@/tags/repository";
+import { createTestUser, freshDataDir, setupEnv, userCookie } from "../helpers/auth";
 
-const SECRET = "test-secret";
 const FIXTURES = join(process.cwd(), "tests", "fixtures");
 
-function freshDataDir(): string {
-	const dir = join(tmpdir(), `rmtest-${Math.random().toString(36).slice(2)}`);
-	mkdirSync(dir, { recursive: true });
+function freshDataDirWithImages(): string {
+	const dir = freshDataDir();
 	mkdirSync(join(dir, "images"), { recursive: true });
 	return dir;
 }
 
 interface SetupResult {
-	app: Hono;
+	app: App;
 	cookie: string;
 	restore: () => void;
 }
 
 async function setupApp(seedRecipe = false): Promise<SetupResult> {
-	process.env.APP_PASSWORD = "pw";
-	process.env.SESSION_SECRET = SECRET;
-	const dataDir = freshDataDir();
-	process.env.DATA_DIR = dataDir;
+	const dataDir = freshDataDirWithImages();
+	setupEnv(dataDir);
+
+	const db = new Database(join(dataDir, "recipes.db"));
+	migrate(db);
+	const { userId } = createTestUser(db);
 
 	if (seedRecipe) {
-		const db = new Database(join(dataDir, "recipes.db"));
-		migrate(db);
-		const recipes = new RecipeRepository(db);
-		const tags = new TagRepository(db);
+		const recipes = new RecipeRepository(db, userId);
+		const tags = new TagRepository(db, userId);
 		const id = recipes.insert({
 			title: "Sample Cake",
 			ingredients: ["2 cups flour"],
 		});
 		tags.replaceForRecipe(id, []);
-		db.close();
 	}
+	db.close();
 
 	const originalFetch = globalThis.fetch;
 	globalThis.fetch = (() => {
@@ -50,7 +47,7 @@ async function setupApp(seedRecipe = false): Promise<SetupResult> {
 	}) as unknown as typeof globalThis.fetch;
 
 	const app = buildApp();
-	const cookie = await createSessionCookie(SECRET, 3600);
+	const cookie = await userCookie(userId);
 	return {
 		app,
 		cookie,
@@ -83,15 +80,15 @@ describe("settings page", () => {
 		expect(body).toContain('name="file"');
 	});
 
-	it("GET /settings renders the appearance theme selector and about section", async () => {
+	it("GET /settings renders theme hint, About section, and exports", async () => {
 		const ctx = await setupApp();
 		restore = ctx.restore;
 		const res = await ctx.app.request("/settings", {
 			headers: { Cookie: `session=${ctx.cookie}` },
 		});
 		const body = await res.text();
-		expect(body).toContain("Appearance");
-		expect(body).toContain('name="theme"');
+		expect(body).toContain("toggle between light and dark");
+		expect(body).toContain("/export/formats/json");
 		expect(body).toContain("About");
 		expect(body).toContain("Version 1.0.0");
 		expect(body).toContain("github.com");

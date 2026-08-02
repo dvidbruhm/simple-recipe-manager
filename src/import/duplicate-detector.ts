@@ -13,13 +13,19 @@ interface ExistingRecipe {
 	ingredients: string;
 }
 
-export function detectDuplicates(db: Database, incoming: PartialRecipe[]): DetectionResult[] {
+export function detectDuplicates(
+	db: Database,
+	incoming: PartialRecipe[],
+	ownerId: number,
+): DetectionResult[] {
 	const bySourceUrl = new Map<string, number>();
 	const byNormalizedTitle = new Map<string, ExistingRecipe>();
 
 	const rows = db
-		.query("SELECT id, title, source_url, ingredients FROM recipes WHERE deleted_at IS NULL")
-		.all() as ExistingRecipe[];
+		.query(
+			"SELECT id, title, source_url, ingredients FROM recipes WHERE owner_id = ? AND deleted_at IS NULL",
+		)
+		.all(ownerId) as ExistingRecipe[];
 
 	for (const r of rows) {
 		if (r.source_url) {

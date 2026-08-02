@@ -1,35 +1,23 @@
 import { Database } from "bun:sqlite";
-import { mkdirSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { createSessionCookie } from "@/auth/session";
 import { migrate } from "@/db/migrate";
 import { RecipeRepository } from "@/recipes/repository";
 import { buildApp } from "@/server";
 import { TagRepository } from "@/tags/repository";
-
-const SECRET = "test-secret";
-
-function freshDataDir(): string {
-	const dir = join(tmpdir(), `rmtest-${Math.random().toString(36).slice(2)}`);
-	mkdirSync(dir, { recursive: true });
-	return dir;
-}
+import { createTestUser, freshDataDir, setupEnv, userCookie } from "../helpers/auth";
 
 async function setupApp() {
-	process.env.APP_PASSWORD = "pw";
-	process.env.SESSION_SECRET = SECRET;
 	const dataDir = freshDataDir();
-	process.env.DATA_DIR = dataDir;
+	setupEnv(dataDir);
 	const db = new Database(`${dataDir}/recipes.db`);
 	migrate(db);
-	const recipes = new RecipeRepository(db);
+	const { userId } = createTestUser(db);
+	const recipes = new RecipeRepository(db, userId);
 	const id1 = recipes.insert({ title: "Tiramisu", ingredients: ["flour"] });
 	const id2 = recipes.insert({ title: "Bolognese", ingredients: ["pasta"] });
 	const id3 = recipes.insert({ title: "Ratatouille", ingredients: ["aubergine"] });
 	db.close();
 	const app = buildApp();
-	const cookie = await createSessionCookie(SECRET, 3600);
+	const cookie = await userCookie(userId);
 	return { app, cookie, id1, id2, id3 };
 }
 
@@ -127,21 +115,20 @@ describe("bulk delete / restore", () => {
 	});
 
 	it("POST /recipes/bulk-delete (HX) honors an active tag filter sent in the body", async () => {
-		process.env.APP_PASSWORD = "pw";
-		process.env.SESSION_SECRET = SECRET;
 		const dataDir = freshDataDir();
-		process.env.DATA_DIR = dataDir;
+		setupEnv(dataDir);
 		const db = new Database(`${dataDir}/recipes.db`);
 		migrate(db);
-		const recipes = new RecipeRepository(db);
-		const tags = new TagRepository(db);
+		const { userId } = createTestUser(db);
+		const recipes = new RecipeRepository(db, userId);
+		const tags = new TagRepository(db, userId);
 		const cake = recipes.insert({ title: "Chocolate Cake", ingredients: ["cocoa"] });
 		const soup = recipes.insert({ title: "Onion Soup", ingredients: ["onion"] });
 		tags.replaceForRecipe(cake, ["dessert"]);
 		tags.replaceForRecipe(soup, ["soup"]);
 		db.close();
 		const app = buildApp();
-		const cookie = await createSessionCookie(SECRET, 3600);
+		const cookie = await userCookie(userId);
 
 		const fd = new FormData();
 		fd.append("ids", String(cake));

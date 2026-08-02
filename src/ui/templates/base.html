@@ -8,12 +8,15 @@
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <script src="/static/htmx.min.js" defer></script>
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#5a7a4f">
+  <meta name="theme-color" content="{{ theme_color | default('#161617') }}">
+  <link rel="apple-touch-icon" href="/static/icons/192.png">
+  <meta name="apple-mobile-web-app-title" content="Recipes">
 </head>
 <body>
   <header class="site-header">
     <a href="/recipes" class="logo" aria-label="recipes"><img src="/static/favicon.svg" alt="" class="logo-icon"></a>
     {% block header_extra %}{% endblock %}
+    <button type="button" id="pwa-install" class="btn pwa-install-btn" hidden aria-label="Install app">Install</button>
     <form method="post" action="/theme" class="theme-form">
       <input type="hidden" name="theme" value="{{ next_theme | default('dark') }}">
       <button type="submit" class="btn theme-toggle" aria-label="Toggle theme">{{ theme_icon | default('☀') }}</button>
@@ -25,10 +28,119 @@
   <main class="site-main">
     {% block content %}{{ body_content | safe }}{% endblock %}
   </main>
+  <div id="global-toast-area" class="global-toast-area" aria-live="polite"></div>
   <script>
+  function showPwaToast(message, actionLabel, action) {
+    const area = document.getElementById("global-toast-area");
+    if (!area) return;
+    const el = document.createElement("div");
+    el.className = "toast";
+    el.setAttribute("data-toast", "");
+    el.setAttribute("role", "status");
+    const msg = document.createElement("span");
+    msg.className = "toast-msg";
+    msg.textContent = message;
+    el.appendChild(msg);
+    if (actionLabel && action) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn toast-action-btn";
+      btn.textContent = actionLabel;
+      btn.addEventListener("click", () => {
+        action();
+        if (el.parentNode) el.remove();
+      });
+      el.appendChild(btn);
+    }
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "toast-close";
+    close.setAttribute("aria-label", "Dismiss");
+    close.innerHTML = "&times;";
+    close.addEventListener("click", () => {
+      if (el.parentNode) el.remove();
+    });
+    el.appendChild(close);
+    area.appendChild(el);
+    setTimeout(() => {
+      if (el.parentNode) el.remove();
+    }, 10000);
+  }
+  window.showPwaToast = showPwaToast;
+
+  document.addEventListener("htmx:beforeOnLoad", (e) => {
+    const status = e.detail && e.detail.xhr && e.detail.xhr.status;
+    if (status >= 400 && status !== 401) {
+      const target = e.detail && e.detail.target;
+      if (target && target.id === "grid") {
+        showPwaToast("Couldn't update the recipe grid.", null, null);
+      }
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest && e.target.closest("[data-back-link]");
+    if (!link) return;
+    if (document.referrer && document.referrer !== location.href && new URL(document.referrer).origin === location.origin) {
+      e.preventDefault();
+      history.back();
+    }
+  });
+
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker.register("/sw.js").then((reg) => {
+        reg.addEventListener("updatefound", () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener("statechange", () => {
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+              showPwaToast("Update available", "Reload", () => {
+                newWorker.postMessage("skip-waiting");
+                location.reload();
+              });
+            }
+          });
+        });
+      }).catch(() => {});
+    });
+
+    let deferredPrompt = null;
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById("pwa-install");
+      if (btn) btn.hidden = false;
+    });
+    window.addEventListener("appinstalled", () => {
+      const btn = document.getElementById("pwa-install");
+      if (btn) btn.hidden = true;
+      deferredPrompt = null;
+    });
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest && e.target.closest("#pwa-install");
+      if (!btn || !deferredPrompt) return;
+      e.preventDefault();
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        btn.hidden = true;
+      });
+    });
+
+    window.addEventListener("offline", () => {
+      showPwaToast("You're offline — changes may not save", null, null);
+    });
+
+    document.addEventListener("htmx:responseError", (e) => {
+      const detail = e.detail || {};
+      const status = detail.xhr && detail.xhr.status;
+      let msg = "Connection problem — please retry.";
+      if (status === 401) msg = "Your session has expired. Reloading…";
+      else if (status === 403) msg = "You don't have permission to do that.";
+      else if (status === 404) msg = "That item could not be found.";
+      else if (status >= 500) msg = "Server error — please try again in a moment.";
+      showPwaToast(msg, status === 401 ? "Reload" : null, status === 401 ? () => location.reload() : null);
     });
   }
   </script>

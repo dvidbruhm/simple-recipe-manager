@@ -3,7 +3,7 @@ import { getCookie } from "hono/cookie";
 import type { Config } from "@/config";
 import { SESSION_COOKIE_NAME, verifySessionCookie } from "./session";
 
-const PUBLIC_EXACT = new Set(["/login"]);
+const PUBLIC_EXACT = new Set(["/login", "/register", "/forgot", "/forgot/sent", "/reset"]);
 const PUBLIC_PREFIX = ["/static/"];
 
 export function authMiddleware(config: Config): MiddlewareHandler {
@@ -13,8 +13,12 @@ export function authMiddleware(config: Config): MiddlewareHandler {
 			return next();
 		}
 		const cookie = getCookie(c, SESSION_COOKIE_NAME);
-		if (cookie && (await verifySessionCookie(cookie, config.sessionSecret))) {
-			return next();
+		if (cookie) {
+			const verified = await verifySessionCookie(cookie, config.sessionSecret);
+			if (verified) {
+				c.set("userId", verified.userId);
+				return next();
+			}
 		}
 		const returnParam = encodeURIComponent(path);
 		return c.redirect(`/login?return=${returnParam}`);

@@ -1,3 +1,5 @@
+const FALLBACK = "#5a7a4f";
+
 const PALETTE = [
 	"#d4644f",
 	"#e08a3c",
@@ -19,5 +21,5 @@ export function tagColor(name: string): string {
 		hash = (hash * 31 + name.charCodeAt(i)) | 0;
 	}
 	const idx = Math.abs(hash) % PALETTE.length;
-	return PALETTE[idx] ?? PALETTE[0] ?? "#5a7a4f";
+	return PALETTE[idx] ?? FALLBACK;
 }
