@@ -14,7 +14,7 @@
     </div>
   {% endif %}
 
-  {% if mode == "paste_html" %}
+  {% if edit_mode == "paste_html" %}
     <div class="draft-banner border border-[color:var(--color-accent)] bg-[color:var(--color-surface)] rounded p-4 mb-4">
       <p class="mb-2 text-[color:var(--color-text)]">URL fetch failed; paste the page's HTML to retry extraction</p>
       <form action="/recipes/import/html" method="post">
@@ -24,7 +24,7 @@
         <button type="submit" class="btn btn--primary mt-2">Retry extraction</button>
       </form>
     </div>
-  {% elif mode == "manual" %}
+  {% elif edit_mode == "manual" %}
     <div class="draft-banner border border-[color:var(--color-accent)] bg-[color:var(--color-surface)] rounded p-4 mb-4">
       <p class="text-[color:var(--color-text)]">Manual mode: open the original in a new tab and paste what you want here.</p>
       {% if r.source_url %}
