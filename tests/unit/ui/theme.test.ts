@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { themeVars, THEMES, LIGHT_READY, type Theme } from "@/ui/theme";
+import { LIGHT_READY, THEMES, type Theme, themeVars } from "@/ui/theme";
 
 function ctx(cookies: Record<string, string>): Context {
 	// hono's getCookie reads c.req.raw.headers.get("Cookie"); provide that shape.
@@ -56,8 +56,13 @@ describe("themeVars", () => {
 
 	it("THEMES is exactly the 7 expected ids and LIGHT_READY initially contains only neutral", () => {
 		expect(THEMES).toEqual([
-			"neutral", "aurora", "aurora-solstice", "inkwell",
-			"hearth", "hearth-spice", "gourmet-noir",
+			"neutral",
+			"aurora",
+			"aurora-solstice",
+			"inkwell",
+			"hearth",
+			"hearth-spice",
+			"gourmet-noir",
 		]);
 		expect(LIGHT_READY).toEqual(new Set<Theme>(["neutral"]));
 	});
