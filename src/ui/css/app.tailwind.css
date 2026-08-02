@@ -55,6 +55,141 @@
 	--ring: 0 0 0 2px var(--color-accent);
 }
 
+[data-theme="aurora"] {
+	--color-bg: light-dark(#f4f6fb, #0b0e14);
+	--color-surface: light-dark(#ffffff, #131720);
+	--color-elevated: light-dark(#f8f9fc, #171c28);
+	--color-text: light-dark(#0f1320, #e6e8ec);
+	--color-muted: light-dark(#5b6478, #8b93a7);
+	--color-accent: light-dark(#4f46e5, #6366f1);
+	--color-accent-soft: light-dark(rgba(79, 70, 229, 0.1), rgba(99, 102, 241, 0.14));
+	--color-border: light-dark(rgba(15, 19, 32, 0.1), rgba(255, 255, 255, 0.08));
+	--color-danger: light-dark(#dc2626, #f87171);
+	--color-favorite: light-dark(#e11d48, #fb7185);
+	--color-star: light-dark(#b45309, #fbbf24);
+	--font-display: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	--font-body: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	--radius-card: 12px;
+	--radius-control: 10px;
+	--radius-pill: 999px;
+	--shadow-card: light-dark(0 1px 2px rgba(15, 19, 32, 0.06), 0 1px 2px rgba(0, 0, 0, 0.4));
+	--shadow-hover: light-dark(0 8px 24px rgba(15, 19, 32, 0.1), 0 8px 24px rgba(0, 0, 0, 0.45));
+	--ring: 0 0 0 1px var(--color-accent),
+		0 0 16px light-dark(rgba(79, 70, 229, 0.35), rgba(99, 102, 241, 0.45));
+}
+
+[data-theme="aurora-solstice"] {
+	--color-bg: light-dark(#faf6f0, #100c08);
+	--color-surface: light-dark(#ffffff, #1a1410);
+	--color-elevated: light-dark(#fdfaf5, #211b15);
+	--color-text: light-dark(#2a2018, #f0e8de);
+	--color-muted: light-dark(#8a7d6c, #9a8f80);
+	--color-accent: light-dark(#ea580c, #f97316);
+	--color-accent-soft: light-dark(rgba(234, 88, 12, 0.1), rgba(249, 115, 22, 0.14));
+	--color-border: light-dark(rgba(42, 32, 24, 0.1), rgba(255, 255, 255, 0.08));
+	--color-danger: light-dark(#dc2626, #ef4444);
+	--color-favorite: light-dark(#e11d48, #fb7185);
+	--color-star: light-dark(#b45309, #fbbf24);
+	--font-display: "Sora", "Inter", -apple-system, system-ui, sans-serif;
+	--font-body: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	--radius-card: 12px;
+	--radius-control: 10px;
+	--radius-pill: 999px;
+	--shadow-card: light-dark(0 1px 2px rgba(60, 40, 20, 0.06), 0 1px 2px rgba(0, 0, 0, 0.4));
+	--shadow-hover: light-dark(0 8px 24px rgba(60, 40, 20, 0.1), 0 8px 24px rgba(0, 0, 0, 0.45));
+	--ring: 0 0 0 1px var(--color-accent),
+		0 0 16px light-dark(rgba(234, 88, 12, 0.35), rgba(249, 115, 22, 0.45));
+}
+
+[data-theme="inkwell"] {
+	--color-bg: light-dark(#ffffff, #000000);
+	--color-surface: light-dark(#f5f5f5, #0a0a0a);
+	--color-elevated: light-dark(#ffffff, #0f0f0f);
+	--color-text: light-dark(#000000, #ffffff);
+	--color-muted: light-dark(#6a6a6a, #6a6a6a);
+	--color-accent: light-dark(#000000, #ffffff);
+	--color-accent-soft: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.08));
+	--color-border: light-dark(#e4e4e4, #1f1f1f);
+	--color-danger: light-dark(#000000, #ffffff);
+	--color-favorite: light-dark(#000000, #ffffff);
+	--color-star: light-dark(#000000, #ffffff);
+	--font-display: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	--font-body: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	--font-mono: "IBM Plex Mono", ui-monospace, monospace;
+	--radius-card: 2px;
+	--radius-control: 2px;
+	--radius-pill: 2px;
+	--shadow-card: none;
+	--shadow-hover: none;
+	--ring: 0 0 0 2px var(--color-text);
+}
+
+[data-theme="hearth"] {
+	--color-bg: light-dark(#f7f2ea, #1f1a16);
+	--color-surface: light-dark(#fffaf2, #2a221c);
+	--color-elevated: light-dark(#fffdf8, #332a22);
+	--color-text: light-dark(#2c241c, #e8dcc8);
+	--color-muted: light-dark(#8a7d6a, #9a8b7a);
+	--color-accent: light-dark(#5f7a52, #8aa67a);
+	--color-accent-soft: light-dark(rgba(95, 122, 82, 0.12), rgba(138, 166, 122, 0.16));
+	--color-border: light-dark(#e0d4c2, #44382d);
+	--color-danger: light-dark(#b15a3a, #c97a4a);
+	--color-favorite: light-dark(#b15a3a, #c97a4a);
+	--color-star: light-dark(#b8862b, #d2b483);
+	--font-display: "Fraunces", Georgia, serif;
+	--font-body: "Nunito", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	--radius-card: 28px;
+	--radius-control: 18px;
+	--radius-pill: 999px;
+	--shadow-card: light-dark(0 6px 20px rgba(60, 40, 30, 0.08), 0 6px 20px rgba(0, 0, 0, 0.3));
+	--shadow-hover: light-dark(0 10px 30px rgba(60, 40, 30, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4));
+	--ring: 0 0 0 2px var(--color-accent);
+}
+
+[data-theme="hearth-spice"] {
+	--color-bg: light-dark(#faf3ea, #1f1410);
+	--color-surface: light-dark(#fff8ef, #2a1c16);
+	--color-elevated: light-dark(#fffdf8, #33241c);
+	--color-text: light-dark(#2e1f15, #f2e6d3);
+	--color-muted: light-dark(#8c7560, #a08a72);
+	--color-accent: light-dark(#c24a25, #d2603a);
+	--color-accent-soft: light-dark(rgba(194, 74, 37, 0.12), rgba(210, 96, 58, 0.16));
+	--color-border: light-dark(#e4d4c0, #4a342a);
+	--color-danger: light-dark(#b03a1a, #d2603a);
+	--color-favorite: light-dark(#a06a1a, #e0a82e);
+	--color-star: light-dark(#a06a1a, #e0a82e);
+	--font-display: "Fraunces", Georgia, serif;
+	--font-body: "Nunito", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	--radius-card: 24px;
+	--radius-control: 16px;
+	--radius-pill: 999px;
+	--shadow-card: light-dark(0 6px 20px rgba(60, 40, 30, 0.08), 0 6px 20px rgba(0, 0, 0, 0.3));
+	--shadow-hover: light-dark(0 10px 30px rgba(60, 40, 30, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4));
+	--ring: 0 0 0 2px var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] {
+	--color-bg: light-dark(#f9f4ea, #15120e);
+	--color-surface: light-dark(#fffdf7, #1d1812);
+	--color-elevated: light-dark(#fffdf9, #241e16);
+	--color-text: light-dark(#2a2014, #ece4d3);
+	--color-muted: light-dark(#8a7c63, #8a7e63);
+	--color-accent: light-dark(#a07a2e, #d4b483);
+	--color-accent-soft: light-dark(rgba(160, 122, 46, 0.12), rgba(212, 180, 131, 0.14));
+	--color-border: light-dark(#e2d6c0, #3a3128);
+	--color-danger: light-dark(#a8472b, #c97a4a);
+	--color-favorite: light-dark(#a8472b, #c97a4a);
+	--color-star: light-dark(#a07a2e, #d4b483);
+	--font-display: "Playfair Display", Georgia, serif;
+	--font-body: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	--radius-card: 2px;
+	--radius-control: 2px;
+	--radius-pill: 2px;
+	--shadow-card: light-dark(0 1px 3px rgba(60, 40, 30, 0.08), 0 1px 3px rgba(0, 0, 0, 0.4));
+	--shadow-hover: light-dark(0 6px 18px rgba(60, 40, 30, 0.12), 0 6px 18px rgba(0, 0, 0, 0.45));
+	--ring: 0 0 0 2px var(--color-accent);
+}
+
 body {
 	background: var(--color-bg);
 	color: var(--color-text);
