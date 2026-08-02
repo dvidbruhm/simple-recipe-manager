@@ -188,4 +188,50 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 			expect(body).toContain('rel="stylesheet" href="https://fonts.googleapis.com/css2');
 		});
 	});
+
+	describe("Settings appearance gallery", () => {
+		it("renders all 7 theme swatches and a light/dark control", async () => {
+			const { app, cookie } = await setupApp();
+			const res = await app.request("/settings", auth(cookie));
+			const body = await res.text();
+			for (const id of [
+				"neutral",
+				"aurora",
+				"aurora-solstice",
+				"inkwell",
+				"hearth",
+				"hearth-spice",
+				"gourmet-noir",
+			]) {
+				expect(body).toContain(`data-theme-id="${id}"`);
+			}
+			expect(body).toContain('name="mode"');
+			expect(body).toContain('value="dark"');
+			expect(body).toContain('value="light"');
+		});
+
+		it("marks the active theme and disables light for themes without a light variant", async () => {
+			const { app, cookie } = await setupApp();
+			const res = await app.request(
+				"/settings",
+				auth(cookie, { Cookie: `theme=hearth; mode=dark; session=${cookie}` }),
+			);
+			const body = await res.text();
+			expect(body).toContain('data-theme-id="hearth" aria-current="true"');
+			expect(body).toContain("data-mode-light-disabled");
+		});
+
+		it("posts theme + mode to /theme from the gallery form", async () => {
+			const { app, cookie } = await setupApp();
+			const res = await app.request("/theme", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Cookie: `session=${cookie}`,
+				},
+				body: "theme=inkwell&mode=dark",
+			});
+			expect(res.status).toBe(302);
+		});
+	});
 });

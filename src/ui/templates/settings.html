@@ -6,6 +6,27 @@
   <p class="text-sm text-[color:var(--color-muted)] mb-6">Use the ☀ / ☾ button in the header to toggle between light and dark theme.</p>
 
   <div class="settings-card rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5 mb-5">
+    <h2 class="text-lg font-semibold text-[color:var(--color-text)] mb-1">Appearance</h2>
+    <p class="text-sm text-[color:var(--color-muted)] mb-4">Pick a theme. Each has its own colors, type, and detailing.</p>
+    <form action="/theme" method="post" class="theme-gallery">
+      <input type="hidden" name="mode" value="{{ mode | default('dark') }}" id="theme-mode" />
+      <input type="hidden" name="theme" value="{{ theme | default('neutral') }}" />
+      <div class="theme-swatches grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3 mb-4">
+        {% for t in themes %}
+        <button type="submit" name="theme" value="{{ t.id }}" class="theme-swatch block text-left p-3 rounded border bg-[color:var(--color-bg)]" data-theme-id="{{ t.id }}"{% if t.id == theme %} aria-current="true"{% endif %}>
+          <span class="block font-medium text-[color:var(--color-text)]">{{ t.id }}</span>
+          <span class="block text-xs text-[color:var(--color-muted)] mt-1">{{ "light + dark" if t.light_ready else "dark" }}</span>
+        </button>
+        {% endfor %}
+      </div>
+      <div class="flex gap-2" role="group" aria-label="Color mode">
+        <button type="button" class="btn theme-mode-btn" onclick='document.getElementById("theme-mode").value="dark"; this.form.requestSubmit()'>☾ Dark</button>
+        <button type="button" class="btn theme-mode-btn"{% if not active_light_ready %} disabled data-mode-light-disabled title="Light variant not available yet for this theme"{% endif %} onclick='document.getElementById("theme-mode").value="light"; this.form.requestSubmit()'>☀ Light</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="settings-card rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5 mb-5">
     <h2 class="text-lg font-semibold text-[color:var(--color-text)] mb-1">Export</h2>
     <p class="text-sm text-[color:var(--color-muted)] mb-3">Download all your recipes in the format you need.</p>
     <div class="export-buttons flex flex-wrap gap-2">

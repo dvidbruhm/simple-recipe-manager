@@ -13,7 +13,7 @@ import { previewSessions } from "@/import/preview-session";
 import { RecipeRepository } from "@/recipes/repository";
 import { TagRepository } from "@/tags/repository";
 import { render } from "@/ui/nunjucks";
-import { themeVars } from "@/ui/theme";
+import { LIGHT_READY, THEMES, type Theme, themeVars } from "@/ui/theme";
 
 type UserIdFrom = (c: Ctx) => number;
 
@@ -21,12 +21,15 @@ export function settingsRoutes(db: Database, config: Config, userIdFrom: UserIdF
 	const app: App = new Hono();
 
 	app.get("/settings", (c) => {
+		const vars = themeVars(c);
 		return c.html(
 			render("settings.html", {
-				...themeVars(c),
+				...vars,
 				title: "Settings",
 				app_version: APP_VERSION,
 				github_url: GITHUB_URL,
+				active_light_ready: LIGHT_READY.has(vars.theme),
+				themes: THEMES.map((id) => ({ id, light_ready: LIGHT_READY.has(id as Theme) })),
 			}),
 		);
 	});

@@ -1216,3 +1216,12 @@ body.is-cooking .cook-step.is-current {
 	padding-left: 1rem;
 	font-style: italic;
 }
+
+.theme-swatch[aria-current="true"] {
+	border-color: var(--color-accent) !important;
+	box-shadow: var(--ring);
+}
+
+.theme-mode-btn {
+	flex: 0 0 auto;
+}
