@@ -1105,3 +1105,114 @@ body.is-cooking .cook-step.is-current {
     animation: none;
   }
 }
+
+/* ───────────────────────── Theme motifs (Level C) ───────────────────────── */
+
+/* Focus uses the theme ring token everywhere. */
+*:focus-visible {
+	outline: none;
+	box-shadow: var(--ring);
+}
+
+/* aurora + aurora-solstice: glassy surfaces + glow ring (ring is the glow via --ring token). */
+[data-theme="aurora"] .card,
+[data-theme="aurora-solstice"] .card {
+	box-shadow: var(--shadow-card),
+		light-dark(inset 0 0 0 transparent, inset 0 1px 0 rgba(255, 255, 255, 0.04));
+}
+
+/* inkwell: monochrome — desaturate photography; mono small-caps section labels. */
+[data-theme="inkwell"] img {
+	filter: grayscale(1) contrast(1.05);
+}
+
+[data-theme="inkwell"] h2,
+[data-theme="inkwell"] h3 {
+	font-family: var(--font-mono), ui-monospace, monospace;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	font-size: 0.8rem;
+	font-weight: 500;
+}
+
+/* hearth: hand-drawn squiggle under section headings + leaf bullets in ingredient lists. */
+[data-theme="hearth"] h2 {
+	position: relative;
+	padding-bottom: 0.6rem;
+}
+
+[data-theme="hearth"] h2::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 3rem;
+	height: 0.45rem;
+	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 8' fill='none' stroke='%238aa67a' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M2 5 Q 8 1 14 5 T 26 5 T 38 5 T 50 5 T 58 5'/%3E%3C/svg%3E")
+		no-repeat center / contain;
+}
+
+[data-theme="hearth"] .ingredients li {
+	list-style: none;
+}
+
+[data-theme="hearth"] .ingredients li::before {
+	content: "\1F33F";
+	margin-right: 0.4rem;
+}
+
+/* hearth-spice: tile-pattern top band on cards + diamond stamp before chips/labels. */
+[data-theme="hearth-spice"] .card {
+	position: relative;
+	border-width: 1px;
+}
+
+[data-theme="hearth-spice"] .card::before {
+	content: "";
+	display: block;
+	height: 8px;
+	background: repeating-linear-gradient(
+		45deg,
+		var(--color-accent) 0 6px,
+		transparent 6px 12px
+	);
+}
+
+[data-theme="hearth-spice"] .tag-chip::before {
+	content: "\25C6";
+	margin-right: 0.3rem;
+	color: var(--color-accent);
+}
+
+/* gourmet-noir: drop caps, ornament dividers, small-caps eyebrows, pull-quote notes. */
+[data-theme="gourmet-noir"] .description::first-letter,
+[data-theme="gourmet-noir"] .notes p::first-letter {
+	font-family: var(--font-display);
+	font-size: 3rem;
+	line-height: 0.9;
+	float: left;
+	padding: 0.1rem 0.4rem 0 0;
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] h2 {
+	text-align: left;
+}
+
+[data-theme="gourmet-noir"] .site-main h2::after {
+	content: "  \2766";
+	color: var(--color-accent);
+	opacity: 0.7;
+	font-weight: 400;
+}
+
+[data-theme="gourmet-noir"] h3 {
+	font-variant: small-caps;
+	letter-spacing: 0.04em;
+}
+
+[data-theme="gourmet-noir"] .notes {
+	border-left: 3px solid var(--color-accent);
+	padding-left: 1rem;
+	font-style: italic;
+}
