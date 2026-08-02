@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { themeVars, THEMES, LIGHT_READY, type Theme, type Mode } from "@/ui/theme";
+import { themeVars, THEMES, LIGHT_READY, type Theme } from "@/ui/theme";
 
 function ctx(cookies: Record<string, string>): Context {
 	// hono's getCookie reads c.req.raw.headers.get("Cookie"); provide that shape.
