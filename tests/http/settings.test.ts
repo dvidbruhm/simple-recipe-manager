@@ -87,7 +87,7 @@ describe("settings page", () => {
 			headers: { Cookie: `session=${ctx.cookie}` },
 		});
 		const body = await res.text();
-		expect(body).toContain("toggle between light and dark");
+		expect(body).toContain("Appearance");
 		expect(body).toContain("/export/formats/json");
 		expect(body).toContain("About");
 		expect(body).toContain("Version 1.0.0");

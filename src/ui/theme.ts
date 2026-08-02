@@ -31,7 +31,7 @@ const THEME_COLOR: Record<Theme, Record<Mode, string>> = {
 	"gourmet-noir": { light: "#f9f4ea", dark: "#15120e" },
 };
 
-/** Google Fonts CSS2 URL per theme (a later task swaps these for self-hosted /static/fonts/<theme>.css). */
+/** Self-hosted font CSS per theme, served from /static/fonts/<theme>.css and precached by the service worker. */
 const FONT_URL: Record<Theme, string> = {
 	neutral: "",
 	aurora: "/static/fonts/aurora.css",
