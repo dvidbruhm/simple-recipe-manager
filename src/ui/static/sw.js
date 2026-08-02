@@ -1,13 +1,19 @@
-const CACHE = "recipe-manager-v3";
+const CACHE = "recipe-manager-v4";
 const SHELL = [
   "/static/app.css",
   "/static/htmx.min.js",
   "/manifest.webmanifest",
   "/login",
+  "/static/fonts/aurora.css",
+  "/static/fonts/aurora-solstice.css",
+  "/static/fonts/inkwell.css",
+  "/static/fonts/hearth.css",
+  "/static/fonts/hearth-spice.css",
+  "/static/fonts/gourmet-noir.css",
 ];
 
 const OFFLINE_PAGE = `<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="neutral" data-mode="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">

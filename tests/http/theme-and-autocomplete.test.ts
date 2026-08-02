@@ -185,7 +185,7 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 				auth(cookie, { Cookie: `theme=hearth; mode=dark; session=${cookie}` }),
 			);
 			const body = await res.text();
-			expect(body).toContain('rel="stylesheet" href="https://fonts.googleapis.com/css2');
+			expect(body).toContain('rel="stylesheet" href="/static/fonts/hearth.css"');
 		});
 	});
 

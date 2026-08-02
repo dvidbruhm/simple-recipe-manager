@@ -34,17 +34,12 @@ const THEME_COLOR: Record<Theme, Record<Mode, string>> = {
 /** Google Fonts CSS2 URL per theme (a later task swaps these for self-hosted /static/fonts/<theme>.css). */
 const FONT_URL: Record<Theme, string> = {
 	neutral: "",
-	aurora: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
-	"aurora-solstice":
-		"https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap",
-	inkwell:
-		"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap",
-	hearth:
-		"https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;500;600;700&display=swap",
-	"hearth-spice":
-		"https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;500;600;700&display=swap",
-	"gourmet-noir":
-		"https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap",
+	aurora: "/static/fonts/aurora.css",
+	"aurora-solstice": "/static/fonts/aurora-solstice.css",
+	inkwell: "/static/fonts/inkwell.css",
+	hearth: "/static/fonts/hearth.css",
+	"hearth-spice": "/static/fonts/hearth-spice.css",
+	"gourmet-noir": "/static/fonts/gourmet-noir.css",
 };
 
 export interface ThemeVars {
