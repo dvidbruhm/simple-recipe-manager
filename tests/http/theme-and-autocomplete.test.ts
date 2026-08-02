@@ -233,5 +233,13 @@ describe("theme toggle, tag autocomplete, and image serving", () => {
 			});
 			expect(res.status).toBe(302);
 		});
+
+		it("uses a single hidden theme field (no duplicate theme keys from swatches)", async () => {
+			const { app, cookie } = await setupApp();
+			const res = await app.request("/settings", auth(cookie));
+			const body = await res.text();
+			expect(body).not.toContain('type="submit" name="theme"');
+			expect((body.match(/name="theme"/g) ?? []).length).toBe(1);
+		});
 	});
 });

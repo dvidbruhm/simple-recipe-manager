@@ -3,17 +3,17 @@
 {% block content %}
 <section class="settings-page max-w-3xl mx-auto px-4">
   <h1 class="text-2xl font-bold mb-2 text-[color:var(--color-text)]">Settings</h1>
-  <p class="text-sm text-[color:var(--color-muted)] mb-6">Use the ☀ / ☾ button in the header to toggle between light and dark theme.</p>
+  <p class="text-sm text-[color:var(--color-muted)] mb-6">Choose a theme below. Switch any time — your pick is remembered on this device.</p>
 
   <div class="settings-card rounded border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5 mb-5">
     <h2 class="text-lg font-semibold text-[color:var(--color-text)] mb-1">Appearance</h2>
     <p class="text-sm text-[color:var(--color-muted)] mb-4">Pick a theme. Each has its own colors, type, and detailing.</p>
     <form action="/theme" method="post" class="theme-gallery">
       <input type="hidden" name="mode" value="{{ mode | default('dark') }}" id="theme-mode" />
-      <input type="hidden" name="theme" value="{{ theme | default('neutral') }}" />
+      <input type="hidden" name="theme" value="{{ theme | default('neutral') }}" id="theme-input" />
       <div class="theme-swatches grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3 mb-4">
         {% for t in themes %}
-        <button type="submit" name="theme" value="{{ t.id }}" class="theme-swatch block text-left p-3 rounded border bg-[color:var(--color-bg)]" data-theme-id="{{ t.id }}"{% if t.id == theme %} aria-current="true"{% endif %}>
+        <button type="button" class="theme-swatch block text-left p-3 rounded border bg-[color:var(--color-bg)]" data-theme-id="{{ t.id }}"{% if t.id == theme %} aria-current="true"{% endif %} onclick='document.getElementById("theme-input").value="{{ t.id }}"; this.form.requestSubmit()'>
           <span class="block font-medium text-[color:var(--color-text)]">{{ t.id }}</span>
           <span class="block text-xs text-[color:var(--color-muted)] mt-1">{{ "light + dark" if t.light_ready else "dark" }}</span>
         </button>
