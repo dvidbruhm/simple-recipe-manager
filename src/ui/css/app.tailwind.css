@@ -1155,11 +1155,13 @@ body.is-cooking .cook-step.is-current {
 
 [data-theme="hearth"] .ingredients li {
 	list-style: none;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 }
 
 [data-theme="hearth"] .ingredients li::before {
 	content: "\1F33F";
-	margin-right: 0.4rem;
 }
 
 /* hearth-spice: tile-pattern top band on cards + diamond stamp before chips/labels. */

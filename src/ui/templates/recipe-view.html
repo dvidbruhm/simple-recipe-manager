@@ -6,6 +6,8 @@
   <header class="recipe-header flex flex-col sm:flex-row gap-4 sm:gap-6 mb-8">
     {% if r.image_filename %}
       <img src="/static/images/{{ r.image_filename }}" alt="{{ r.title }}" class="recipe-header__img shrink-0 w-full sm:w-40 h-40 object-cover rounded" loading="lazy" onerror="this.onerror=null;this.src='/static/placeholder.svg';this.style.objectFit='contain';this.style.padding='1rem'">
+    {% else %}
+      <img src="/static/placeholder.svg" alt="" class="recipe-header__img shrink-0 w-full sm:w-40 h-40 object-contain p-4 rounded" loading="lazy">
     {% endif %}
     <div class="recipe-header__info flex-1 min-w-0">
       <h1 class="text-2xl sm:text-3xl font-bold text-[color:var(--color-text)] break-words">{{ r.title }}</h1>
