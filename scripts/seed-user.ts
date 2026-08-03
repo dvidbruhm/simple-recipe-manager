@@ -109,7 +109,7 @@ for (let i = 0; i < count; i++) {
 		`Stir in the ${pick(VEGETABLES)} and simmer for 15 minutes.`,
 		`Season with ${pick(PANTRY)} and serve hot.`,
 	];
-	const imageFilename = await makeImage();
+	const imageFilename = Math.random() < 0.5 ? await makeImage() : "";
 	const id = recipes.insert({
 		title,
 		description: `A ${pick(ADJECTIVES).toLowerCase()} ${pick(REGIONS).toLowerCase()} dish.`,
