@@ -133,6 +133,10 @@ export function recipeRoutes(db: Database, config: Config): App {
 			clear_url: data.clearUrl,
 			sort_label: data.sortLabel,
 			append: opts?.append === true,
+			// This partial is only rendered for HTMX requests; library.html renders the
+			// canonical #library-meta / #sort-label on full page loads. The OOB swap targets
+			// below must emit only here, never inline in a full-page render.
+			htmx: true,
 		});
 	}
 

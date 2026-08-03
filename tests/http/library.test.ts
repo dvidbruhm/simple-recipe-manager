@@ -42,6 +42,16 @@ describe("library page", () => {
 		expect(body).toContain("Bolognese");
 	});
 
+	it("GET /recipes full-page render does not duplicate library-meta / sort-label", async () => {
+		const { app, cookie } = await setupApp();
+		const res = await app.request("/recipes", { headers: { Cookie: `session=${cookie}` } });
+		const body = await res.text();
+		// The OOB swap targets live only in the HTMX partial; on a full page load
+		// library.html renders the single canonical copy. Regression: they appeared twice.
+		expect((body.match(/id="library-meta"/g) ?? []).length).toBe(1);
+		expect((body.match(/id="sort-label"/g) ?? []).length).toBe(1);
+	});
+
 	it("GET /recipes?tag=dessert filters by tag", async () => {
 		const { app, cookie } = await setupApp();
 		const res = await app.request("/recipes?tag=dessert", {

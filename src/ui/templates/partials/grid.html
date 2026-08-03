@@ -1,4 +1,4 @@
-{% if not append %}
+{% if htmx and not append %}
 <div id="library-meta" hx-swap-oob="true">{% include "partials/library-meta.html" %}</div>
 <span id="sort-label" class="sort-label" hx-swap-oob="true">{{ sort_label | default('Newest') }}</span>
 {% endif %}
