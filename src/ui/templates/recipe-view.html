@@ -4,6 +4,7 @@
 <article class="recipe-view max-w-5xl mx-auto px-4" data-recipe-id="{{ r.id }}">
   <a href="/recipes" class="back-link btn" data-back-link>← Recipes</a>
   <header class="recipe-header flex flex-col sm:flex-row gap-4 sm:gap-6 mb-8">
+    {% include "partials/favorite-btn.html" %}
     {% if r.image_filename %}
       <img src="/static/images/{{ r.image_filename }}" alt="{{ r.title }}" class="recipe-header__img shrink-0 w-full sm:w-40 h-40 object-cover rounded" loading="lazy" onerror="this.onerror=null;this.src='/static/placeholder.svg';this.style.objectFit='contain';this.style.padding='1rem'">
     {% else %}
@@ -80,7 +81,7 @@
 
   <footer class="recipe-footer mt-8 pt-6 border-t border-[color:var(--color-border)] flex flex-wrap items-center gap-4">
     {% if r.source_url %}
-      <a href="{{ r.source_url }}" rel="noopener noreferrer" target="_blank" class="text-[color:var(--color-accent)] underline">Original ↗</a>
+      <a href="{{ r.source_url }}" rel="noopener noreferrer" target="_blank" class="btn-link text-[color:var(--color-accent)] underline">Original ↗</a>
     {% endif %}
     <a href="/recipes/{{ r.id }}/edit" class="btn">Edit</a>
     <form action="/recipes/{{ r.id }}/delete" method="post" class="inline">
