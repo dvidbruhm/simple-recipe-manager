@@ -1,0 +1,1106 @@
+/*
+ * Inkwell theme — component overrides.
+ * Ports the visual language of .mockups/theme-inkwell.html onto the live app's
+ * real component classes. Every rule is scoped to [data-theme="inkwell"] so it
+ * only applies when the inkwell theme is active. Inkwell is strictly monochrome:
+ * accent / danger / favorite / star all resolve to ink (black in light, white in
+ * dark), so we lean on var(--color-text) / var(--color-bg) and hairline borders
+ * instead of color. Helper vars below derive the two intermediate grays the
+ * mockup uses (a stronger hairline and a softer body gray) from existing tokens
+ * so they stay correct in both light + dark mode.
+ */
+
+/* ───────────────────────── Helper tokens ───────────────────────── */
+
+[data-theme="inkwell"] {
+	/* A hairline slightly stronger than --color-border (mockup --border-strong). */
+	--ink-border-strong: color-mix(in srgb, var(--color-border), var(--color-text) 8%);
+	/* Soft body / secondary gray (mockup --subdued): sits between muted and text. */
+	--ink-subdued: color-mix(in srgb, var(--color-muted), var(--color-text) 22%);
+}
+
+/* ───────────────────────── Base / type ───────────────────────── */
+
+[data-theme="inkwell"] body {
+	letter-spacing: -0.005em;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+[data-theme="inkwell"] ::selection {
+	background: var(--color-text);
+	color: var(--color-bg);
+}
+
+[data-theme="inkwell"] h1,
+[data-theme="inkwell"] h4 {
+	font-family: var(--font-display);
+	font-weight: 500;
+	letter-spacing: -0.015em;
+	line-height: 1.3;
+}
+
+/* Section labels (Ingredients / Steps / Notes) read as mono uppercase eyebrows,
+   muted — matching the mockup's col-title treatment. (The base motif already
+   switches h2/h3 to mono uppercase; these refine colour + tracking.) */
+[data-theme="inkwell"] .recipe-view h2,
+[data-theme="inkwell"] .notes h2 {
+	color: var(--color-muted);
+	letter-spacing: 0.16em;
+}
+
+/* Settings card titles are Inter display, not mono labels. */
+[data-theme="inkwell"] .settings-card h2 {
+	font-family: var(--font-display);
+	text-transform: none;
+	letter-spacing: -0.01em;
+	font-size: 16px;
+	font-weight: 500;
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Header ───────────────────────── */
+
+[data-theme="inkwell"] .site-header {
+	background: var(--color-bg);
+	border-bottom: 1px solid var(--color-border);
+	padding: 14px 18px;
+}
+
+[data-theme="inkwell"] .site-header .logo {
+	font-weight: 500;
+	letter-spacing: -0.01em;
+	gap: 9px;
+}
+
+[data-theme="inkwell"] .site-header .logo-icon {
+	width: 1.5rem;
+	height: 1.5rem;
+}
+
+[data-theme="inkwell"] .site-header .settings-gear {
+	color: var(--ink-subdued);
+}
+
+/* ───────────────────────── Buttons ───────────────────────── */
+/* Base hairline button. Also covers <summary class="btn"> menus. */
+
+[data-theme="inkwell"] .btn {
+	font-family: var(--font-body);
+	font-weight: 400;
+	font-size: 12.5px;
+	padding: 9px 16px;
+	border-radius: var(--radius-control);
+	border: 1px solid var(--ink-border-strong);
+	background: transparent;
+	color: var(--color-text);
+	gap: 8px;
+	letter-spacing: -0.005em;
+	line-height: 1;
+}
+
+[data-theme="inkwell"] .btn:hover,
+[data-theme="inkwell"] .btn:focus {
+	border-color: var(--color-text);
+}
+
+[data-theme="inkwell"] .btn--sm {
+	padding: 6px 10px;
+	font-size: 11.5px;
+}
+
+[data-theme="inkwell"] .pwa-install-btn {
+	padding: 6px 12px;
+	font-size: 11.5px;
+}
+
+/* Primary inverts to ink-on-paper. The base motif keeps text as --color-bg here. */
+[data-theme="inkwell"] .btn--primary {
+	background: var(--color-text);
+	border-color: var(--color-text);
+	color: var(--color-bg);
+}
+
+[data-theme="inkwell"] .btn--primary:hover,
+[data-theme="inkwell"] .btn--primary:focus {
+	background: var(--ink-subdued);
+	border-color: var(--ink-subdued);
+	color: var(--color-bg);
+}
+
+/* Danger is signalled monochromatically — outline only, inverting on hover. */
+[data-theme="inkwell"] .btn--danger {
+	border: 1px solid var(--ink-border-strong);
+	background: transparent;
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .btn--danger:hover,
+[data-theme="inkwell"] .btn--danger:focus {
+	border-color: var(--color-text);
+	background: var(--color-text);
+	color: var(--color-bg);
+}
+
+/* Icon buttons in the header / toolbars. */
+[data-theme="inkwell"] .settings-gear,
+[data-theme="inkwell"] .view-toggle {
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	border: 1px solid transparent;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: var(--ink-subdued);
+}
+
+[data-theme="inkwell"] .settings-gear:hover,
+[data-theme="inkwell"] .view-toggle:hover {
+	color: var(--color-text);
+	background: var(--color-elevated);
+	border-color: transparent;
+}
+
+/* Servings ± step buttons (sharp hairline squares). */
+[data-theme="inkwell"] .servings-step {
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid var(--ink-border-strong);
+	background: transparent;
+	color: var(--color-text);
+	border-radius: var(--radius-control);
+	font-size: 14px;
+	line-height: 1;
+}
+
+[data-theme="inkwell"] .servings-step:hover {
+	border-color: var(--color-text);
+}
+
+/* Reset + back-link read as mono underlined labels, not buttons. */
+[data-theme="inkwell"] .servings-reset {
+	font-family: var(--font-mono);
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	color: var(--color-muted);
+	background: transparent;
+	border: 0;
+	border-bottom: 1px solid var(--ink-border-strong);
+	border-radius: 0;
+	padding: 0 0 2px;
+}
+
+[data-theme="inkwell"] .servings-reset:hover {
+	color: var(--color-text);
+	border-bottom-color: var(--color-text);
+}
+
+[data-theme="inkwell"] .back-link {
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--color-muted);
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	padding: 0;
+	gap: 8px;
+}
+
+[data-theme="inkwell"] .back-link:hover {
+	color: var(--color-text);
+	border-color: transparent;
+}
+
+/* Cook-mode toggle inverts when active. Motif keeps the glyph as --color-bg. */
+[data-theme="inkwell"] .cook-toggle[aria-pressed="true"] {
+	background: var(--color-text);
+	border-color: var(--color-text);
+	color: var(--color-bg);
+}
+
+/* ───────────────────────── Favorite button ───────────────────────── */
+
+[data-theme="inkwell"] .fav-btn {
+	width: 34px;
+	height: 34px;
+	border: 1px solid transparent;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: var(--ink-subdued);
+	font-size: 18px;
+	line-height: 1;
+}
+
+[data-theme="inkwell"] .fav-btn:hover {
+	color: var(--color-text);
+	background: transparent;
+	transform: none;
+}
+
+[data-theme="inkwell"] .fav-btn.is-fav,
+[data-theme="inkwell"] .fav-btn.is-fav:hover {
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Form controls ───────────────────────── */
+
+[data-theme="inkwell"] input[type="text"],
+[data-theme="inkwell"] input[type="search"],
+[data-theme="inkwell"] input[type="email"],
+[data-theme="inkwell"] input[type="password"],
+[data-theme="inkwell"] input[type="url"],
+[data-theme="inkwell"] input[type="number"],
+[data-theme="inkwell"] textarea,
+[data-theme="inkwell"] select {
+	width: 100%;
+	padding: 11px 14px;
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	color: var(--color-text);
+	font-family: var(--font-body);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+[data-theme="inkwell"] input::placeholder,
+[data-theme="inkwell"] textarea::placeholder {
+	color: var(--color-muted);
+}
+
+[data-theme="inkwell"] input:focus-visible,
+[data-theme="inkwell"] textarea:focus-visible,
+[data-theme="inkwell"] select:focus-visible {
+	outline: none;
+	border-color: var(--ink-subdued);
+}
+
+[data-theme="inkwell"] textarea {
+	min-height: 88px;
+	resize: vertical;
+	line-height: 1.6;
+}
+
+/* Custom mono arrow for native select. */
+[data-theme="inkwell"] select {
+	appearance: none;
+	background-image: linear-gradient(45deg, transparent 50%, var(--ink-subdued) 50%),
+		linear-gradient(135deg, var(--ink-subdued) 50%, transparent 50%);
+	background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+	background-size: 5px 5px, 5px 5px;
+	background-repeat: no-repeat;
+	padding-right: 36px;
+}
+
+/* Hide number spinners. */
+[data-theme="inkwell"] input[type="number"] {
+	-moz-appearance: textfield;
+}
+[data-theme="inkwell"] input[type="number"]::-webkit-outer-spin-button,
+[data-theme="inkwell"] input[type="number"]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* Compact centered servings field (more specific than the type rule above). */
+[data-theme="inkwell"] input.servings-input {
+	width: 46px;
+	height: 30px;
+	text-align: center;
+	padding: 0;
+	border: 1px solid var(--ink-border-strong);
+	background: var(--color-surface);
+	color: var(--color-text);
+	font-size: 13px;
+}
+
+/* File input + its selector button. */
+[data-theme="inkwell"] input[type="file"] {
+	font-size: 12px;
+	color: var(--ink-subdued);
+	background: var(--color-surface);
+	padding: 9px;
+}
+
+[data-theme="inkwell"] input[type="file"]::file-selector-button {
+	font-family: var(--font-body);
+	background: transparent;
+	color: var(--color-text);
+	border: 1px solid var(--ink-border-strong);
+	padding: 8px 12px;
+	margin-right: 12px;
+	font-size: 12px;
+	border-radius: var(--radius-control);
+	cursor: pointer;
+}
+
+/* Form labels become mono uppercase eyebrows. */
+[data-theme="inkwell"] .recipe-edit label,
+[data-theme="inkwell"] .auth-form label {
+	font-family: var(--font-mono);
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	color: var(--color-muted);
+	font-weight: 400;
+}
+
+/* "or paste an image here" hint follows the file input. */
+[data-theme="inkwell"] .recipe-edit input[type="file"] + p {
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	letter-spacing: 0.04em;
+	color: var(--color-muted);
+	margin-top: 8px;
+}
+
+/* Ingredient list — one centered row per item, hairline dividers, soft text. */
+[data-theme="inkwell"] .ingredients ul {
+	gap: 0;
+}
+
+[data-theme="inkwell"] .ingredients li {
+	border-bottom: 1px solid var(--color-border);
+	padding: 12px 0;
+	font-size: 13.5px;
+	line-height: 1.5;
+}
+
+[data-theme="inkwell"] .ingredients li:last-child {
+	border-bottom: 0;
+}
+
+[data-theme="inkwell"] .ingredients li label {
+	align-items: center;
+	color: var(--ink-subdued);
+}
+
+[data-theme="inkwell"] .ing-check {
+	margin-top: 0;
+}
+
+/* Ingredient checkboxes → 14px ink tiles (check glyph stays --color-bg via motif). */
+[data-theme="inkwell"] .ingredients input[type="checkbox"] {
+	width: 14px;
+	height: 14px;
+	border-radius: var(--radius-control);
+	border: 1px solid var(--ink-border-strong);
+	background: var(--color-surface);
+}
+
+[data-theme="inkwell"] .ingredients input[type="checkbox"]:checked {
+	background: var(--color-text);
+	border-color: var(--color-text);
+}
+
+/* ───────────────────────── Tags & chips ───────────────────────── */
+/* Card + list tags collapse to mono mini labels (no chip background). */
+[data-theme="inkwell"] .card-tags .tag,
+[data-theme="inkwell"] .list-row .tag {
+	font-family: var(--font-mono);
+	font-size: 9.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	color: var(--color-muted);
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	padding: 0;
+	transform: none;
+}
+
+[data-theme="inkwell"] .card-tags .tag:hover,
+[data-theme="inkwell"] .list-row .tag:hover {
+	transform: none;
+}
+
+/* Recipe-view tags + filter tag-chips read as outlined hairline chips. */
+[data-theme="inkwell"] .recipe-view .tag,
+[data-theme="inkwell"] .tag-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 5px 11px;
+	border: 1px solid var(--ink-border-strong);
+	border-radius: var(--radius-pill);
+	background: transparent;
+	color: var(--ink-subdued);
+	font-size: 12px;
+	line-height: 1.3;
+	transform: none;
+}
+
+[data-theme="inkwell"] .recipe-view .tag:hover,
+[data-theme="inkwell"] .tag-chip:hover {
+	border-color: var(--color-text);
+	color: var(--color-text);
+	transform: none;
+}
+
+/* Active (checked) filter chip inverts to ink-on-paper. */
+[data-theme="inkwell"] .tag-chip:has(input:checked) {
+	background: var(--color-text);
+	border-color: var(--color-text);
+	color: var(--color-bg);
+}
+
+[data-theme="inkwell"] .tag-chip:has(input:checked) .count {
+	color: var(--color-bg);
+	opacity: 0.7;
+}
+
+/* Active-filter removal chips in the library meta bar. */
+[data-theme="inkwell"] .filter-chip {
+	padding: 4px 10px;
+	border: 1px solid var(--ink-border-strong);
+	border-radius: var(--radius-pill);
+	background: transparent;
+	color: var(--ink-subdued);
+	font-size: 11.5px;
+}
+
+[data-theme="inkwell"] .filter-chip:hover {
+	border-color: var(--color-text);
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .filter-chip--clear {
+	color: var(--color-muted);
+}
+
+[data-theme="inkwell"] .filter-chip--clear:hover {
+	color: var(--color-text);
+	border-color: var(--color-text);
+}
+
+/* Tag editor (edit form). */
+[data-theme="inkwell"] .tags-input {
+	border: 1px solid var(--color-border);
+	background: var(--color-surface);
+	border-radius: var(--radius-control);
+	padding: 12px;
+	gap: 8px;
+}
+
+[data-theme="inkwell"] .tags-input:focus-within {
+	border-color: var(--ink-subdued);
+}
+
+[data-theme="inkwell"] .tags-input__chip {
+	border: 1px solid var(--ink-border-strong);
+	background: transparent;
+	color: var(--ink-subdued);
+	border-radius: var(--radius-pill);
+	font-size: 12px;
+	padding: 4px 8px;
+}
+
+[data-theme="inkwell"] .tags-input__remove {
+	color: var(--color-muted);
+}
+
+[data-theme="inkwell"] .tags-input__remove:hover {
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .tags-input__field {
+	color: var(--color-text);
+	font-family: var(--font-body);
+	font-size: 13px;
+}
+
+[data-theme="inkwell"] .tags-input__field::placeholder {
+	color: var(--color-muted);
+}
+
+[data-theme="inkwell"] .tags-input__suggestions {
+	border: 1px solid var(--ink-border-strong);
+	background: var(--color-elevated);
+	border-radius: var(--radius-control);
+	padding: 6px;
+}
+
+[data-theme="inkwell"] .tags-input__suggestions li {
+	padding: 7px 10px;
+	border-radius: var(--radius-control);
+	font-size: 12.5px;
+	color: var(--ink-subdued);
+}
+
+[data-theme="inkwell"] .tags-input__suggestions li[aria-selected="true"],
+[data-theme="inkwell"] .tags-input__suggestions li:hover {
+	background: var(--color-surface);
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Grid cards ───────────────────────── */
+
+[data-theme="inkwell"] .card {
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	background: var(--color-surface);
+	overflow: hidden;
+}
+
+[data-theme="inkwell"] .card:hover {
+	border-color: var(--ink-border-strong);
+	transform: none;
+	box-shadow: none;
+}
+
+[data-theme="inkwell"] .card img {
+	width: 100%;
+	height: auto;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+	border-bottom: 1px solid var(--color-border);
+	background: var(--color-elevated);
+}
+
+/* No-image container (the div preceding .card-body when no photo). */
+[data-theme="inkwell"] .card a > div:first-child {
+	aspect-ratio: 4 / 3;
+	background: var(--color-surface);
+	border-bottom: 1px solid var(--color-border);
+}
+
+[data-theme="inkwell"] .card-body {
+	padding: 18px 18px 16px;
+}
+
+[data-theme="inkwell"] .card-title {
+	font-family: var(--font-display);
+	font-size: 15px;
+	font-weight: 500;
+	letter-spacing: -0.015em;
+	line-height: 1.35;
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .card-meta {
+	margin-top: auto;
+	padding-top: 8px;
+	gap: 10px;
+}
+
+[data-theme="inkwell"] .card-meta > span:first-child {
+	font-family: var(--font-mono);
+	font-size: 9.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--color-muted);
+}
+
+[data-theme="inkwell"] .card-tags {
+	gap: 6px;
+}
+
+/* Stars render as ★/☆ glyphs; colour them solid ink (hollow ☆ reads as muted). */
+[data-theme="inkwell"] .stars {
+	color: var(--color-text);
+	letter-spacing: 0.05em;
+}
+
+/* Bulk-select checkbox on cards/list rows → sharp ink square. */
+[data-theme="inkwell"] .check {
+	border-radius: var(--radius-control);
+}
+
+[data-theme="inkwell"] .check.on {
+	border-color: var(--color-text);
+}
+
+/* Selected card ring + elevated body. */
+[data-theme="inkwell"] .card-wrap.is-selected .card,
+[data-theme="inkwell"] .list-wrap.is-selected > .list-row {
+	border-color: var(--color-text);
+	box-shadow: 0 0 0 1px var(--color-text);
+}
+
+[data-theme="inkwell"] .card-wrap.is-selected .card-body {
+	background: var(--color-elevated);
+}
+
+/* ───────────────────────── List rows ───────────────────────── */
+
+[data-theme="inkwell"] .list-row {
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	background: var(--color-surface);
+	padding: 12px 14px;
+}
+
+[data-theme="inkwell"] .list-row:hover {
+	border-color: var(--ink-border-strong);
+	box-shadow: none;
+}
+
+[data-theme="inkwell"] .list-row .shrink-0 {
+	width: 64px;
+	height: 48px;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	background: var(--color-elevated);
+	overflow: hidden;
+}
+
+[data-theme="inkwell"] .list-row .shrink-0 img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+[data-theme="inkwell"] .list-row .font-medium {
+	font-family: var(--font-display);
+	font-size: 14px;
+	font-weight: 400;
+	letter-spacing: -0.01em;
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Cook view ───────────────────────── */
+
+[data-theme="inkwell"] .recipe-header {
+	position: relative;
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 24px;
+	gap: 32px;
+}
+
+[data-theme="inkwell"] .recipe-header .fav-btn {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	z-index: 2;
+}
+
+[data-theme="inkwell"] .recipe-header__img {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-border);
+	object-fit: cover;
+}
+
+[data-theme="inkwell"] .recipe-header__info h1 {
+	font-family: var(--font-display);
+	font-weight: 400;
+	font-size: clamp(28px, 5vw, 40px);
+	letter-spacing: -0.03em;
+	line-height: 1.05;
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .description {
+	color: var(--ink-subdued);
+	font-size: 14px;
+	line-height: 1.65;
+	max-width: 65ch;
+}
+
+[data-theme="inkwell"] #rating {
+	color: var(--color-text);
+	font-size: 26px;
+	letter-spacing: 0.1em;
+	gap: 6px;
+	margin-top: 12px;
+}
+
+[data-theme="inkwell"] .rating .star:hover {
+	transform: none;
+}
+
+/* Servings control — mono label, sharp pieces. */
+[data-theme="inkwell"] .servings-control {
+	font-size: 13px;
+	gap: 8px;
+}
+
+[data-theme="inkwell"] .servings-control label {
+	font-family: var(--font-mono);
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	color: var(--color-muted);
+}
+
+/* Cook-mode step list → decimal-leading-zero mono numerals, symmetric padding,
+   hairline dividers, sharp radius on the highlight. */
+[data-theme="inkwell"] .cook-list {
+	list-style: none;
+	counter-reset: step;
+	padding: 0;
+}
+
+[data-theme="inkwell"] .cook-step {
+	counter-increment: step;
+	position: relative;
+	list-style: none;
+	padding: 16px 0 16px 48px;
+	margin: 0;
+	border: 1px solid transparent;
+	border-bottom: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	color: var(--ink-subdued);
+	font-size: 13.5px;
+	line-height: 1.6;
+}
+
+[data-theme="inkwell"] .cook-step:last-child {
+	border-bottom: 0;
+}
+
+[data-theme="inkwell"] .cook-step::before {
+	content: counter(step, decimal-leading-zero);
+	position: absolute;
+	left: 0;
+	top: 16px;
+	width: 32px;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	letter-spacing: 0.1em;
+	color: var(--color-muted);
+	padding-top: 2px;
+}
+
+[data-theme="inkwell"] .cook-step:hover {
+	background: var(--color-surface);
+}
+
+[data-theme="inkwell"] body.is-cooking .cook-step.is-current {
+	background: transparent;
+	border-color: transparent;
+	color: var(--color-text);
+	font-weight: 500;
+}
+
+[data-theme="inkwell"] .cook-step.is-current::before {
+	color: var(--color-text);
+	border-bottom: 1px solid var(--color-text);
+	padding-bottom: 2px;
+	width: fit-content;
+}
+
+[data-theme="inkwell"] .cook-step.is-done {
+	opacity: 0.6;
+}
+
+/* Cook progress bar — ink slab with mono label. */
+[data-theme="inkwell"] .cook-progress {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 16px 20px;
+	margin-bottom: 24px;
+}
+
+[data-theme="inkwell"] .cook-progress__label {
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .cook-progress .btn {
+	padding: 6px 10px;
+	font-size: 11.5px;
+}
+
+/* Notes — italic, hairline top + bottom rules. */
+[data-theme="inkwell"] .notes {
+	background: transparent;
+	border-top: 1px solid var(--color-border);
+	border-bottom: 1px solid var(--color-border);
+	border-radius: 0;
+	padding: 32px 0;
+	margin-top: 32px;
+	font-size: 14px;
+	line-height: 1.7;
+	color: var(--ink-subdued);
+	font-style: italic;
+}
+
+[data-theme="inkwell"] .notes p {
+	color: var(--ink-subdued);
+}
+
+/* Recipe footer — Original link left, actions right. */
+[data-theme="inkwell"] .recipe-footer {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 12px;
+	border-top: 1px solid var(--color-border);
+	padding-top: 24px;
+	margin-top: 32px;
+}
+
+[data-theme="inkwell"] .recipe-footer .btn-link {
+	margin-right: auto;
+	background: transparent;
+	border: 0;
+	border-bottom: 1px solid var(--ink-border-strong);
+	border-radius: 0;
+	color: var(--color-text);
+	font-size: 13px;
+	padding: 0 0 2px;
+	text-decoration: none;
+}
+
+[data-theme="inkwell"] .recipe-footer .btn-link:hover {
+	border-bottom-color: var(--color-text);
+}
+
+/* ───────────────────────── Edit form / banners ───────────────────────── */
+
+[data-theme="inkwell"] .recipe-edit h1,
+[data-theme="inkwell"] .settings-page h1 {
+	font-family: var(--font-display);
+	font-weight: 500;
+	letter-spacing: -0.02em;
+}
+
+[data-theme="inkwell"] .draft-banner {
+	border: 1px solid var(--ink-border-strong);
+	border-left: 2px solid var(--color-text);
+	background: var(--color-surface);
+	border-radius: var(--radius-control);
+	padding: 14px 18px;
+}
+
+[data-theme="inkwell"] .draft-banner p {
+	color: var(--ink-subdued);
+}
+
+/* ───────────────────────── Settings cards ───────────────────────── */
+
+[data-theme="inkwell"] .settings-card {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 28px 32px;
+}
+
+[data-theme="inkwell"] .settings-card p {
+	color: var(--color-muted);
+	font-size: 13px;
+}
+
+[data-theme="inkwell"] .theme-swatch {
+	border: 1px solid var(--color-border);
+	background: var(--color-bg);
+	border-radius: var(--radius-control);
+	padding: 12px;
+}
+
+[data-theme="inkwell"] .theme-swatch:hover {
+	border-color: var(--ink-border-strong);
+}
+
+[data-theme="inkwell"] .theme-mode-btn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	border-color: var(--color-border);
+}
+
+/* ───────────────────────── Auth form ───────────────────────── */
+
+[data-theme="inkwell"] .auth-form {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 48px 44px;
+	gap: 22px;
+	max-width: 400px;
+}
+
+[data-theme="inkwell"] .auth-form__title {
+	font-family: var(--font-display);
+	font-weight: 400;
+	font-size: 26px;
+	letter-spacing: -0.02em;
+	color: var(--color-text);
+	text-align: left;
+}
+
+[data-theme="inkwell"] .auth-form button {
+	background: var(--color-text);
+	border-color: var(--color-text);
+	color: var(--color-bg);
+	padding: 12px 16px;
+	font-size: 12.5px;
+}
+
+[data-theme="inkwell"] .auth-error {
+	border: 1px solid var(--ink-border-strong);
+	border-left: 2px solid var(--color-text);
+	background: transparent;
+	color: var(--ink-subdued);
+	border-radius: var(--radius-control);
+	font-size: 12.5px;
+	padding: 12px 14px;
+}
+
+[data-theme="inkwell"] .auth-form__links {
+	gap: 6px;
+	font-size: 13px;
+	padding-top: 6px;
+}
+
+[data-theme="inkwell"] .auth-form__links a {
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Dropdown menus ───────────────────────── */
+
+[data-theme="inkwell"] .add-menu > div,
+[data-theme="inkwell"] .sort-menu > div {
+	background: var(--color-elevated);
+	border: 1px solid var(--ink-border-strong);
+	border-radius: var(--radius-control);
+	padding: 6px;
+	box-shadow: none;
+}
+
+[data-theme="inkwell"] .add-menu a,
+[data-theme="inkwell"] .sort-option {
+	border: 0;
+	border-radius: var(--radius-control);
+	padding: 8px 12px;
+	font-size: 12.5px;
+	color: var(--ink-subdued);
+	background: transparent;
+}
+
+[data-theme="inkwell"] .add-menu a:hover,
+[data-theme="inkwell"] .sort-option:hover {
+	background: var(--color-surface);
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .add-menu a + a {
+	border-top: 0;
+}
+
+[data-theme="inkwell"] .sort-option--active {
+	background: transparent;
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Toasts ───────────────────────── */
+
+[data-theme="inkwell"] .toast,
+[data-theme="inkwell"] .global-toast-area .toast {
+	background: var(--color-elevated);
+	border: 1px solid var(--ink-border-strong);
+	border-radius: var(--radius-control);
+	box-shadow: none;
+	padding: 14px 18px;
+	font-size: 13px;
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .toast-msg {
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .toast-undo {
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .toast-close {
+	color: var(--color-muted);
+}
+
+[data-theme="inkwell"] .toast-close:hover {
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Bulk action bar ───────────────────────── */
+
+[data-theme="inkwell"] .bulk-actionbar {
+	background: var(--color-elevated);
+	border: 1px solid var(--ink-border-strong);
+	border-radius: var(--radius-card);
+	box-shadow: none;
+	padding: 12px 20px;
+	gap: 16px;
+}
+
+[data-theme="inkwell"] .bulk-count,
+[data-theme="inkwell"] .bulk-count__n {
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Skeletons + spinner ───────────────────────── */
+
+[data-theme="inkwell"] .skeleton-card {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+}
+
+[data-theme="inkwell"] .skeleton {
+	background: var(--color-elevated);
+	animation: inkwell-sk-pulse 1.6s ease-in-out infinite;
+}
+
+[data-theme="inkwell"] .skeleton::after {
+	display: none;
+}
+
+@keyframes inkwell-sk-pulse {
+	0%,
+	100% {
+		background: var(--color-elevated);
+	}
+	50% {
+		background: var(--ink-border-strong);
+	}
+}
+
+[data-theme="inkwell"] .spinner {
+	width: 22px;
+	height: 22px;
+	border: 1px solid var(--color-border);
+	border-top-color: var(--color-text);
+}
+
+/* ───────────────────────── Empty states ───────────────────────── */
+
+[data-theme="inkwell"] .empty-state {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 48px 40px;
+	text-align: center;
+}
+
+[data-theme="inkwell"] .empty-state h2 {
+	font-family: var(--font-display);
+	text-transform: none;
+	letter-spacing: -0.015em;
+	font-size: 20px;
+	font-weight: 500;
+	color: var(--color-text);
+}
+
+[data-theme="inkwell"] .empty-state p {
+	color: var(--ink-subdued);
+	font-size: 13.5px;
+}
+
+[data-theme="inkwell"] .empty {
+	color: var(--color-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-theme="inkwell"] .skeleton {
+		animation: none;
+	}
+}

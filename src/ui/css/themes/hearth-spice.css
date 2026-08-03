@@ -1,0 +1,1179 @@
+/*
+ * Hearth: Spice Market theme — component overrides.
+ * Ports the visual language of .mockups/theme-hearth-spice.html onto the live
+ * app's real component classes. Every rule is scoped to [data-theme="hearth-spice"]
+ * so it only applies when this theme is active. Values favour the spice tokens
+ * (paprika / turmeric / teal on warm dark); light-dark() keeps light mode
+ * consistent, and a handful of --spice-* helpers carry the elements tokens
+ * alone can't express (teal, paprika shades, the diamond-tile SVG).
+ */
+
+/* ───────────────────────── Spice-only tokens ───────────────────────── */
+
+[data-theme="hearth-spice"] {
+	--spice-paprika: light-dark(#c24a25, #d2603a);
+	--spice-paprika-dim: light-dark(#9a3a18, #b14a28);
+	--spice-paprika-deep: light-dark(#3a1408, #1a0e08);
+	--spice-turmeric: light-dark(#a06a1a, #e0a82e);
+	--spice-turmeric-dim: light-dark(#7a5012, #b98719);
+	--spice-teal: light-dark(#1f6b6b, #2e8a8a);
+	--spice-teal-dim: light-dark(#185757, #236e6e);
+	--spice-cream: light-dark(#fff8ef, #f2e6d3);
+	/* Repeating diamond tile (paprika + turmeric + teal) for crown / divider bands. */
+	--spice-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cpath d='M0 6 L4 0 L8 6 L4 12 Z' fill='%23d2603a'/%3E%3Cpath d='M8 6 L12 0 L16 6 L12 12 Z' fill='%23e0a82e'/%3E%3Cpath d='M16 6 L20 0 L24 6 L20 12 Z' fill='%232e8a8a'/%3E%3C/svg%3E");
+}
+
+/* ───────────────────────── Base / type ───────────────────────── */
+
+[data-theme="hearth-spice"] body {
+	font-size: 16px;
+	line-height: 1.6;
+	background-image:
+		radial-gradient(circle at 10% 4%, color-mix(in srgb, var(--spice-paprika) 12%, transparent), transparent 40%),
+		radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--spice-teal) 9%, transparent), transparent 36%),
+		radial-gradient(circle at 50% 112%, color-mix(in srgb, var(--spice-turmeric) 7%, transparent), transparent 55%),
+		repeating-linear-gradient(45deg, color-mix(in srgb, var(--spice-turmeric) 1.5%, transparent) 0 2px, transparent 2px 14px),
+		repeating-linear-gradient(-45deg, color-mix(in srgb, var(--spice-paprika) 1.5%, transparent) 0 2px, transparent 2px 14px);
+}
+
+[data-theme="hearth-spice"] h1,
+[data-theme="hearth-spice"] h2,
+[data-theme="hearth-spice"] h3,
+[data-theme="hearth-spice"] h4 {
+	font-family: var(--font-display);
+	font-variation-settings: "opsz" 144;
+}
+
+[data-theme="hearth-spice"] a {
+	color: var(--spice-teal);
+}
+
+[data-theme="hearth-spice"] a:hover {
+	color: var(--spice-turmeric);
+}
+
+/* ───────────────────────── Header ───────────────────────── */
+/* Tile-trim crown along the top of the site bar, echoing the mockup appbar. */
+
+[data-theme="hearth-spice"] .site-header {
+	position: relative;
+	background: var(--color-surface);
+	border-bottom: 1px solid var(--color-border);
+	box-shadow: var(--shadow-card);
+	overflow: hidden;
+}
+
+[data-theme="hearth-spice"] .site-header::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 6px;
+	background-image: var(--spice-tile);
+	background-repeat: repeat-x;
+	background-size: 24px 12px;
+	opacity: 0.9;
+	pointer-events: none;
+}
+
+[data-theme="hearth-spice"] .site-header .logo {
+	gap: 0.4rem;
+}
+
+[data-theme="hearth-spice"] .site-header .logo-icon {
+	width: 2.4rem;
+	height: 2.4rem;
+	border-radius: 50%;
+	border: 1.5px solid var(--spice-paprika);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--spice-paprika) 12%, transparent);
+}
+
+[data-theme="hearth-spice"] .site-header .settings-gear {
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Buttons ───────────────────────── */
+/* Ornamented pills with warm inner highlights. Paprika = primary, crimson =
+   danger, turmeric = hover warmth. Also covers <summary class="btn"> menus. */
+
+[data-theme="hearth-spice"] .btn {
+	font-family: var(--font-body);
+	font-weight: 700;
+	font-size: 14.5px;
+	padding: 11px 22px;
+	border-radius: 999px;
+	border: 1.5px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+	gap: 8px;
+	letter-spacing: 0.01em;
+}
+
+[data-theme="hearth-spice"] .btn:hover {
+	border-color: var(--spice-turmeric);
+	color: var(--spice-turmeric);
+}
+
+[data-theme="hearth-spice"] .btn:active {
+	transform: translateY(1px);
+}
+
+[data-theme="hearth-spice"] .btn--primary {
+	background: linear-gradient(180deg, var(--spice-paprika), var(--spice-paprika-dim));
+	color: var(--spice-cream);
+	border-color: transparent;
+	box-shadow: 0 4px 14px color-mix(in srgb, var(--spice-paprika) 34%, transparent),
+		inset 0 1px 0 rgba(255, 255, 255, 0.22),
+		inset 0 -2px 0 rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="hearth-spice"] .btn--primary:hover {
+	border-color: transparent;
+	color: var(--spice-cream);
+	box-shadow: 0 10px 24px color-mix(in srgb, var(--spice-paprika) 48%, transparent),
+		inset 0 1px 0 rgba(255, 255, 255, 0.28),
+		inset 0 -2px 0 rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="hearth-spice"] .btn--danger {
+	background: linear-gradient(180deg, #b8324a, #8c1f33);
+	color: var(--spice-cream);
+	border-color: transparent;
+	box-shadow: 0 4px 14px rgba(184, 50, 74, 0.32),
+		inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="hearth-spice"] .btn--danger:hover {
+	border-color: transparent;
+	color: var(--spice-cream);
+	box-shadow: 0 10px 24px rgba(184, 50, 74, 0.46),
+		inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* Round icon buttons in the header / toolbars. */
+[data-theme="hearth-spice"] .settings-gear,
+[data-theme="hearth-spice"] .view-toggle {
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border-radius: 50%;
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+}
+
+[data-theme="hearth-spice"] .settings-gear:hover,
+[data-theme="hearth-spice"] .view-toggle:hover {
+	border-color: var(--spice-turmeric);
+	color: var(--spice-turmeric);
+}
+
+[data-theme="hearth-spice"] .pwa-install-btn {
+	padding: 8px 16px;
+	font-size: 13px;
+	border-radius: 999px;
+}
+
+/* Servings +/- step buttons (round). */
+[data-theme="hearth-spice"] .servings-step {
+	width: 38px;
+	height: 38px;
+	padding: 0;
+	border-radius: 50%;
+	border: 1.5px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+[data-theme="hearth-spice"] .servings-step:hover {
+	border-color: var(--spice-paprika);
+	color: var(--spice-paprika);
+	transform: scale(1.06);
+}
+
+[data-theme="hearth-spice"] .servings-reset {
+	padding: 8px 16px;
+	font-size: 13px;
+	border-radius: 999px;
+}
+
+/* Cook-mode toggle behaves as a primary pill when active. */
+[data-theme="hearth-spice"] .cook-toggle[aria-pressed="true"] {
+	background: linear-gradient(180deg, var(--spice-paprika), var(--spice-paprika-dim));
+	color: var(--spice-cream);
+	border-color: transparent;
+}
+
+/* Back link behaves as a teal pill. */
+[data-theme="hearth-spice"] .back-link {
+	padding: 4px 10px;
+	font-size: 13.5px;
+	font-weight: 700;
+	border-radius: 999px;
+	color: var(--spice-teal);
+	background: transparent;
+}
+
+[data-theme="hearth-spice"] .back-link:hover {
+	color: var(--spice-turmeric);
+}
+
+/* ───────────────────────── Favorite button ───────────────────────── */
+
+[data-theme="hearth-spice"] .fav-btn {
+	width: 42px;
+	height: 42px;
+	border-radius: 50%;
+	border: 1.5px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-muted);
+	font-size: 20px;
+}
+
+[data-theme="hearth-spice"] .fav-btn:hover {
+	color: var(--spice-paprika);
+	border-color: var(--spice-paprika);
+	background: var(--color-elevated);
+	transform: scale(1.06);
+}
+
+[data-theme="hearth-spice"] .fav-btn.is-fav {
+	background: color-mix(in srgb, var(--spice-paprika) 18%, transparent);
+	border-color: var(--spice-paprika);
+	color: var(--spice-paprika);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--spice-paprika) 12%, transparent);
+}
+
+[data-theme="hearth-spice"] .fav-btn.is-fav:hover {
+	color: color-mix(in srgb, var(--spice-paprika) 80%, #ffffff 20%);
+}
+
+/* ───────────────────────── Form controls ───────────────────────── */
+/* Generous 14px radii, turmeric focus glow, paprika diamond label pips. */
+
+[data-theme="hearth-spice"] input[type="text"],
+[data-theme="hearth-spice"] input[type="search"],
+[data-theme="hearth-spice"] input[type="email"],
+[data-theme="hearth-spice"] input[type="password"],
+[data-theme="hearth-spice"] input[type="url"],
+[data-theme="hearth-spice"] input[type="number"],
+[data-theme="hearth-spice"] textarea,
+[data-theme="hearth-spice"] select {
+	background: var(--color-bg);
+	border: 1.5px solid var(--color-border);
+	border-radius: 14px;
+	color: var(--color-text);
+	padding: 11px 14px;
+	font-family: var(--font-body);
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+[data-theme="hearth-spice"] input::placeholder,
+[data-theme="hearth-spice"] textarea::placeholder {
+	color: var(--color-muted);
+	opacity: 0.85;
+}
+
+[data-theme="hearth-spice"] textarea {
+	resize: vertical;
+	min-height: 80px;
+	line-height: 1.55;
+}
+
+[data-theme="hearth-spice"] input:focus-visible,
+[data-theme="hearth-spice"] textarea:focus-visible,
+[data-theme="hearth-spice"] select:focus-visible {
+	border-color: var(--spice-turmeric);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--spice-turmeric) 20%, transparent);
+}
+
+[data-theme="hearth-spice"] .search-form input {
+	padding-left: 14px;
+}
+
+/* Number / servings input: compact, centered. */
+[data-theme="hearth-spice"] .servings-input {
+	width: 64px;
+	text-align: center;
+	padding-left: 6px;
+	padding-right: 6px;
+}
+
+/* File input + its selector button. */
+[data-theme="hearth-spice"] input[type="file"] {
+	padding: 9px;
+	background: var(--color-bg);
+}
+
+[data-theme="hearth-spice"] input[type="file"]::file-selector-button {
+	font-family: var(--font-body);
+	font-weight: 700;
+	background: linear-gradient(180deg, var(--spice-paprika), var(--spice-paprika-dim));
+	color: var(--spice-cream);
+	border: none;
+	border-radius: 999px;
+	padding: 7px 14px;
+	margin-right: 12px;
+	cursor: pointer;
+}
+
+/* Edit-form labels lead with a paprika diamond pip. */
+[data-theme="hearth-spice"] .recipe-edit label,
+[data-theme="hearth-spice"] .settings-card label {
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+
+[data-theme="hearth-spice"] .recipe-edit label::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	flex: none;
+	background: var(--spice-paprika);
+	transform: rotate(45deg);
+	display: inline-block;
+}
+
+/* Ingredient checkboxes become paprika tiles with a cream check. */
+[data-theme="hearth-spice"] .ingredients input[type="checkbox"] {
+	width: 22px;
+	height: 22px;
+	border-radius: 7px;
+	border-width: 1.5px;
+	margin-top: 0;
+}
+
+[data-theme="hearth-spice"] .ingredients input[type="checkbox"]:checked {
+	background: var(--spice-paprika);
+	border-color: var(--spice-paprika);
+}
+
+[data-theme="hearth-spice"] .ingredients input[type="checkbox"]:checked::before {
+	box-shadow: inset 1em 1em var(--spice-cream);
+}
+
+/* ───────────────────────── Tags & chips ───────────────────────── */
+/* Card / inline tags, filter tag-chips and active-filter chips all share the
+   ornamental elevated pill, each leading with a rotated-diamond stamp. The
+   base .tag colours them per --tag-color; spice overrides to the warm uniform
+   look, with turmeric fill on active. */
+
+[data-theme="hearth-spice"] .tag {
+	position: relative;
+	background: var(--color-elevated);
+	color: var(--color-text);
+	border: 1px solid var(--color-border);
+	padding: 4px 11px 4px 9px;
+	font-size: 11.5px;
+	font-weight: 700;
+	border-radius: 999px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22),
+		inset 0 0 0 1px color-mix(in srgb, var(--spice-turmeric) 5%, transparent);
+	letter-spacing: 0.01em;
+}
+
+[data-theme="hearth-spice"] .tag::before {
+	content: "";
+	width: 5px;
+	height: 5px;
+	flex: none;
+	background: var(--spice-paprika);
+	transform: rotate(45deg);
+	display: inline-block;
+	margin-right: 5px;
+	vertical-align: 1px;
+}
+
+[data-theme="hearth-spice"] .tag:hover {
+	border-color: var(--spice-turmeric);
+	color: var(--spice-turmeric);
+}
+
+[data-theme="hearth-spice"] .tag:hover::before {
+	background: var(--spice-turmeric);
+}
+
+/* Filter tag-chips are slightly larger (chip, not chip-sm). */
+[data-theme="hearth-spice"] .tag-chip {
+	padding: 7px 15px 7px 12px;
+	font-size: 13px;
+}
+
+[data-theme="hearth-spice"] .tag-chip::before {
+	margin-right: 0.3rem;
+}
+
+[data-theme="hearth-spice"] .tag-chip .count {
+	opacity: 0.7;
+}
+
+/* Active (checked) filter chip = saturated turmeric fill with paprika diamond. */
+[data-theme="hearth-spice"] .tag-chip:has(input:checked) {
+	background: linear-gradient(135deg, var(--spice-turmeric), var(--spice-turmeric-dim));
+	color: var(--spice-paprika-deep);
+	border-color: transparent;
+	box-shadow: 0 4px 12px color-mix(in srgb, var(--spice-turmeric) 34%, transparent),
+		inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="hearth-spice"] .tag-chip:has(input:checked)::before {
+	background: var(--spice-paprika-deep);
+}
+
+[data-theme="hearth-spice"] .tag-chip:has(input:checked) .count {
+	color: var(--spice-paprika-deep);
+	opacity: 0.8;
+}
+
+/* Favorites tag-chip uses teal (info) instead of paprika. The favorites label
+   is the only tag-chip that sets --tag-color to var(--color-favorite) inline. */
+[data-theme="hearth-spice"] .tag-chip[style*="--tag-color: var(--color-favorite)"] {
+	background: color-mix(in srgb, var(--spice-teal) 14%, transparent);
+	border-color: var(--spice-teal);
+	color: var(--spice-teal);
+}
+
+[data-theme="hearth-spice"] .tag-chip[style*="--tag-color: var(--color-favorite)"]::before {
+	background: var(--spice-teal);
+}
+
+/* Active-filter removal chips in the library meta bar. */
+[data-theme="hearth-spice"] .filter-chip {
+	padding: 4px 11px 4px 9px;
+	font-size: 11.5px;
+	font-weight: 700;
+	border-radius: 999px;
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+}
+
+[data-theme="hearth-spice"] .filter-chip:hover {
+	border-color: var(--spice-turmeric);
+	color: var(--spice-turmeric);
+}
+
+[data-theme="hearth-spice"] .filter-chip--clear {
+	background: transparent;
+	box-shadow: none;
+	color: var(--color-muted);
+}
+
+[data-theme="hearth-spice"] .filter-chip--clear:hover {
+	color: var(--spice-paprika);
+	border-color: var(--spice-paprika);
+}
+
+/* ───────────────────────── Grid cards ───────────────────────── */
+/* Each card wears a patterned diamond-tile crown. The base app.tailwind.css
+   motif sets a diagonal stripe; this overrides it with the SVG tile. The
+   .card-wrap ancestor bumps specificity so the override wins the cascade. */
+
+[data-theme="hearth-spice"] .card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+	overflow: hidden;
+}
+
+[data-theme="hearth-spice"] .card:hover {
+	border-color: var(--spice-turmeric);
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="hearth-spice"] .card::before,
+[data-theme="hearth-spice"] .card-wrap .card::before {
+	height: 7px;
+	background-image: var(--spice-tile);
+	background-repeat: repeat-x;
+	background-size: 24px 12px;
+	background-color: transparent;
+	opacity: 0.95;
+	z-index: 2;
+}
+
+[data-theme="hearth-spice"] .card > img {
+	height: auto;
+	aspect-ratio: 16 / 10;
+	width: 100%;
+	object-fit: cover;
+	background: var(--color-elevated);
+}
+
+/* No-image placeholder container (crosshatched spice-sack). */
+[data-theme="hearth-spice"] .card > div:first-child:not(.card-body) {
+	height: auto;
+	aspect-ratio: 16 / 10;
+	background:
+		repeating-linear-gradient(45deg, color-mix(in srgb, var(--spice-turmeric) 5%, transparent) 0 12px, transparent 12px 24px),
+		repeating-linear-gradient(-45deg, color-mix(in srgb, var(--spice-teal) 4%, transparent) 0 12px, transparent 12px 24px),
+		var(--color-elevated);
+}
+
+[data-theme="hearth-spice"] .card-body {
+	padding: 16px 18px 18px;
+}
+
+[data-theme="hearth-spice"] .card-title {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 19px;
+	font-variation-settings: "SOFT" 60, "opsz" 144;
+	line-height: 1.2;
+	margin-bottom: 5px;
+}
+
+[data-theme="hearth-spice"] .card-meta {
+	margin-top: 9px;
+	gap: 10px;
+}
+
+/* Domain source span (live has no .card-source class). */
+[data-theme="hearth-spice"] .card-meta > span:first-child {
+	font-size: 12.5px;
+	font-weight: 600;
+}
+
+[data-theme="hearth-spice"] .card-tags {
+	gap: 6px;
+	margin-top: 11px;
+}
+
+/* Stars (text glyphs) → turmeric. */
+[data-theme="hearth-spice"] .stars {
+	color: var(--spice-turmeric);
+	letter-spacing: 0.05em;
+}
+
+/* Select checkbox on cards / rows: paprika disc with cream check. */
+[data-theme="hearth-spice"] .check {
+	border-radius: 50%;
+	border: 2px solid var(--color-bg);
+	background: var(--color-elevated);
+	color: var(--color-text);
+}
+
+[data-theme="hearth-spice"] .check.on {
+	background: var(--spice-paprika);
+	border-color: var(--color-bg);
+	color: var(--spice-cream);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Selected card ring + warm tint. */
+[data-theme="hearth-spice"] .card-wrap.is-selected .card,
+[data-theme="hearth-spice"] .list-wrap.is-selected > .list-row {
+	border-color: var(--spice-paprika);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--spice-paprika) 40%, transparent),
+		var(--shadow-hover);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--spice-paprika) 9%, transparent), var(--color-surface) 42%);
+}
+
+/* ───────────────────────── List rows ───────────────────────── */
+/* Compact rows with a vertical tile ribbon up the leading edge. */
+
+[data-theme="hearth-spice"] .list-row {
+	position: relative;
+	border-radius: 18px;
+	border-width: 1px;
+	padding: 12px 16px;
+	gap: 14px;
+	box-shadow: var(--shadow-card);
+	overflow: hidden;
+}
+
+[data-theme="hearth-spice"] .list-row::before {
+	content: "";
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 4px;
+	background-image: var(--spice-tile);
+	background-size: 24px 12px;
+	background-repeat: repeat-y;
+}
+
+[data-theme="hearth-spice"] .list-row:hover {
+	border-color: var(--spice-turmeric);
+	box-shadow: var(--shadow-hover);
+}
+
+/* Thumbnail (real image or placeholder). */
+[data-theme="hearth-spice"] .list-row .shrink-0 {
+	width: 56px;
+	height: 56px;
+	border-radius: 14px;
+	object-fit: cover;
+	flex: none;
+	margin-left: 4px;
+}
+
+[data-theme="hearth-spice"] .list-row .shrink-0 img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+/* List title (live uses .font-medium, no .row-title). */
+[data-theme="hearth-spice"] .list-row .font-medium {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 17px;
+	font-variation-settings: "SOFT" 60, "opsz" 144;
+}
+
+/* ───────────────────────── Cook view ───────────────────────── */
+
+[data-theme="hearth-spice"] .recipe-header {
+	position: relative;
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+	overflow: hidden;
+	padding: 18px 20px;
+}
+
+[data-theme="hearth-spice"] .recipe-header .fav-btn {
+	position: absolute;
+	top: 14px;
+	right: 14px;
+	z-index: 1;
+}
+
+[data-theme="hearth-spice"] .recipe-header__img {
+	border-radius: 18px;
+	object-fit: cover;
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="hearth-spice"] .recipe-header__info h1 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 36px;
+	font-variation-settings: "SOFT" 60, "WONK" 1, "opsz" 144;
+	line-height: 1.05;
+	letter-spacing: -0.01em;
+}
+
+[data-theme="hearth-spice"] .description {
+	max-width: 65ch;
+	font-size: 15.5px;
+	line-height: 1.65;
+	opacity: 0.92;
+}
+
+/* Section headings (Ingredients / Steps / Notes). */
+[data-theme="hearth-spice"] .recipe-view h2,
+[data-theme="hearth-spice"] .recipe-edit h1,
+[data-theme="hearth-spice"] .settings-page h1 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 22px;
+	font-variation-settings: "SOFT" 60, "opsz" 144;
+	letter-spacing: -0.01em;
+}
+
+/* Rating stars on the cook view (turmeric + large). */
+[data-theme="hearth-spice"] #rating {
+	color: var(--spice-turmeric);
+	font-size: 34px;
+	letter-spacing: 0.1em;
+}
+
+/* Servings control. */
+[data-theme="hearth-spice"] .servings-control {
+	font-size: 13px;
+}
+
+[data-theme="hearth-spice"] .servings-control label {
+	font-weight: 700;
+	color: var(--color-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+/* Ingredients list — one centered row per item, dashed dividers between. */
+[data-theme="hearth-spice"] .ingredients ul {
+	gap: 0;
+}
+
+[data-theme="hearth-spice"] .ingredients li {
+	border-bottom: 1px dashed var(--color-border);
+	padding: 9px 0;
+	font-size: 14.5px;
+}
+
+[data-theme="hearth-spice"] .ingredients li:last-child {
+	border-bottom: none;
+}
+
+[data-theme="hearth-spice"] .ingredients li label {
+	align-items: center;
+}
+
+/* Cook-mode step list → numbered circles; current step glows paprika. */
+[data-theme="hearth-spice"] .cook-list {
+	list-style: none;
+	counter-reset: step;
+	padding: 0;
+}
+
+[data-theme="hearth-spice"] .cook-step {
+	counter-increment: step;
+	position: relative;
+	padding: 5px 12px 5px 46px;
+	margin: 0 0 8px 0;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background: none;
+	line-height: 1.55;
+	font-size: 14.5px;
+}
+
+[data-theme="hearth-spice"] .cook-step::before {
+	content: counter(step);
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: var(--color-elevated);
+	border: 1.5px solid var(--color-border);
+	color: var(--color-muted);
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+[data-theme="hearth-spice"] .cook-step:hover {
+	background: color-mix(in srgb, var(--spice-paprika) 6%, transparent);
+}
+
+[data-theme="hearth-spice"] .cook-step.is-current {
+	background: none;
+	border: none;
+	font-weight: 600;
+}
+
+[data-theme="hearth-spice"] .cook-step.is-current::before {
+	background: linear-gradient(180deg, var(--spice-paprika), var(--spice-paprika-dim));
+	border-color: var(--spice-paprika);
+	color: var(--spice-cream);
+	box-shadow: 0 4px 14px color-mix(in srgb, var(--spice-paprika) 45%, transparent),
+		0 0 0 3px color-mix(in srgb, var(--spice-paprika) 16%, transparent);
+}
+
+[data-theme="hearth-spice"] .cook-step.is-done {
+	opacity: 1;
+	color: var(--color-muted);
+}
+
+[data-theme="hearth-spice"] .cook-step.is-done::before {
+	background: var(--spice-teal);
+	border-color: var(--spice-teal);
+	color: var(--spice-cream);
+}
+
+/* Cook progress bar container. */
+[data-theme="hearth-spice"] .cook-progress {
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-radius: 18px;
+	padding: 14px 16px;
+}
+
+[data-theme="hearth-spice"] .cook-progress__label {
+	font-weight: 700;
+	font-size: 13px;
+}
+
+[data-theme="hearth-spice"] .cook-progress .btn {
+	padding: 8px 16px;
+	font-size: 13px;
+}
+
+/* Notes — turmeric-tinted box with a dashed turmeric border. */
+[data-theme="hearth-spice"] .notes {
+	background: color-mix(in srgb, var(--spice-turmeric) 7%, transparent);
+	border: 1px dashed var(--spice-turmeric);
+	border-top: 1px dashed var(--spice-turmeric);
+	border-radius: 18px;
+	padding: 18px 22px;
+	margin-top: 2rem;
+	font-size: 14.5px;
+	line-height: 1.6;
+}
+
+[data-theme="hearth-spice"] .notes h2 {
+	color: var(--spice-turmeric);
+	font-size: 16px;
+	margin-bottom: 4px;
+}
+
+/* Recipe footer — rounded surfaced bar; Original left, actions right. */
+[data-theme="hearth-spice"] .recipe-footer {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+	padding: 18px 24px 22px;
+}
+
+[data-theme="hearth-spice"] .recipe-footer .btn-link {
+	margin-right: auto;
+	background: none;
+	border: none;
+	color: var(--spice-teal);
+	font-weight: 700;
+	text-decoration: none;
+	padding: 4px 10px;
+	border-radius: 999px;
+}
+
+[data-theme="hearth-spice"] .recipe-footer .btn-link:hover {
+	color: var(--spice-turmeric);
+}
+
+/* ───────────────────────── Tags input (edit form) ───────────────────────── */
+
+[data-theme="hearth-spice"] .tags-input {
+	border: 1.5px solid var(--color-border);
+	border-radius: 14px;
+	padding: 10px 12px;
+}
+
+[data-theme="hearth-spice"] .tags-input:focus-within {
+	border-color: var(--spice-turmeric);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--spice-turmeric) 20%, transparent);
+}
+
+[data-theme="hearth-spice"] .tags-input__chip {
+	border-radius: 999px;
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	font-weight: 700;
+	font-size: 13px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+}
+
+[data-theme="hearth-spice"] .tags-input__suggestions {
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	border-radius: 14px;
+	padding: 8px;
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="hearth-spice"] .tags-input__suggestions li {
+	border-radius: 10px;
+	font-weight: 600;
+}
+
+[data-theme="hearth-spice"] .tags-input__suggestions li[aria-selected="true"],
+[data-theme="hearth-spice"] .tags-input__suggestions li:hover {
+	background: var(--color-surface);
+	color: var(--spice-turmeric);
+}
+
+/* Draft / extraction banners. */
+[data-theme="hearth-spice"] .draft-banner {
+	border-radius: 14px;
+	padding: 14px 16px;
+	background: color-mix(in srgb, var(--spice-paprika) 11%, var(--color-surface));
+	border-width: 1px;
+}
+
+/* ───────────────────────── Settings cards ───────────────────────── */
+/* Stacked tile-trimmed panels; each heading leads with a paprika diamond. */
+
+[data-theme="hearth-spice"] .settings-card {
+	position: relative;
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+	padding: 30px 26px 22px;
+	overflow: hidden;
+}
+
+[data-theme="hearth-spice"] .settings-card::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 6px;
+	background-image: var(--spice-tile);
+	background-repeat: repeat-x;
+	background-size: 24px 12px;
+	opacity: 0.9;
+	pointer-events: none;
+}
+
+[data-theme="hearth-spice"] .settings-card h2 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 21px;
+	font-variation-settings: "SOFT" 60, "opsz" 144;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+}
+
+[data-theme="hearth-spice"] .settings-card h2::before {
+	content: "";
+	width: 9px;
+	height: 9px;
+	background: var(--spice-paprika);
+	transform: rotate(45deg);
+	display: inline-block;
+}
+
+[data-theme="hearth-spice"] .settings-card p {
+	color: var(--color-muted);
+	font-size: 14px;
+}
+
+/* ───────────────────────── Auth form ───────────────────────── */
+
+[data-theme="hearth-spice"] .auth-form {
+	position: relative;
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+	padding: 40px 36px 34px;
+	max-width: 440px;
+	overflow: hidden;
+}
+
+[data-theme="hearth-spice"] .auth-form::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 6px;
+	background-image: var(--spice-tile);
+	background-repeat: repeat-x;
+	background-size: 24px 12px;
+	opacity: 0.9;
+	pointer-events: none;
+}
+
+[data-theme="hearth-spice"] .auth-form__title {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 30px;
+	font-variation-settings: "SOFT" 60, "WONK" 1, "opsz" 144;
+	text-align: center;
+	margin-bottom: 6px;
+}
+
+[data-theme="hearth-spice"] .auth-form label {
+	font-weight: 700;
+	color: var(--color-text);
+}
+
+[data-theme="hearth-spice"] .auth-error {
+	background: color-mix(in srgb, var(--spice-paprika) 15%, transparent);
+	border: 1px solid var(--spice-paprika);
+	color: light-dark(#9a3a18, #f4b59c);
+	border-radius: 12px;
+	font-weight: 600;
+	font-size: 13.5px;
+}
+
+[data-theme="hearth-spice"] .auth-form__links {
+	justify-content: space-between;
+	flex-direction: row;
+	font-size: 13.5px;
+	margin-top: 1.125rem;
+}
+
+/* ───────────────────────── Dropdown menus ───────────────────────── */
+/* Add/sort menus wear a tile-trim crown; items warm to turmeric on hover. */
+
+[data-theme="hearth-spice"] .add-menu > div,
+[data-theme="hearth-spice"] .sort-menu > div {
+	position: relative;
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-radius: 18px;
+	padding: 16px 8px 8px;
+	box-shadow: var(--shadow-hover);
+	overflow: hidden;
+}
+
+[data-theme="hearth-spice"] .add-menu > div::before,
+[data-theme="hearth-spice"] .sort-menu > div::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 6px;
+	background-image: var(--spice-tile);
+	background-repeat: repeat-x;
+	background-size: 24px 12px;
+	opacity: 0.85;
+	pointer-events: none;
+}
+
+[data-theme="hearth-spice"] .add-menu a,
+[data-theme="hearth-spice"] .sort-option {
+	border-radius: 12px;
+	padding: 9px 12px;
+	font-weight: 600;
+	font-size: 14px;
+	color: var(--color-text);
+}
+
+[data-theme="hearth-spice"] .add-menu a:hover,
+[data-theme="hearth-spice"] .sort-option:hover {
+	background: var(--color-surface);
+	color: var(--color-text);
+}
+
+[data-theme="hearth-spice"] .sort-option--active {
+	background: color-mix(in srgb, var(--spice-paprika) 18%, transparent);
+	color: var(--spice-paprika);
+}
+
+/* ───────────────────────── Toasts ───────────────────────── */
+
+[data-theme="hearth-spice"] .toast,
+[data-theme="hearth-spice"] .global-toast-area .toast {
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-left: 4px solid var(--spice-turmeric);
+	border-radius: 14px;
+	box-shadow: var(--shadow-hover);
+}
+
+/* ───────────────────────── Bulk action bar ───────────────────────── */
+/* Paprika border + diamond-stamped count, floating warm above the grid. */
+
+[data-theme="hearth-spice"] .bulk-actionbar {
+	background: linear-gradient(135deg, var(--color-elevated), var(--color-surface));
+	border: 1px solid var(--spice-paprika);
+	border-top: 1px solid var(--spice-paprika);
+	border-radius: 16px;
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="hearth-spice"] .bulk-count {
+	color: var(--spice-paprika);
+	font-weight: 800;
+}
+
+[data-theme="hearth-spice"] .bulk-count::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	background: var(--spice-paprika);
+	transform: rotate(45deg);
+	display: inline-block;
+	margin-right: 8px;
+	vertical-align: 1px;
+}
+
+[data-theme="hearth-spice"] .bulk-count__n {
+	color: var(--spice-paprika);
+}
+
+/* ───────────────────────── Skeletons + spinner ───────────────────────── */
+
+[data-theme="hearth-spice"] .skeleton-card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="hearth-spice"] .skeleton {
+	background: linear-gradient(
+		100deg,
+		var(--color-elevated) 30%,
+		color-mix(in srgb, var(--color-border) 50%, var(--color-elevated)) 50%,
+		var(--color-elevated) 70%
+	);
+	background-size: 200% 100%;
+	animation: spice-shimmer 1.4s infinite;
+}
+
+[data-theme="hearth-spice"] .skeleton::after {
+	display: none;
+}
+
+@keyframes spice-shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+/* Two-tone spice spinner: paprika top, turmeric right. */
+[data-theme="hearth-spice"] .spinner {
+	width: 34px;
+	height: 34px;
+	border-width: 3.5px;
+	border-color: var(--color-border);
+	border-top-color: var(--spice-paprika);
+	border-right-color: var(--spice-turmeric);
+}
+
+/* ───────────────────────── Empty states ───────────────────────── */
+/* Live uses .empty for the "no tags" line; .empty-state is added for parity. */
+
+[data-theme="hearth-spice"] .empty-state {
+	position: relative;
+	background: var(--color-surface);
+	border: 1.5px dashed var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 42px 28px;
+	text-align: center;
+	overflow: hidden;
+}
+
+[data-theme="hearth-spice"] .empty-state::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 6px;
+	background-image: var(--spice-tile);
+	background-repeat: repeat-x;
+	background-size: 24px 12px;
+	opacity: 0.85;
+	pointer-events: none;
+}
+
+[data-theme="hearth-spice"] .empty-state h4 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 20px;
+	font-variation-settings: "SOFT" 60, "opsz" 144;
+	color: var(--color-text);
+}
+
+[data-theme="hearth-spice"] .empty-state p {
+	color: var(--color-muted);
+	font-size: 14px;
+}
+
+[data-theme="hearth-spice"] .empty {
+	color: var(--color-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-theme="hearth-spice"] .skeleton {
+		animation: none;
+	}
+}

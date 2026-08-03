@@ -1,0 +1,1040 @@
+/*
+ * Aurora: Solstice theme — component overrides.
+ * Ports the visual language of .mockups/theme-aurora-solstice.html onto the
+ * live app's real component classes. Every rule is scoped to
+ * [data-theme="aurora-solstice"] so it only applies when this theme is active.
+ * Tokens (defined in app.tailwind.css) carry colour, radii, fonts, shadows and
+ * the signature amber glow ring (--ring). Hex / light-dark() is used only where
+ * the mockup does something tokens can't express: the amber vertical gradient
+ * fills, warm accent-tint text, and the glassy 1px + inner-top-highlight edges.
+ */
+
+/* Helper values composed from tokens, scoped to this theme so they cascade. */
+[data-theme="aurora-solstice"] {
+	--as-border-strong: color-mix(in srgb, var(--color-border), var(--color-text) 14%);
+	--as-tint: light-dark(#c2410c, #fdba74);
+	--as-grad: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 80%, #fff) 0%, var(--color-accent) 100%);
+	--as-inset: inset 0 1px 0 rgba(255, 225, 195, 0.05);
+}
+
+/* ───────────────────────── Base / type ───────────────────────── */
+
+[data-theme="aurora-solstice"] body {
+	font-size: 14px;
+	line-height: 1.55;
+	background-image:
+		radial-gradient(ellipse 55% 50% at 30% 0%, color-mix(in srgb, var(--color-accent) 22%, transparent), transparent 70%),
+		radial-gradient(ellipse 50% 50% at 72% 4%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 70%);
+}
+
+[data-theme="aurora-solstice"] h1,
+[data-theme="aurora-solstice"] h2,
+[data-theme="aurora-solstice"] h3,
+[data-theme="aurora-solstice"] h4 {
+	font-family: var(--font-display);
+	letter-spacing: -0.01em;
+}
+
+[data-theme="aurora-solstice"] a {
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Header ───────────────────────── */
+
+[data-theme="aurora-solstice"] .site-header {
+	background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+	backdrop-filter: blur(14px);
+	-webkit-backdrop-filter: blur(14px);
+	border-bottom: 1px solid var(--color-border);
+	box-shadow: var(--shadow-card), var(--as-inset);
+}
+
+[data-theme="aurora-solstice"] .site-header .logo {
+	gap: 0.4rem;
+}
+
+[data-theme="aurora-solstice"] .site-header .logo-icon {
+	border-radius: 9px;
+	box-shadow: 0 2px 12px color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
+
+[data-theme="aurora-solstice"] .site-header .settings-gear {
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Buttons ───────────────────────── */
+/* Base pill (also covers <summary class="btn"> menu triggers). Variant and
+   control-specific overrides below win ties by source order / specificity. */
+
+[data-theme="aurora-solstice"] .btn {
+	font-family: var(--font-body);
+	font-weight: 500;
+	font-size: 13px;
+	line-height: 1;
+	padding: 9px 14px;
+	border-radius: var(--radius-control);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+	gap: 7px;
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="aurora-solstice"] .btn:hover {
+	border-color: var(--as-border-strong);
+	transform: translateY(-1px);
+}
+
+[data-theme="aurora-solstice"] .btn:active {
+	transform: translateY(0);
+}
+
+[data-theme="aurora-solstice"] .btn--primary {
+	background: var(--as-grad);
+	color: #fff;
+	border-color: transparent;
+	font-weight: 600;
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.35),
+		inset 0 1px 0 rgba(255, 255, 255, 0.22),
+		0 4px 14px color-mix(in srgb, var(--color-accent) 28%, transparent);
+}
+
+[data-theme="aurora-solstice"] .btn--primary:hover {
+	border-color: transparent;
+	color: #fff;
+	box-shadow:
+		0 6px 20px color-mix(in srgb, var(--color-accent) 45%, transparent),
+		inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Danger is a soft coral tint, not a solid red (per mockup). */
+[data-theme="aurora-solstice"] .btn--danger {
+	background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+	border-color: color-mix(in srgb, var(--color-danger) 32%, transparent);
+	color: light-dark(#c0392b, #fca5a5);
+}
+
+[data-theme="aurora-solstice"] .btn--danger:hover {
+	background: color-mix(in srgb, var(--color-danger) 20%, transparent);
+	border-color: color-mix(in srgb, var(--color-danger) 42%, transparent);
+	color: light-dark(#c0392b, #fca5a5);
+}
+
+/* Icon buttons in the header / toolbars. */
+[data-theme="aurora-solstice"] .settings-gear,
+[data-theme="aurora-solstice"] .view-toggle {
+	width: 38px;
+	height: 38px;
+	padding: 0;
+	border-radius: var(--radius-control);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-muted);
+}
+
+[data-theme="aurora-solstice"] .settings-gear:hover,
+[data-theme="aurora-solstice"] .view-toggle:hover {
+	color: var(--color-text);
+	border-color: var(--as-border-strong);
+}
+
+[data-theme="aurora-solstice"] .pwa-install-btn {
+	padding: 7px 12px;
+	font-size: 12px;
+	border-radius: var(--radius-control);
+}
+
+/* Servings +/- step buttons (mockup .step-btn). */
+[data-theme="aurora-solstice"] .servings-step {
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border-radius: 8px;
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 1;
+}
+
+[data-theme="aurora-solstice"] .servings-step:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+[data-theme="aurora-solstice"] .servings-reset {
+	padding: 7px 11px;
+	font-size: 12px;
+	border-radius: var(--radius-control);
+}
+
+/* Cook-mode toggle rides the amber gradient when active. */
+[data-theme="aurora-solstice"] .cook-toggle[aria-pressed="true"] {
+	background: var(--as-grad);
+	color: #fff;
+	border-color: transparent;
+	box-shadow:
+		0 4px 14px color-mix(in srgb, var(--color-accent) 28%, transparent),
+		inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* Back link is a plain muted link, not a pill (mockup .cook .back). */
+[data-theme="aurora-solstice"] .back-link {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	color: var(--color-muted);
+	font-size: 13px;
+	padding: 0;
+	margin-bottom: 16px;
+}
+
+[data-theme="aurora-solstice"] .back-link:hover {
+	color: var(--color-text);
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	transform: none;
+}
+
+/* Text link button (Original ↗ etc.). */
+[data-theme="aurora-solstice"] .btn-link {
+	background: none;
+	border: none;
+	box-shadow: none;
+	color: var(--color-accent);
+	font-weight: 500;
+	font-size: 13px;
+	text-decoration: none;
+	padding: 0;
+}
+
+[data-theme="aurora-solstice"] .btn-link:hover {
+	color: var(--color-accent);
+	text-decoration: underline;
+}
+
+/* ───────────────────────── Favorite button ───────────────────────── */
+
+[data-theme="aurora-solstice"] .fav-btn {
+	width: 38px;
+	height: 38px;
+	border-radius: var(--radius-control);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-muted);
+	font-size: 17px;
+}
+
+[data-theme="aurora-solstice"] .fav-btn:hover {
+	color: var(--color-text);
+	border-color: var(--as-border-strong);
+	background: var(--color-elevated);
+}
+
+[data-theme="aurora-solstice"] .fav-btn.is-fav {
+	color: var(--color-favorite);
+	border-color: color-mix(in srgb, var(--color-favorite) 35%, transparent);
+	background: color-mix(in srgb, var(--color-favorite) 12%, transparent);
+}
+
+[data-theme="aurora-solstice"] .fav-btn.is-fav:hover {
+	color: color-mix(in srgb, var(--color-favorite) 85%, #fff);
+}
+
+/* ───────────────────────── Form controls ───────────────────────── */
+
+[data-theme="aurora-solstice"] input[type="text"],
+[data-theme="aurora-solstice"] input[type="search"],
+[data-theme="aurora-solstice"] input[type="email"],
+[data-theme="aurora-solstice"] input[type="password"],
+[data-theme="aurora-solstice"] input[type="url"],
+[data-theme="aurora-solstice"] input[type="number"],
+[data-theme="aurora-solstice"] textarea,
+[data-theme="aurora-solstice"] select {
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	color: var(--color-text);
+	padding: 10px 12px;
+	font-family: var(--font-body);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+[data-theme="aurora-solstice"] input::placeholder,
+[data-theme="aurora-solstice"] textarea::placeholder {
+	color: var(--color-muted);
+	opacity: 0.7;
+}
+
+[data-theme="aurora-solstice"] input:hover,
+[data-theme="aurora-solstice"] textarea:hover,
+[data-theme="aurora-solstice"] select:hover {
+	border-color: var(--as-border-strong);
+}
+
+[data-theme="aurora-solstice"] input:focus-visible,
+[data-theme="aurora-solstice"] textarea:focus-visible,
+[data-theme="aurora-solstice"] select:focus-visible {
+	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+	background: var(--color-surface);
+}
+
+[data-theme="aurora-solstice"] textarea {
+	resize: vertical;
+	min-height: 84px;
+	line-height: 1.5;
+}
+
+[data-theme="aurora-solstice"] select {
+	appearance: none;
+	-webkit-appearance: none;
+	cursor: pointer;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238b8378' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	padding-right: 34px;
+}
+
+/* Number / servings input: compact, centered, display weight. */
+[data-theme="aurora-solstice"] .servings-input {
+	width: 48px;
+	text-align: center;
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 15px;
+	padding: 7px 0;
+}
+
+/* File input + its selector button. */
+[data-theme="aurora-solstice"] input[type="file"] {
+	padding: 8px 10px;
+	background: var(--color-bg);
+}
+
+[data-theme="aurora-solstice"] input[type="file"]::file-selector-button {
+	font-family: var(--font-body);
+	font-weight: 600;
+	font-size: 12px;
+	background: var(--as-grad);
+	color: #fff;
+	border: none;
+	border-radius: var(--radius-control);
+	padding: 7px 12px;
+	margin-right: 12px;
+	cursor: pointer;
+}
+
+/* Form labels inside the edit form / settings. */
+[data-theme="aurora-solstice"] .recipe-edit label,
+[data-theme="aurora-solstice"] .settings-card label {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color-muted);
+}
+
+/* Ingredient checkboxes: one centered row, 18px rounded tiles, amber gradient
+   check. These structural fixes keep each ingredient on a single aligned row. */
+[data-theme="aurora-solstice"] .ingredients li label {
+	align-items: center;
+}
+
+[data-theme="aurora-solstice"] .ing-check {
+	margin-top: 0;
+}
+
+[data-theme="aurora-solstice"] .ingredients input[type="checkbox"] {
+	width: 18px;
+	height: 18px;
+	border-radius: 5px;
+	border: 1px solid var(--as-border-strong);
+	background: var(--color-bg);
+}
+
+[data-theme="aurora-solstice"] .ingredients input[type="checkbox"]:hover {
+	border-color: var(--color-accent);
+}
+
+[data-theme="aurora-solstice"] .ingredients input[type="checkbox"]:checked {
+	background: var(--as-grad);
+	border-color: transparent;
+}
+
+[data-theme="aurora-solstice"] .ingredients input[type="checkbox"]:checked::before {
+	box-shadow: inset 1em 1em #fff;
+}
+
+/* ───────────────────────── Tags & chips ───────────────────────── */
+
+[data-theme="aurora-solstice"] .tag {
+	background: var(--color-elevated);
+	color: var(--color-muted);
+	border: 1px solid var(--color-border);
+	padding: 3px 8px;
+	font-size: 11px;
+	font-weight: 500;
+	border-radius: 6px;
+}
+
+[data-theme="aurora-solstice"] .tag:hover {
+	color: var(--color-text);
+	border-color: var(--as-border-strong);
+	transform: none;
+}
+
+/* Filter tag-chips: pill; active is the amber gradient with a warm bloom. */
+[data-theme="aurora-solstice"] .tag-chip {
+	padding: 6px 13px;
+	font-size: 12px;
+	font-weight: 500;
+	border-radius: var(--radius-pill);
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	color: var(--color-muted);
+}
+
+[data-theme="aurora-solstice"] .tag-chip:hover {
+	color: var(--color-text);
+	border-color: var(--as-border-strong);
+}
+
+[data-theme="aurora-solstice"] .tag-chip:has(input:checked) {
+	background: var(--as-grad);
+	border-color: transparent;
+	color: #fff;
+	box-shadow: 0 2px 10px color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
+
+[data-theme="aurora-solstice"] .tag-chip:has(input:checked) .count {
+	color: #fff;
+	opacity: 0.8;
+}
+
+/* Active-filter removal chips in the library meta bar (mockup .chip). */
+[data-theme="aurora-solstice"] .filter-chip {
+	padding: 5px 10px;
+	font-size: 12px;
+	font-weight: 500;
+	border-radius: 7px;
+	background: var(--color-accent-soft);
+	border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+	color: var(--as-tint);
+}
+
+[data-theme="aurora-solstice"] .filter-chip:hover {
+	background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+	color: var(--as-tint);
+	border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+[data-theme="aurora-solstice"] .filter-chip--clear {
+	background: transparent;
+	color: var(--color-muted);
+	border-color: var(--color-border);
+}
+
+[data-theme="aurora-solstice"] .filter-chip--clear:hover {
+	color: var(--color-danger);
+	border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+	background: transparent;
+}
+
+/* ───────────────────────── Grid cards ───────────────────────── */
+
+[data-theme="aurora-solstice"] .card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	border-color: var(--color-border);
+	background-color: var(--color-surface);
+	background-image: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 3%, transparent), transparent 90px);
+	box-shadow: var(--shadow-card), var(--as-inset);
+}
+
+[data-theme="aurora-solstice"] .card:hover {
+	border-color: var(--as-border-strong);
+	box-shadow: var(--shadow-hover), var(--as-inset);
+	transform: translateY(-3px);
+}
+
+[data-theme="aurora-solstice"] .card > img {
+	height: auto;
+	aspect-ratio: 16 / 10;
+	width: 100%;
+	object-fit: cover;
+	background: var(--color-elevated);
+}
+
+/* No-image placeholder container (warm crosshatch, like .no-image). */
+[data-theme="aurora-solstice"] .card > div:first-child:not(.card-body) {
+	height: auto;
+	aspect-ratio: 16 / 10;
+	background:
+		repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-accent) 3%, transparent) 0 10px, transparent 10px 20px),
+		var(--color-elevated);
+	border-bottom: 1px solid var(--color-border);
+	color: var(--color-muted);
+}
+
+[data-theme="aurora-solstice"] .card-body {
+	padding: 14px 15px 16px;
+}
+
+[data-theme="aurora-solstice"] .card-title {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 15px;
+	letter-spacing: -0.012em;
+	margin-bottom: 4px;
+}
+
+[data-theme="aurora-solstice"] .card-meta {
+	gap: 8px;
+	font-size: 12px;
+	margin-top: 4px;
+}
+
+[data-theme="aurora-solstice"] .card-tags {
+	gap: 6px;
+	margin-top: 10px;
+}
+
+/* Stars (text glyphs) → warm gold. */
+[data-theme="aurora-solstice"] .stars {
+	color: var(--color-star);
+	letter-spacing: 1px;
+}
+
+/* Select checkbox on cards (amber-gradient corner stamp). */
+[data-theme="aurora-solstice"] .check {
+	border-radius: 7px;
+	border: none;
+	background: var(--as-grad);
+	color: #fff;
+	box-shadow: 0 2px 10px color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+[data-theme="aurora-solstice"] .check:hover,
+[data-theme="aurora-solstice"] .check.on {
+	background: var(--as-grad);
+}
+
+/* Selected card / row: amber edge + signature glow ring. */
+[data-theme="aurora-solstice"] .card-wrap.is-selected .card,
+[data-theme="aurora-solstice"] .list-wrap.is-selected > .list-row {
+	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+	box-shadow: var(--ring), var(--shadow-card);
+}
+
+/* ───────────────────────── List rows ───────────────────────── */
+
+[data-theme="aurora-solstice"] .list-row {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	border-color: var(--color-border);
+	background-color: var(--color-surface);
+	background-image: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 2.5%, transparent), transparent 80px);
+	padding: 12px 16px;
+	gap: 14px;
+	box-shadow: var(--shadow-card), var(--as-inset);
+}
+
+[data-theme="aurora-solstice"] .list-row:hover {
+	border-color: var(--as-border-strong);
+	box-shadow: var(--shadow-hover), var(--as-inset);
+}
+
+[data-theme="aurora-solstice"] .list-row .shrink-0 {
+	width: 64px;
+	height: 48px;
+	border-radius: 8px;
+	object-fit: cover;
+	flex: none;
+	background: var(--color-elevated);
+}
+
+[data-theme="aurora-solstice"] .list-row .shrink-0 img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+[data-theme="aurora-solstice"] .list-row .font-medium {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 14px;
+	letter-spacing: -0.012em;
+}
+
+/* ───────────────────────── Cook view ───────────────────────── */
+
+/* Recipe header: padded glassy panel, favorite pinned top-right. */
+[data-theme="aurora-solstice"] .recipe-header {
+	position: relative;
+	background-color: var(--color-surface);
+	background-image: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 3%, transparent), transparent 120px);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card), var(--as-inset);
+	padding: 18px 20px;
+	overflow: hidden;
+}
+
+[data-theme="aurora-solstice"] .recipe-header .fav-btn {
+	position: absolute;
+	top: 14px;
+	right: 14px;
+	z-index: 1;
+}
+
+[data-theme="aurora-solstice"] .recipe-header__img {
+	border-radius: var(--radius-card);
+	object-fit: cover;
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="aurora-solstice"] .recipe-header__info h1 {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 32px;
+	line-height: 1.1;
+	letter-spacing: -0.035em;
+}
+
+[data-theme="aurora-solstice"] .description {
+	max-width: 56ch;
+	font-size: 14px;
+	line-height: 1.6;
+	opacity: 0.9;
+}
+
+/* Section headings (Ingredients / Steps / Notes) and page titles. */
+[data-theme="aurora-solstice"] .recipe-view h2,
+[data-theme="aurora-solstice"] .recipe-edit h1,
+[data-theme="aurora-solstice"] .settings-page h1 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+
+/* Rating stars on the cook view (warm gold, large). */
+[data-theme="aurora-solstice"] #rating {
+	color: var(--color-star);
+	font-size: 20px;
+	letter-spacing: 2px;
+}
+
+/* Servings control. */
+[data-theme="aurora-solstice"] .servings-control {
+	font-size: 13px;
+}
+
+[data-theme="aurora-solstice"] .servings-control label {
+	font-size: 12px;
+	color: var(--color-muted);
+}
+
+/* Ingredients list — solid warm dividers between rows. */
+[data-theme="aurora-solstice"] .ingredients li {
+	border-bottom: 1px solid var(--color-border);
+	padding: 9px 4px;
+	font-size: 14px;
+}
+
+[data-theme="aurora-solstice"] .ingredients li:last-child {
+	border-bottom: none;
+}
+
+/* Cook-mode step list → numbered amber circles. Symmetric vertical padding +
+   margin-bottom keeps the hover/selected highlight centred on the content. */
+[data-theme="aurora-solstice"] .cook-list {
+	list-style: none;
+	counter-reset: step;
+	padding: 0;
+}
+
+[data-theme="aurora-solstice"] .cook-step {
+	counter-increment: step;
+	position: relative;
+	padding: 5px 12px 5px 46px;
+	margin: 0 0 8px 0;
+	border: 1px solid transparent;
+	border-radius: var(--radius-control);
+	background: none;
+	line-height: 1.55;
+	font-size: 14px;
+}
+
+[data-theme="aurora-solstice"] .cook-step::before {
+	content: counter(step);
+	position: absolute;
+	left: 8px;
+	top: 5px;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	color: var(--color-muted);
+	font-family: var(--font-body);
+	font-weight: 600;
+	font-size: 13px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+[data-theme="aurora-solstice"] .cook-step:hover {
+	background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+}
+
+[data-theme="aurora-solstice"] .cook-step.is-current {
+	background: var(--color-accent-soft);
+	border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+	box-shadow: var(--ring);
+}
+
+[data-theme="aurora-solstice"] .cook-step.is-current::before {
+	background: var(--as-grad);
+	color: #fff;
+	border-color: transparent;
+}
+
+[data-theme="aurora-solstice"] .cook-step.is-done {
+	color: var(--color-muted);
+}
+
+[data-theme="aurora-solstice"] .cook-step.is-done::before {
+	content: "\2713";
+	background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+	color: var(--as-tint);
+	border-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+/* Cook progress bar container. */
+[data-theme="aurora-solstice"] .cook-progress {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	padding: 14px 16px;
+}
+
+[data-theme="aurora-solstice"] .cook-progress__label {
+	font-size: 12px;
+	color: var(--color-muted);
+}
+
+[data-theme="aurora-solstice"] .cook-progress .btn {
+	padding: 7px 11px;
+	font-size: 12px;
+}
+
+/* Notes — boxed glassy panel. */
+[data-theme="aurora-solstice"] .notes {
+	background-color: var(--color-surface);
+	background-image: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 2.5%, transparent), transparent 120px);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card), var(--as-inset);
+	padding: 16px 18px;
+	margin-top: 26px;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+[data-theme="aurora-solstice"] .notes h2 {
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: var(--color-muted);
+	margin-bottom: 8px;
+}
+
+/* Recipe footer: rounded panel; Original link pushed left, actions right. */
+[data-theme="aurora-solstice"] .recipe-footer {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	background-color: var(--color-surface);
+	background-image: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 2.5%, transparent), transparent 120px);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card), var(--as-inset);
+	padding: 16px 18px;
+}
+
+[data-theme="aurora-solstice"] .recipe-footer .btn-link {
+	margin-right: auto;
+}
+
+/* ───────────────────────── Tags input (edit form) ───────────────────────── */
+
+[data-theme="aurora-solstice"] .tags-input {
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	padding: 10px;
+	background: var(--color-bg);
+}
+
+[data-theme="aurora-solstice"] .tags-input:focus-within {
+	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+	box-shadow: var(--ring);
+}
+
+[data-theme="aurora-solstice"] .tags-input__chip {
+	border-radius: 7px;
+	border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+	background: var(--color-accent-soft);
+	color: var(--as-tint);
+	font-weight: 500;
+	font-size: 12px;
+	padding: 5px 6px 5px 10px;
+}
+
+[data-theme="aurora-solstice"] .tags-input__remove {
+	color: var(--color-muted);
+	font-size: 14px;
+	border-radius: 5px;
+}
+
+[data-theme="aurora-solstice"] .tags-input__remove:hover {
+	background: color-mix(in srgb, var(--color-danger) 20%, transparent);
+	color: light-dark(#c0392b, #fca5a5);
+}
+
+[data-theme="aurora-solstice"] .tags-input__suggestions {
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	border-radius: var(--radius-control);
+	padding: 6px;
+	box-shadow: var(--shadow-hover), var(--as-inset);
+}
+
+[data-theme="aurora-solstice"] .tags-input__suggestions li {
+	border-radius: 7px;
+	padding: 7px 10px;
+	font-size: 13px;
+}
+
+[data-theme="aurora-solstice"] .tags-input__suggestions li[aria-selected="true"],
+[data-theme="aurora-solstice"] .tags-input__suggestions li:hover {
+	background: var(--color-accent-soft);
+	color: var(--as-tint);
+}
+
+/* Draft / extraction banners — keep the template's danger/accent border colour. */
+[data-theme="aurora-solstice"] .draft-banner {
+	border-width: 1px;
+	border-radius: var(--radius-control);
+	padding: 12px 14px;
+	background: var(--color-surface);
+	font-size: 13px;
+}
+
+/* ───────────────────────── Settings cards ───────────────────────── */
+
+[data-theme="aurora-solstice"] .settings-card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	border-color: var(--color-border);
+	background-color: var(--color-surface);
+	background-image: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 2.5%, transparent), transparent 120px);
+	box-shadow: var(--shadow-card), var(--as-inset);
+	padding: 18px 20px;
+}
+
+[data-theme="aurora-solstice"] .settings-card h2 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 15px;
+	letter-spacing: -0.012em;
+}
+
+[data-theme="aurora-solstice"] .settings-card p,
+[data-theme="aurora-solstice"] .settings-card .hint {
+	color: var(--color-muted);
+	font-size: 13px;
+}
+
+[data-theme="aurora-solstice"] .theme-swatch {
+	border-radius: var(--radius-control);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+}
+
+/* ───────────────────────── Auth form ───────────────────────── */
+
+[data-theme="aurora-solstice"] .auth-form {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	border-color: var(--color-border);
+	background-color: var(--color-surface);
+	background-image: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 3%, transparent), transparent 120px);
+	box-shadow: var(--shadow-card), var(--as-inset);
+	padding: 30px;
+	max-width: 400px;
+}
+
+[data-theme="aurora-solstice"] .auth-form__title {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 24px;
+	letter-spacing: -0.025em;
+	text-align: center;
+	margin-bottom: 6px;
+}
+
+[data-theme="aurora-solstice"] .auth-form label {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color-muted);
+}
+
+[data-theme="aurora-solstice"] .auth-error {
+	background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+	border: 1px solid color-mix(in srgb, var(--color-danger) 32%, transparent);
+	color: light-dark(#c0392b, #fca5a5);
+	border-radius: var(--radius-control);
+	font-size: 13px;
+	padding: 10px 12px;
+}
+
+[data-theme="aurora-solstice"] .auth-form__links {
+	flex-direction: row;
+	justify-content: space-between;
+	font-size: 12px;
+	margin-top: 18px;
+}
+
+/* ───────────────────────── Dropdown menus ───────────────────────── */
+
+[data-theme="aurora-solstice"] .add-menu > div,
+[data-theme="aurora-solstice"] .sort-menu > div {
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	padding: 6px;
+	box-shadow: var(--shadow-hover), var(--as-inset);
+}
+
+[data-theme="aurora-solstice"] .add-menu a,
+[data-theme="aurora-solstice"] .sort-option {
+	border-radius: 7px;
+	padding: 8px 10px;
+	font-size: 13px;
+	color: var(--color-text);
+	border: none;
+}
+
+[data-theme="aurora-solstice"] .add-menu a:hover,
+[data-theme="aurora-solstice"] .sort-option:hover {
+	background: color-mix(in srgb, var(--color-text) 5%, transparent);
+	color: var(--color-text);
+}
+
+[data-theme="aurora-solstice"] .sort-option--active {
+	background: var(--color-accent-soft);
+	color: var(--as-tint);
+}
+
+/* ───────────────────────── Toasts ───────────────────────── */
+
+[data-theme="aurora-solstice"] .toast,
+[data-theme="aurora-solstice"] .global-toast-area .toast {
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-left: 3px solid var(--color-accent);
+	border-radius: var(--radius-control);
+	box-shadow: var(--shadow-hover);
+}
+
+/* ───────────────────────── Bulk action bar ───────────────────────── */
+
+[data-theme="aurora-solstice"] .bulk-actionbar {
+	background: var(--color-elevated);
+	border: 1px solid color-mix(in srgb, var(--color-accent) 32%, transparent);
+	border-top: 1px solid color-mix(in srgb, var(--color-accent) 32%, transparent);
+	border-radius: var(--radius-control);
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="aurora-solstice"] .bulk-count__n {
+	color: var(--as-tint);
+}
+
+/* ───────────────────────── Skeletons + spinner ───────────────────────── */
+
+[data-theme="aurora-solstice"] .skeleton-card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	border-color: var(--color-border);
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="aurora-solstice"] .skeleton {
+	background: linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--color-accent) 4%, var(--color-elevated)) 25%,
+		color-mix(in srgb, var(--color-accent) 9%, var(--color-elevated)) 37%,
+		color-mix(in srgb, var(--color-accent) 4%, var(--color-elevated)) 63%
+	);
+	background-size: 400% 100%;
+	animation: aurora-solstice-shimmer 1.4s ease infinite;
+}
+
+[data-theme="aurora-solstice"] .skeleton::after {
+	display: none;
+}
+
+@keyframes aurora-solstice-shimmer {
+	0% {
+		background-position: 100% 0;
+	}
+	100% {
+		background-position: -100% 0;
+	}
+}
+
+[data-theme="aurora-solstice"] .spinner {
+	width: 26px;
+	height: 26px;
+	border-width: 2.5px;
+	border-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+	border-top-color: var(--color-accent);
+}
+
+/* ───────────────────────── Empty states ───────────────────────── */
+
+[data-theme="aurora-solstice"] .empty-state {
+	background: var(--color-surface);
+	border: 1px dashed color-mix(in srgb, var(--color-accent) 30%, transparent);
+	border-radius: var(--radius-card);
+	padding: 36px 28px;
+	text-align: center;
+}
+
+[data-theme="aurora-solstice"] .empty-state h4 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 14px;
+	color: var(--color-text);
+}
+
+[data-theme="aurora-solstice"] .empty-state p {
+	color: var(--color-muted);
+	font-size: 12px;
+}
+
+[data-theme="aurora-solstice"] .empty {
+	color: var(--color-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-theme="aurora-solstice"] .skeleton {
+		animation: none;
+	}
+}

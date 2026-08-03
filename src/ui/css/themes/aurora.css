@@ -1,0 +1,1077 @@
+/*
+ * Aurora theme — component overrides.
+ * Ports the visual language of .mockups/theme-aurora.html onto the live app's
+ * real component classes. Every rule is scoped to [data-theme="aurora"] so it
+ * only applies when the aurora theme is active. Values favour aurora tokens so
+ * light + dark mode both stay consistent; raw rgba/hex is used only where the
+ * mockup does something tokens can't express (the indigo vertical gradient,
+ * indigo-soft chip text, glassy sheen, aurora canvas glow).
+ */
+
+/* Aurora-local helpers (gradients / tints the mockup defines but tokens don't). */
+[data-theme="aurora"] {
+	--aurora-grad: linear-gradient(
+		180deg,
+		var(--color-accent),
+		color-mix(in srgb, var(--color-accent) 82%, #000)
+	);
+	--aurora-border-strong: light-dark(rgba(15, 19, 32, 0.16), rgba(255, 255, 255, 0.14));
+	--aurora-indigo-soft: light-dark(#4338ca, #c7d2fe);
+	--aurora-indigo: light-dark(#4f46e5, #a5b4fc);
+	--aurora-sheen: light-dark(
+		linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 120px),
+		linear-gradient(180deg, rgba(255, 255, 255, 0.022), transparent 120px)
+	);
+}
+
+/* ───────────────────────── Base / type ───────────────────────── */
+
+[data-theme="aurora"] body {
+	position: relative;
+	overflow-x: clip;
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+/* Aurora canvas glow + faint engineering grid, fading out below the fold. */
+[data-theme="aurora"] body::before {
+	content: "";
+	position: absolute;
+	top: -280px;
+	left: 50%;
+	width: 1280px;
+	height: 720px;
+	transform: translateX(-50%);
+	background:
+		radial-gradient(ellipse 55% 50% at 32% 50%, light-dark(rgba(79, 70, 229, 0.12), rgba(99, 102, 241, 0.3)), transparent 70%),
+		radial-gradient(ellipse 50% 50% at 70% 55%, light-dark(rgba(79, 70, 229, 0.08), rgba(79, 70, 229, 0.22)), transparent 70%),
+		radial-gradient(ellipse 38% 40% at 50% 38%, light-dark(rgba(56, 189, 248, 0.06), rgba(56, 189, 248, 0.1)), transparent 70%);
+	filter: blur(50px);
+	z-index: 0;
+	pointer-events: none;
+}
+
+[data-theme="aurora"] body::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	background-image:
+		linear-gradient(light-dark(rgba(15, 19, 32, 0.02), rgba(255, 255, 255, 0.018)) 1px, transparent 1px),
+		linear-gradient(90deg, light-dark(rgba(15, 19, 32, 0.02), rgba(255, 255, 255, 0.018)) 1px, transparent 1px);
+	background-size: 44px 44px;
+	-webkit-mask-image: linear-gradient(180deg, #000, transparent 640px);
+	mask-image: linear-gradient(180deg, #000, transparent 640px);
+}
+
+/* Lift real content above the canvas glow/grid. */
+[data-theme="aurora"] .site-header,
+[data-theme="aurora"] .site-main {
+	position: relative;
+	z-index: 1;
+}
+
+[data-theme="aurora"] h1,
+[data-theme="aurora"] h2,
+[data-theme="aurora"] h3,
+[data-theme="aurora"] h4 {
+	font-family: var(--font-display);
+	letter-spacing: -0.02em;
+}
+
+[data-theme="aurora"] a {
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Header ───────────────────────── */
+
+[data-theme="aurora"] .site-header {
+	background: light-dark(rgba(255, 255, 255, 0.82), rgba(19, 23, 32, 0.72));
+	backdrop-filter: blur(14px);
+	-webkit-backdrop-filter: blur(14px);
+	border-bottom: 1px solid var(--color-border);
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="aurora"] .site-header .logo-icon {
+	width: 2.4rem;
+	height: 2.4rem;
+	border-radius: 9px;
+	box-shadow: 0 2px 10px color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
+
+[data-theme="aurora"] .site-header .settings-gear {
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Buttons ───────────────────────── */
+/* Base control button (also covers <summary class="btn"> menus). */
+
+[data-theme="aurora"] .btn {
+	font-family: var(--font-body);
+	font-weight: 500;
+	font-size: 13px;
+	line-height: 1;
+	padding: 9px 14px;
+	border-radius: var(--radius-control);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+	gap: 7px;
+	box-shadow: var(--shadow-card);
+	transition: border-color 0.16s ease, background-color 0.16s ease, color 0.16s ease,
+		box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+[data-theme="aurora"] .btn:hover {
+	border-color: var(--aurora-border-strong);
+	transform: translateY(-1px);
+}
+
+[data-theme="aurora"] .btn:active {
+	transform: translateY(0);
+}
+
+[data-theme="aurora"] .btn--primary {
+	background: var(--aurora-grad);
+	border-color: transparent;
+	color: #fff;
+	font-weight: 600;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4),
+		inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="aurora"] .btn--primary:hover {
+	border-color: transparent;
+	color: #fff;
+	box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 40%, transparent),
+		inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="aurora"] .btn--danger {
+	background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+	border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
+	color: light-dark(#b91c1c, #fca5a5);
+}
+
+[data-theme="aurora"] .btn--danger:hover {
+	background: color-mix(in srgb, var(--color-danger) 20%, transparent);
+	border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+	color: light-dark(#b91c1c, #fca5a5);
+}
+
+/* Icon buttons in the header / toolbars. */
+[data-theme="aurora"] .settings-gear,
+[data-theme="aurora"] .view-toggle {
+	width: 38px;
+	height: 38px;
+	padding: 0;
+	border-radius: var(--radius-control);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-muted);
+}
+
+[data-theme="aurora"] .settings-gear:hover,
+[data-theme="aurora"] .view-toggle:hover {
+	color: var(--color-text);
+	border-color: var(--aurora-border-strong);
+}
+
+[data-theme="aurora"] .pwa-install-btn {
+	padding: 8px 16px;
+	font-size: 13px;
+	border-radius: var(--radius-control);
+}
+
+/* Servings +/- step buttons (compact square, indigo on hover). */
+[data-theme="aurora"] .servings-step {
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border-radius: 8px;
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 1;
+}
+
+[data-theme="aurora"] .servings-step:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+[data-theme="aurora"] .servings-reset {
+	padding: 7px 12px;
+	font-size: 13px;
+	border-radius: var(--radius-control);
+}
+
+/* Cook-mode toggle behaves like the primary gradient when active. */
+[data-theme="aurora"] .cook-toggle[aria-pressed="true"] {
+	background: var(--aurora-grad);
+	color: #fff;
+	border-color: transparent;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4),
+		inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="aurora"] .back-link {
+	padding: 4px 10px;
+	font-size: 13px;
+	font-weight: 500;
+	border-radius: var(--radius-control);
+	color: var(--color-muted);
+}
+
+[data-theme="aurora"] .back-link:hover {
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Favorite button ───────────────────────── */
+
+[data-theme="aurora"] .fav-btn {
+	width: 38px;
+	height: 38px;
+	border-radius: var(--radius-control);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-muted);
+	font-size: 18px;
+}
+
+[data-theme="aurora"] .fav-btn:hover {
+	color: var(--color-text);
+	border-color: var(--aurora-border-strong);
+}
+
+[data-theme="aurora"] .fav-btn.is-fav {
+	color: var(--color-favorite);
+	border-color: color-mix(in srgb, var(--color-favorite) 35%, transparent);
+	background: color-mix(in srgb, var(--color-favorite) 10%, transparent);
+}
+
+[data-theme="aurora"] .fav-btn.is-fav:hover {
+	color: var(--color-favorite);
+}
+
+/* ───────────────────────── Form controls ───────────────────────── */
+
+[data-theme="aurora"] input[type="text"],
+[data-theme="aurora"] input[type="search"],
+[data-theme="aurora"] input[type="email"],
+[data-theme="aurora"] input[type="password"],
+[data-theme="aurora"] input[type="url"],
+[data-theme="aurora"] input[type="number"],
+[data-theme="aurora"] textarea,
+[data-theme="aurora"] select {
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	color: var(--color-text);
+	padding: 10px 12px;
+	font-family: var(--font-body);
+	font-size: 13px;
+	line-height: 1.5;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+[data-theme="aurora"] input::placeholder,
+[data-theme="aurora"] textarea::placeholder {
+	color: light-dark(#5b6478, #5d6679);
+}
+
+[data-theme="aurora"] input[type="text"]:hover,
+[data-theme="aurora"] input[type="search"]:hover,
+[data-theme="aurora"] input[type="email"]:hover,
+[data-theme="aurora"] input[type="password"]:hover,
+[data-theme="aurora"] input[type="url"]:hover,
+[data-theme="aurora"] input[type="number"]:hover,
+[data-theme="aurora"] textarea:hover,
+[data-theme="aurora"] select:hover {
+	border-color: var(--aurora-border-strong);
+}
+
+[data-theme="aurora"] input[type="text"]:focus-visible,
+[data-theme="aurora"] input[type="search"]:focus-visible,
+[data-theme="aurora"] input[type="email"]:focus-visible,
+[data-theme="aurora"] input[type="password"]:focus-visible,
+[data-theme="aurora"] input[type="url"]:focus-visible,
+[data-theme="aurora"] input[type="number"]:focus-visible,
+[data-theme="aurora"] textarea:focus-visible,
+[data-theme="aurora"] select:focus-visible {
+	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+	box-shadow: var(--ring);
+	background: var(--color-surface);
+	outline: none;
+}
+
+[data-theme="aurora"] textarea {
+	resize: vertical;
+	min-height: 84px;
+	line-height: 1.5;
+}
+
+[data-theme="aurora"] .search-form input {
+	padding-left: 12px;
+}
+
+/* Servings number input: compact, centered. */
+[data-theme="aurora"] .servings-input {
+	width: 48px;
+	text-align: center;
+	font-weight: 600;
+	font-size: 15px;
+	padding: 7px 0;
+	border-radius: 8px;
+}
+
+/* File input + its selector button. */
+[data-theme="aurora"] input[type="file"] {
+	padding: 9px;
+	background: var(--color-bg);
+	font-size: 13px;
+}
+
+[data-theme="aurora"] input[type="file"]::file-selector-button {
+	font-family: var(--font-body);
+	font-weight: 600;
+	font-size: 13px;
+	background: var(--aurora-grad);
+	color: #fff;
+	border: none;
+	border-radius: var(--radius-control);
+	padding: 7px 14px;
+	margin-right: 12px;
+	cursor: pointer;
+}
+
+/* Form labels inside the edit form / settings. */
+[data-theme="aurora"] .recipe-edit label,
+[data-theme="aurora"] .settings-card label {
+	font-weight: 500;
+	font-size: 12px;
+	color: var(--color-muted);
+}
+
+/* Ingredient checkboxes → 18px indigo-gradient tiles with a white check. */
+[data-theme="aurora"] .ingredients input[type="checkbox"] {
+	width: 18px;
+	height: 18px;
+	border-radius: 5px;
+	border: 1px solid var(--aurora-border-strong);
+	background: var(--color-bg);
+	margin-top: 0;
+}
+
+[data-theme="aurora"] .ingredients input[type="checkbox"]:checked {
+	background: var(--aurora-grad);
+	border-color: transparent;
+}
+
+[data-theme="aurora"] .ingredients li label {
+	align-items: center;
+}
+
+/* ───────────────────────── Tags & chips ───────────────────────── */
+/* Card / inline tags share the mockup's quiet surface chip. The base .tag rule
+   colours them per --tag-color; aurora overrides to the uniform glassy chip. */
+
+[data-theme="aurora"] .tag {
+	background: var(--color-elevated);
+	color: var(--color-muted);
+	border: 1px solid var(--color-border);
+	padding: 3px 8px;
+	font-size: 11px;
+	font-weight: 500;
+	border-radius: 6px;
+	letter-spacing: 0;
+}
+
+[data-theme="aurora"] .tag:hover {
+	color: var(--color-text);
+	border-color: var(--aurora-border-strong);
+}
+
+/* Filter tag-chips are pill-shaped and slightly larger. */
+[data-theme="aurora"] .tag-chip {
+	padding: 6px 12px;
+	font-size: 12px;
+	font-weight: 500;
+	border-radius: var(--radius-pill);
+	background: var(--color-elevated);
+	color: var(--color-muted);
+}
+
+[data-theme="aurora"] .tag-chip .count {
+	opacity: 0.7;
+}
+
+[data-theme="aurora"] .tag-chip:hover {
+	color: var(--color-text);
+	border-color: var(--aurora-border-strong);
+}
+
+/* Active (checked) filter chip = indigo gradient. */
+[data-theme="aurora"] .tag-chip:has(input:checked) {
+	background: var(--aurora-grad);
+	color: #fff;
+	border-color: transparent;
+	box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+
+[data-theme="aurora"] .tag-chip:has(input:checked) .count {
+	color: #fff;
+	opacity: 0.8;
+}
+
+/* Active-filter removal chips in the library meta bar. */
+[data-theme="aurora"] .filter-chip {
+	padding: 4px 10px;
+	font-size: 11.5px;
+	font-weight: 500;
+	border-radius: var(--radius-pill);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+}
+
+[data-theme="aurora"] .filter-chip:hover {
+	border-color: var(--aurora-border-strong);
+	color: var(--color-text);
+}
+
+[data-theme="aurora"] .filter-chip--clear {
+	background: transparent;
+	color: var(--color-muted);
+}
+
+[data-theme="aurora"] .filter-chip--clear:hover {
+	color: var(--color-danger);
+	border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+}
+
+/* ───────────────────────── Grid cards ───────────────────────── */
+
+[data-theme="aurora"] .card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	background-image: var(--aurora-sheen);
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="aurora"] .card:hover {
+	border-color: var(--aurora-border-strong);
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="aurora"] .card > img {
+	height: auto;
+	aspect-ratio: 16 / 10;
+	width: 100%;
+	object-fit: cover;
+	background: var(--color-elevated);
+}
+
+/* No-image placeholder container (subtle crosshatch over elevated surface). */
+[data-theme="aurora"] .card > div:first-child:not(.card-body) {
+	height: auto;
+	aspect-ratio: 16 / 10;
+	background: repeating-linear-gradient(
+			45deg,
+			color-mix(in srgb, var(--color-muted) 4%, transparent) 0 10px,
+			transparent 10px 20px
+		),
+		var(--color-elevated);
+	border-bottom: 1px solid var(--color-border);
+}
+
+[data-theme="aurora"] .card-body {
+	padding: 14px 15px 16px;
+}
+
+[data-theme="aurora"] .card-title {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 15px;
+	letter-spacing: -0.01em;
+	line-height: 1.25;
+	margin-bottom: 4px;
+}
+
+[data-theme="aurora"] .card-meta {
+	gap: 8px;
+	font-size: 12px;
+	margin-top: 4px;
+	margin-bottom: 10px;
+}
+
+[data-theme="aurora"] .card-tags {
+	gap: 6px;
+	margin-top: auto;
+	padding-top: 2px;
+}
+
+/* Stars (text glyphs) → amber. */
+[data-theme="aurora"] .stars {
+	color: var(--color-star);
+	letter-spacing: 1px;
+}
+
+/* Select checkbox on cards. */
+[data-theme="aurora"] .check {
+	border-radius: 7px;
+}
+
+[data-theme="aurora"] .check.on {
+	background: var(--aurora-grad);
+	border-color: transparent;
+	color: #fff;
+	box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+/* Selected card ring + indigo glow. */
+[data-theme="aurora"] .card-wrap.is-selected .card,
+[data-theme="aurora"] .list-wrap.is-selected > .list-row {
+	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+	box-shadow: var(--ring), var(--shadow-card);
+}
+
+/* ───────────────────────── List rows ───────────────────────── */
+
+[data-theme="aurora"] .list-row {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	padding: 12px 16px;
+	gap: 16px;
+	background-image: var(--aurora-sheen);
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="aurora"] .list-row:hover {
+	border-color: var(--aurora-border-strong);
+	box-shadow: var(--shadow-hover);
+}
+
+/* Thumbnail (real image or placeholder). */
+[data-theme="aurora"] .list-row .shrink-0 {
+	width: 64px;
+	height: 48px;
+	border-radius: 8px;
+	object-fit: cover;
+	flex: none;
+}
+
+[data-theme="aurora"] .list-row .shrink-0 img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+[data-theme="aurora"] .list-row .font-medium {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 14px;
+	letter-spacing: -0.01em;
+}
+
+/* ───────────────────────── Cook view ───────────────────────── */
+
+[data-theme="aurora"] .recipe-header {
+	position: relative;
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	background-image: var(--aurora-sheen);
+	box-shadow: var(--shadow-card);
+	overflow: hidden;
+	padding: 18px 20px;
+}
+
+[data-theme="aurora"] .recipe-header .fav-btn {
+	position: absolute;
+	top: 14px;
+	right: 14px;
+	z-index: 1;
+}
+
+[data-theme="aurora"] .recipe-header__img {
+	border-radius: var(--radius-card);
+	object-fit: cover;
+	border: 1px solid var(--color-border);
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="aurora"] .recipe-header__info h1 {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 30px;
+	line-height: 1.1;
+	letter-spacing: -0.03em;
+}
+
+[data-theme="aurora"] .description {
+	max-width: 560px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--color-muted);
+}
+
+/* Section headings (Ingredients / Steps / Notes). */
+[data-theme="aurora"] .recipe-view h2,
+[data-theme="aurora"] .recipe-edit h1,
+[data-theme="aurora"] .settings-page h1 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 22px;
+	letter-spacing: -0.025em;
+}
+
+/* Rating stars on the cook view → amber, generous spacing. */
+[data-theme="aurora"] #rating {
+	color: var(--color-star);
+	font-size: 20px;
+	letter-spacing: 2px;
+}
+
+/* Servings control. */
+[data-theme="aurora"] .servings-control {
+	font-size: 12px;
+}
+
+[data-theme="aurora"] .servings-control label {
+	font-size: 12px;
+	color: var(--color-muted);
+}
+
+/* Ingredients list — single centered row per ingredient with hairline dividers. */
+[data-theme="aurora"] .ingredients ul {
+	gap: 0;
+}
+
+[data-theme="aurora"] .ingredients li {
+	border-bottom: 1px solid var(--color-border);
+	padding: 9px 4px;
+	font-size: 14px;
+}
+
+[data-theme="aurora"] .ingredients li:last-child {
+	border-bottom: none;
+}
+
+/* Cook-mode step list → numbered circles, centered on the first line. */
+[data-theme="aurora"] .cook-list {
+	list-style: none;
+	counter-reset: step;
+	padding: 0;
+}
+
+[data-theme="aurora"] .cook-step {
+	counter-increment: step;
+	position: relative;
+	padding: 5px 12px 5px 46px;
+	margin: 0 0 8px 0;
+	border: 1px solid transparent;
+	border-radius: var(--radius-control);
+	background: none;
+	line-height: 1.55;
+	font-size: 14px;
+}
+
+[data-theme="aurora"] .cook-step:last-child {
+	margin-bottom: 0;
+}
+
+[data-theme="aurora"] .cook-step::before {
+	content: counter(step);
+	position: absolute;
+	left: 12px;
+	top: 0;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	color: var(--color-muted);
+	font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+	font-weight: 600;
+	font-size: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+[data-theme="aurora"] .cook-list .cook-step:hover {
+	background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+[data-theme="aurora"] .cook-list .cook-step.is-current {
+	background: var(--color-accent-soft);
+	border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+	box-shadow: var(--ring);
+	font-weight: 500;
+}
+
+[data-theme="aurora"] .cook-list .cook-step.is-current::before {
+	background: var(--aurora-grad);
+	color: #fff;
+	border-color: transparent;
+}
+
+[data-theme="aurora"] .cook-list .cook-step.is-done {
+	color: var(--color-muted);
+}
+
+[data-theme="aurora"] .cook-list .cook-step.is-done::before {
+	background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+	color: var(--aurora-indigo);
+	border-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+/* Cook progress bar container. */
+[data-theme="aurora"] .cook-progress {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	padding: 12px 16px;
+}
+
+[data-theme="aurora"] .cook-progress__label {
+	font-weight: 500;
+	font-size: 13px;
+}
+
+[data-theme="aurora"] .cook-progress .btn {
+	padding: 6px 12px;
+	font-size: 13px;
+}
+
+/* Notes — quiet surface panel. */
+[data-theme="aurora"] .notes {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-top: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 16px 18px;
+	margin-top: 22px;
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+[data-theme="aurora"] .notes h2 {
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--color-muted);
+	margin-bottom: 8px;
+}
+
+/* Recipe footer — rounded panel; "Original" pinned left, actions flow right. */
+[data-theme="aurora"] .recipe-footer {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+	padding: 16px 18px;
+}
+
+[data-theme="aurora"] .recipe-footer .btn-link {
+	margin-right: auto;
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	color: var(--color-accent);
+	font-weight: 500;
+	font-size: 13px;
+	text-decoration: none;
+	padding: 4px 10px;
+}
+
+[data-theme="aurora"] .recipe-footer .btn-link:hover {
+	text-decoration: underline;
+}
+
+/* ───────────────────────── Tags input (edit form) ───────────────────────── */
+
+[data-theme="aurora"] .tags-input {
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	padding: 10px;
+	background: var(--color-bg);
+}
+
+[data-theme="aurora"] .tags-input:focus-within {
+	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+	box-shadow: var(--ring);
+}
+
+[data-theme="aurora"] .tags-input__chip {
+	border-radius: 7px;
+	border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+	background: var(--color-accent-soft);
+	color: var(--aurora-indigo-soft);
+	font-weight: 500;
+	font-size: 12px;
+}
+
+[data-theme="aurora"] .tags-input__remove {
+	color: light-dark(#4338ca, #9aa3c4);
+}
+
+[data-theme="aurora"] .tags-input__remove:hover {
+	background: color-mix(in srgb, var(--color-danger) 20%, transparent);
+	color: light-dark(#b91c1c, #fca5a5);
+}
+
+[data-theme="aurora"] .tags-input__field {
+	font-size: 13px;
+}
+
+[data-theme="aurora"] .tags-input__suggestions {
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	border-radius: var(--radius-control);
+	padding: 6px;
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="aurora"] .tags-input__suggestions li {
+	border-radius: 7px;
+	padding: 7px 10px;
+	font-size: 13px;
+}
+
+[data-theme="aurora"] .tags-input__suggestions li[aria-selected="true"],
+[data-theme="aurora"] .tags-input__suggestions li:hover {
+	background: var(--color-accent-soft);
+	color: var(--aurora-indigo-soft);
+}
+
+/* Draft / extraction banners. */
+[data-theme="aurora"] .draft-banner {
+	border-radius: var(--radius-control);
+	padding: 12px 14px;
+	font-size: 13px;
+}
+
+/* ───────────────────────── Settings cards ───────────────────────── */
+
+[data-theme="aurora"] .settings-card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	background-image: var(--aurora-sheen);
+	box-shadow: var(--shadow-card);
+	padding: 18px 20px;
+}
+
+[data-theme="aurora"] .settings-card h2 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 15px;
+	letter-spacing: -0.01em;
+}
+
+[data-theme="aurora"] .settings-card p {
+	color: var(--color-muted);
+	font-size: 13px;
+}
+
+[data-theme="aurora"] .theme-swatch {
+	border-radius: var(--radius-control);
+}
+
+/* ───────────────────────── Auth form ───────────────────────── */
+
+[data-theme="aurora"] .auth-form {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	background-image: var(--aurora-sheen);
+	box-shadow: var(--shadow-hover);
+	padding: 30px;
+	max-width: 400px;
+}
+
+[data-theme="aurora"] .auth-form__title {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 22px;
+	letter-spacing: -0.02em;
+	text-align: left;
+	margin-bottom: 6px;
+}
+
+[data-theme="aurora"] .auth-form label {
+	font-weight: 500;
+	font-size: 12px;
+	color: var(--color-muted);
+}
+
+[data-theme="aurora"] .auth-form input[type="email"],
+[data-theme="aurora"] .auth-form input[type="password"],
+[data-theme="aurora"] .auth-form input[type="text"] {
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	padding: 10px 12px;
+	font-size: 13px;
+}
+
+[data-theme="aurora"] .auth-error {
+	background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+	border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+	color: light-dark(#b91c1c, #fca5a5);
+	border-radius: var(--radius-control);
+	font-size: 13px;
+}
+
+[data-theme="aurora"] .auth-form__links {
+	justify-content: space-between;
+	flex-direction: row;
+	font-size: 12px;
+	margin-top: 18px;
+}
+
+[data-theme="aurora"] .auth-form__links a {
+	color: var(--color-accent);
+	text-decoration: none;
+}
+
+[data-theme="aurora"] .auth-form__links a:hover {
+	text-decoration: underline;
+}
+
+/* ───────────────────────── Dropdown menus ───────────────────────── */
+
+[data-theme="aurora"] .add-menu > div,
+[data-theme="aurora"] .sort-menu > div {
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	padding: 6px;
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="aurora"] .add-menu a,
+[data-theme="aurora"] .sort-option {
+	border-radius: 7px;
+	padding: 8px 10px;
+	font-weight: 500;
+	font-size: 13px;
+	color: var(--color-text);
+}
+
+[data-theme="aurora"] .add-menu a:hover,
+[data-theme="aurora"] .sort-option:hover {
+	background: light-dark(rgba(15, 19, 32, 0.04), rgba(255, 255, 255, 0.05));
+	color: var(--color-text);
+}
+
+[data-theme="aurora"] .sort-option--active {
+	background: var(--color-accent-soft);
+	color: var(--aurora-indigo-soft);
+}
+
+/* ───────────────────────── Toasts ───────────────────────── */
+
+[data-theme="aurora"] .toast,
+[data-theme="aurora"] .global-toast-area .toast {
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	box-shadow: var(--shadow-hover);
+}
+
+/* ───────────────────────── Bulk action bar ───────────────────────── */
+
+[data-theme="aurora"] .bulk-actionbar {
+	background: var(--color-elevated);
+	border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+	border-top: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+	border-radius: var(--radius-control);
+	box-shadow: var(--shadow-hover);
+	padding: 12px 16px;
+}
+
+[data-theme="aurora"] .bulk-count__n {
+	color: var(--aurora-indigo-soft);
+}
+
+/* ───────────────────────── Skeletons + spinner ───────────────────────── */
+
+[data-theme="aurora"] .skeleton-card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="aurora"] .skeleton {
+	background: linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--color-muted) 8%, transparent) 25%,
+		color-mix(in srgb, var(--color-muted) 14%, transparent) 37%,
+		color-mix(in srgb, var(--color-muted) 8%, transparent) 63%
+	);
+	background-size: 400% 100%;
+	animation: aurora-shimmer 1.4s ease infinite;
+}
+
+[data-theme="aurora"] .skeleton::after {
+	display: none;
+}
+
+@keyframes aurora-shimmer {
+	0% {
+		background-position: 100% 0;
+	}
+	100% {
+		background-position: -100% 0;
+	}
+}
+
+[data-theme="aurora"] .spinner {
+	width: 26px;
+	height: 26px;
+	border-width: 2.5px;
+	border-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+	border-top-color: var(--color-accent);
+}
+
+/* ───────────────────────── Empty states ───────────────────────── */
+
+[data-theme="aurora"] .empty-state {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 28px 24px;
+	text-align: center;
+}
+
+[data-theme="aurora"] .empty-state h4 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 15px;
+	color: var(--color-text);
+}
+
+[data-theme="aurora"] .empty-state p {
+	color: var(--color-muted);
+	font-size: 12px;
+}
+
+[data-theme="aurora"] .empty {
+	color: var(--color-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-theme="aurora"] .skeleton {
+		animation: none;
+	}
+}

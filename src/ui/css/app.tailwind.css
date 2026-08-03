@@ -1,5 +1,10 @@
 @import "tailwindcss";
 @import "./themes/hearth.css";
+@import "./themes/aurora.css";
+@import "./themes/aurora-solstice.css";
+@import "./themes/inkwell.css";
+@import "./themes/hearth-spice.css";
+@import "./themes/gourmet-noir.css";
 
 @theme {
 	--color-bg: #f1f1ef;

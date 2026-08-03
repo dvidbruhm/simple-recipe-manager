@@ -1,0 +1,1183 @@
+/*
+ * Gourmet Noir theme — component overrides.
+ * Ports the visual language of .mockups/theme-gourmet-noir.html onto the live
+ * app's real component classes. Every rule is scoped to [data-theme="gourmet-noir"]
+ * so it only applies when the gourmet-noir theme is active. Values favour
+ * gourmet-noir tokens (warm charcoal, cream, gold, Playfair Display + Inter,
+ * sharp 2px corners) so light + dark mode both stay consistent; color-mix /
+ * light-dark is used only where the mockup does something tokens can't express
+ * (gold tints, terracotta washes, deep-gold pressed states).
+ *
+ * At (0,2,0) these rules beat Tailwind utilities (0,1,0) without !important.
+ * Where the base app.css uses higher-specificity compound selectors
+ * (e.g. body.is-cooking .cook-step.is-current), the theme scopes add a class
+ * (.cook-list …) to win the tie.
+ */
+
+/* ───────────────────────── Base / type ───────────────────────── */
+
+[data-theme="gourmet-noir"] body {
+	font-size: 15px;
+	line-height: 1.6;
+	background-color: var(--color-bg);
+	background-image:
+		radial-gradient(1200px 600px at 80% -10%, color-mix(in srgb, var(--color-accent) 6%, transparent), transparent 60%),
+		radial-gradient(900px 500px at -10% 30%, color-mix(in srgb, var(--color-star) 4%, transparent), transparent 60%);
+}
+
+/* Subtle paper grain over the canvas (lifts content above it below). */
+[data-theme="gourmet-noir"] body::before {
+	content: "";
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+	opacity: 0.04;
+	background-image: repeating-linear-gradient(
+		0deg,
+		color-mix(in srgb, var(--color-text) 40%, transparent) 0 1px,
+		transparent 1px 3px
+	);
+	mix-blend-mode: overlay;
+}
+
+[data-theme="gourmet-noir"] .site-header,
+[data-theme="gourmet-noir"] .site-main {
+	position: relative;
+	z-index: 2;
+}
+
+[data-theme="gourmet-noir"] h1,
+[data-theme="gourmet-noir"] h2,
+[data-theme="gourmet-noir"] h3,
+[data-theme="gourmet-noir"] h4 {
+	font-family: var(--font-display);
+	font-weight: 700;
+}
+
+/* Italic display kickers + gold accent for <em> in editorial areas. */
+[data-theme="gourmet-noir"] h1 em,
+[data-theme="gourmet-noir"] h2 em,
+[data-theme="gourmet-noir"] h3 em,
+[data-theme="gourmet-noir"] h4 em,
+[data-theme="gourmet-noir"] .description em,
+[data-theme="gourmet-noir"] .notes em {
+	font-family: var(--font-display);
+	font-style: italic;
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] a {
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Header ───────────────────────── */
+
+[data-theme="gourmet-noir"] .site-header {
+	background: var(--color-surface);
+	border-bottom: 1px solid var(--color-border);
+	box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="gourmet-noir"] .site-header .logo {
+	gap: 0.6rem;
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 18px;
+	letter-spacing: -0.01em;
+}
+
+[data-theme="gourmet-noir"] .site-header .logo-icon {
+	border-radius: var(--radius-card);
+}
+
+[data-theme="gourmet-noir"] .site-header .settings-gear {
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Buttons ───────────────────────── */
+/* Base square button (covers <summary class="btn"> dropdowns, view toggles,
+   settings gear, etc.). More specific variants below win ties. */
+
+[data-theme="gourmet-noir"] .btn {
+	font-family: var(--font-body);
+	font-weight: 500;
+	font-size: 13px;
+	padding: 9px 14px;
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+	gap: 8px;
+	letter-spacing: 0.02em;
+}
+
+[data-theme="gourmet-noir"] .btn:hover,
+[data-theme="gourmet-noir"] .btn:focus-visible {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .btn:active {
+	transform: translateY(1px);
+}
+
+[data-theme="gourmet-noir"] .btn--primary {
+	background: var(--color-accent);
+	color: var(--color-bg);
+	border-color: var(--color-accent);
+	font-weight: 600;
+}
+
+[data-theme="gourmet-noir"] .btn--primary:hover,
+[data-theme="gourmet-noir"] .btn--primary:focus-visible {
+	background: color-mix(in srgb, var(--color-accent) 82%, #000);
+	border-color: color-mix(in srgb, var(--color-accent) 82%, #000);
+	color: var(--color-bg);
+}
+
+[data-theme="gourmet-noir"] .btn--danger {
+	background: var(--color-elevated);
+	color: var(--color-danger);
+	border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+}
+
+[data-theme="gourmet-noir"] .btn--danger:hover,
+[data-theme="gourmet-noir"] .btn--danger:focus-visible {
+	background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+	border-color: var(--color-danger);
+	color: var(--color-danger);
+}
+
+/* Icon buttons in the header / toolbars. */
+[data-theme="gourmet-noir"] .settings-gear,
+[data-theme="gourmet-noir"] .view-toggle {
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	display: inline-grid;
+	place-items: center;
+}
+
+[data-theme="gourmet-noir"] .settings-gear:hover,
+[data-theme="gourmet-noir"] .view-toggle:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .pwa-install-btn {
+	padding: 7px 12px;
+	font-size: 12px;
+}
+
+/* Servings +/- step buttons (sharp squares, gold on hover). */
+[data-theme="gourmet-noir"] .servings-step {
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1;
+}
+
+[data-theme="gourmet-noir"] .servings-step:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .servings-reset {
+	font-family: var(--font-display);
+	font-style: italic;
+	color: var(--color-muted);
+	background: transparent;
+	border-color: transparent;
+	padding: 7px 10px;
+}
+
+[data-theme="gourmet-noir"] .servings-reset:hover {
+	color: var(--color-accent);
+}
+
+/* Cook-mode toggle behaves as a default square button until pressed. */
+[data-theme="gourmet-noir"] .cook-toggle[aria-pressed="true"] {
+	background: var(--color-accent);
+	color: var(--color-bg);
+	border-color: var(--color-accent);
+	font-weight: 600;
+}
+
+/* Back link → italic serif, hairline-gold rule, no button chrome. */
+[data-theme="gourmet-noir"] .back-link {
+	font-family: var(--font-display);
+	font-style: italic;
+	font-size: 14px;
+	color: var(--color-muted);
+	background: none;
+	border: 0;
+	border-left: 2px solid var(--color-accent);
+	border-radius: 0;
+	padding: 2px 0 2px 12px;
+}
+
+[data-theme="gourmet-noir"] .back-link:hover {
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Favorite button ───────────────────────── */
+
+[data-theme="gourmet-noir"] .fav-btn {
+	width: 36px;
+	height: 36px;
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-border);
+	background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+	color: var(--color-muted);
+	font-size: 15px;
+}
+
+[data-theme="gourmet-noir"] .fav-btn:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+	background: var(--color-elevated);
+	transform: scale(1.06);
+}
+
+[data-theme="gourmet-noir"] .fav-btn.is-fav {
+	color: var(--color-danger);
+	border-color: color-mix(in srgb, var(--color-danger) 50%, transparent);
+	background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+}
+
+[data-theme="gourmet-noir"] .fav-btn.is-fav:hover {
+	color: var(--color-danger);
+	border-color: var(--color-danger);
+}
+
+/* ───────────────────────── Form controls ───────────────────────── */
+
+[data-theme="gourmet-noir"] input[type="text"],
+[data-theme="gourmet-noir"] input[type="search"],
+[data-theme="gourmet-noir"] input[type="email"],
+[data-theme="gourmet-noir"] input[type="password"],
+[data-theme="gourmet-noir"] input[type="url"],
+[data-theme="gourmet-noir"] input[type="number"],
+[data-theme="gourmet-noir"] textarea,
+[data-theme="gourmet-noir"] select {
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	color: var(--color-text);
+	padding: 11px 13px;
+	font-family: var(--font-body);
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+[data-theme="gourmet-noir"] input::placeholder,
+[data-theme="gourmet-noir"] textarea::placeholder {
+	color: var(--color-muted);
+	font-style: italic;
+	font-family: var(--font-display);
+	opacity: 1;
+}
+
+[data-theme="gourmet-noir"] textarea {
+	resize: vertical;
+	min-height: 90px;
+	line-height: 1.6;
+}
+
+[data-theme="gourmet-noir"] input:focus-visible,
+[data-theme="gourmet-noir"] textarea:focus-visible,
+[data-theme="gourmet-noir"] select:focus-visible {
+	border-color: var(--color-accent);
+	box-shadow: 0 0 0 1px var(--color-accent);
+	outline: none;
+}
+
+[data-theme="gourmet-noir"] .search-form input {
+	padding-left: 14px;
+}
+
+/* Custom gold double-arrow on selects (per mockup). */
+[data-theme="gourmet-noir"] select {
+	appearance: none;
+	-webkit-appearance: none;
+	background-image:
+		linear-gradient(45deg, transparent 50%, var(--color-accent) 50%),
+		linear-gradient(135deg, var(--color-accent) 50%, transparent 50%);
+	background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+	background-size: 5px 5px, 5px 5px;
+	background-repeat: no-repeat;
+	padding-right: 36px;
+}
+
+/* Servings scaler input: compact, centered, display-italic numeral. */
+[data-theme="gourmet-noir"] .servings-input {
+	width: 44px;
+	text-align: center;
+	padding-left: 4px;
+	padding-right: 4px;
+	font-family: var(--font-display);
+	font-weight: 600;
+}
+
+/* File input + its selector button. */
+[data-theme="gourmet-noir"] input[type="file"] {
+	padding: 9px;
+	background: var(--color-bg);
+}
+
+[data-theme="gourmet-noir"] input[type="file"]::file-selector-button {
+	font-family: var(--font-body);
+	font-weight: 600;
+	background: var(--color-accent);
+	color: var(--color-bg);
+	border: 0;
+	border-radius: var(--radius-card);
+	padding: 7px 14px;
+	margin-right: 12px;
+	cursor: pointer;
+}
+
+/* Form labels read as small-caps gold eyebrows. */
+[data-theme="gourmet-noir"] .recipe-edit label,
+[data-theme="gourmet-noir"] .settings-card label {
+	font-size: 10px;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--color-accent);
+	font-weight: 500;
+}
+
+/* Ingredient checkboxes: gold tile with a charcoal check when ticked. */
+[data-theme="gourmet-noir"] .ingredients input[type="checkbox"] {
+	width: 16px;
+	height: 16px;
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	border-color: var(--color-border);
+	background: var(--color-bg);
+	margin-top: 0;
+}
+
+[data-theme="gourmet-noir"] .ingredients input[type="checkbox"]:checked {
+	background: var(--color-accent);
+	border-color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .ingredients input[type="checkbox"]:checked::before {
+	box-shadow: inset 1em 1em var(--color-bg);
+}
+
+[data-theme="gourmet-noir"] .ing-check {
+	margin-top: 0;
+}
+
+/* ───────────────────────── Tags & chips ───────────────────────── */
+/* Card tags and filter tag-chips share the mockup's uniform elevated chip;
+   per-tag --tag-color is overridden for the consistent magazine look. */
+
+[data-theme="gourmet-noir"] .tag {
+	background: var(--color-elevated);
+	color: var(--color-text);
+	border: 1px solid var(--color-border);
+	padding: 3px 7px;
+	font-size: 10.5px;
+	font-weight: 500;
+	border-radius: var(--radius-card);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+[data-theme="gourmet-noir"] .tag:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+/* Filter tag-chips are a touch larger and sentence-case. */
+[data-theme="gourmet-noir"] .tag-chip {
+	padding: 7px 14px;
+	font-size: 12.5px;
+	text-transform: none;
+	letter-spacing: 0.02em;
+	border-radius: var(--radius-card);
+}
+
+[data-theme="gourmet-noir"] .tag-chip .count {
+	opacity: 0.7;
+}
+
+/* Active (checked) filter chip = solid gold leaf. */
+[data-theme="gourmet-noir"] .tag-chip:has(input:checked) {
+	background: var(--color-accent);
+	color: var(--color-bg);
+	border-color: var(--color-accent);
+	font-weight: 500;
+}
+
+[data-theme="gourmet-noir"] .tag-chip:has(input:checked) .count {
+	color: var(--color-bg);
+	opacity: 0.8;
+}
+
+/* Active-filter removal chips in the library meta bar. */
+[data-theme="gourmet-noir"] .filter-chip {
+	padding: 4px 8px;
+	font-size: 11px;
+	font-weight: 500;
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	letter-spacing: 0.02em;
+}
+
+[data-theme="gourmet-noir"] .filter-chip:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .filter-chip--clear {
+	background: transparent;
+	color: var(--color-muted);
+}
+
+[data-theme="gourmet-noir"] .filter-chip--clear:hover {
+	color: var(--color-danger);
+	border-color: var(--color-danger);
+}
+
+/* ───────────────────────── Grid cards ───────────────────────── */
+
+[data-theme="gourmet-noir"] .card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	border-color: var(--color-border);
+	background: var(--color-surface);
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="gourmet-noir"] .card:hover {
+	border-color: var(--color-accent);
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="gourmet-noir"] .card > img {
+	height: auto;
+	aspect-ratio: 4 / 3;
+	width: 100%;
+	object-fit: cover;
+	background: var(--color-elevated);
+	filter: saturate(0.92) contrast(1.02);
+}
+
+/* No-image placeholder container (warm crosshatch, like .noimg). */
+[data-theme="gourmet-noir"] .card > div:first-child:not(.card-body) {
+	height: auto;
+	aspect-ratio: 4 / 3;
+	background:
+		repeating-linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-accent) 5%, transparent) 0 12px,
+			transparent 12px 24px
+		),
+		var(--color-elevated);
+	border-bottom: 1px solid var(--color-border);
+}
+
+[data-theme="gourmet-noir"] .card-body {
+	padding: 16px 18px 18px;
+}
+
+[data-theme="gourmet-noir"] .card-title {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 20px;
+	line-height: 1.15;
+	letter-spacing: -0.005em;
+	margin-bottom: 4px;
+}
+
+[data-theme="gourmet-noir"] .card-meta {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--color-border);
+	gap: 10px;
+}
+
+/* Domain source span reads as a small-caps eyebrow (live has no .card-source). */
+[data-theme="gourmet-noir"] .card-meta > span:first-child {
+	font-size: 10px;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--color-muted);
+}
+
+[data-theme="gourmet-noir"] .card-tags {
+	gap: 6px;
+	margin-top: 10px;
+}
+
+/* Stars (text glyphs) → gold, slightly tracked. */
+[data-theme="gourmet-noir"] .stars {
+	color: var(--color-star);
+	letter-spacing: 1px;
+}
+
+/* Bulk-select checkbox on cards. */
+[data-theme="gourmet-noir"] .check {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-border);
+	background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+	color: var(--color-text);
+}
+
+[data-theme="gourmet-noir"] .check.on {
+	background: var(--color-accent);
+	border-color: var(--color-accent);
+	color: var(--color-bg);
+}
+
+/* Selected card ring + warm gold bloom. */
+[data-theme="gourmet-noir"] .card-wrap.is-selected .card,
+[data-theme="gourmet-noir"] .list-wrap.is-selected > .list-row {
+	border-color: var(--color-accent);
+	box-shadow: 0 0 0 1px var(--color-accent),
+		0 30px 50px -25px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+/* ───────────────────────── List rows ───────────────────────── */
+
+[data-theme="gourmet-noir"] .list-row {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	border-color: var(--color-border);
+	background: var(--color-surface);
+	padding: 12px 14px;
+	gap: 14px;
+}
+
+[data-theme="gourmet-noir"] .list-row:hover {
+	border-color: var(--color-accent);
+	box-shadow: var(--shadow-hover);
+}
+
+/* Thumbnail (real image or placeholder block). */
+[data-theme="gourmet-noir"] .list-row .shrink-0 {
+	width: 64px;
+	height: 64px;
+	border-radius: var(--radius-card);
+	object-fit: cover;
+	flex: none;
+	filter: saturate(0.92);
+	border: 1px solid var(--color-border);
+}
+
+[data-theme="gourmet-noir"] .list-row .shrink-0:not(img) {
+	background:
+		repeating-linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-accent) 5%, transparent) 0 10px,
+			transparent 10px 20px
+		),
+		var(--color-elevated);
+}
+
+[data-theme="gourmet-noir"] .list-row .shrink-0 img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+/* List title (live uses .font-medium, no .row-title). */
+[data-theme="gourmet-noir"] .list-row .font-medium {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 17px;
+	letter-spacing: -0.005em;
+}
+
+/* ───────────────────────── Cook view ───────────────────────── */
+
+/* Recipe header: a framed surface card so the global image + favorite sit on
+   a padded panel (template already renders both globally). */
+[data-theme="gourmet-noir"] .recipe-header {
+	position: relative;
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+	padding: 18px 20px;
+	overflow: hidden;
+}
+
+[data-theme="gourmet-noir"] .recipe-header .fav-btn {
+	position: absolute;
+	top: 14px;
+	right: 14px;
+	z-index: 3;
+}
+
+[data-theme="gourmet-noir"] .recipe-header__img {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-border);
+	object-fit: cover;
+	filter: saturate(0.92) contrast(1.02);
+}
+
+[data-theme="gourmet-noir"] .recipe-header__info h1 {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: clamp(26px, 4vw, 38px);
+	line-height: 1.05;
+	letter-spacing: -0.02em;
+}
+
+[data-theme="gourmet-noir"] .description {
+	max-width: 65ch;
+	font-size: 15px;
+	line-height: 1.7;
+}
+
+/* Section headings (Ingredients / Steps / Notes / Edit / Settings). */
+[data-theme="gourmet-noir"] .recipe-view h2,
+[data-theme="gourmet-noir"] .recipe-edit h1,
+[data-theme="gourmet-noir"] .settings-page h1 {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 26px;
+	letter-spacing: -0.01em;
+}
+
+/* Rating stars on the cook view (gold + tracked). */
+[data-theme="gourmet-noir"] #rating {
+	color: var(--color-star);
+	font-size: 22px;
+	letter-spacing: 4px;
+}
+
+/* Servings scaler reads as one framed unit (mockup .scaler). */
+[data-theme="gourmet-noir"] .servings-control {
+	font-size: 13px;
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 6px 8px;
+}
+
+[data-theme="gourmet-noir"] .servings-control label {
+	font-size: 10px;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--color-accent);
+	font-weight: 500;
+}
+
+/* Ingredients list — hairline rules between rows, single centered line. */
+[data-theme="gourmet-noir"] .ingredients ul {
+	gap: 0;
+}
+
+[data-theme="gourmet-noir"] .ingredients li {
+	border-bottom: 1px solid var(--color-border);
+	padding: 11px 4px;
+	font-size: 14.5px;
+}
+
+[data-theme="gourmet-noir"] .ingredients li:last-child {
+	border-bottom: none;
+}
+
+[data-theme="gourmet-noir"] .ingredients li label {
+	align-items: center;
+}
+
+[data-theme="gourmet-noir"] .ingredients li label:has(input:checked) span {
+	color: var(--color-muted);
+}
+
+/* Cook-mode step list → leading-zero italic display numerals. */
+[data-theme="gourmet-noir"] .cook-list {
+	list-style: none;
+	counter-reset: gn-step;
+	padding: 0;
+	margin: 0;
+}
+
+[data-theme="gourmet-noir"] .cook-step {
+	counter-increment: gn-step;
+	display: grid;
+	grid-template-columns: 42px 1fr;
+	gap: 16px;
+	align-items: start;
+	padding: 14px 12px;
+	margin: 0 0 6px 0;
+	border: 1px solid transparent;
+	border-radius: var(--radius-card);
+	background: none;
+	line-height: 1.6;
+	font-size: 14.5px;
+}
+
+[data-theme="gourmet-noir"] .cook-step > * {
+	grid-column: 2;
+}
+
+/* Numeral nudged onto the first text line (symmetric top padding keeps it
+   centered; margin-bottom carries the rhythm, not padding-bottom). */
+[data-theme="gourmet-noir"] .cook-step::before {
+	content: counter(gn-step, decimal-leading-zero);
+	grid-column: 1;
+	font-family: var(--font-display);
+	font-style: italic;
+	font-weight: 600;
+	font-size: 26px;
+	line-height: 1;
+	color: var(--color-muted);
+	padding-top: 5px;
+}
+
+[data-theme="gourmet-noir"] .cook-step:hover {
+	background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+}
+
+[data-theme="gourmet-noir"] .cook-step .cook-step__text {
+	color: var(--color-muted);
+}
+
+[data-theme="gourmet-noir"] .cook-list .cook-step.is-current {
+	background: linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--color-accent) 8%, transparent),
+		transparent 80%
+	);
+	border: 1px solid transparent;
+	border-left: 2px solid var(--color-accent);
+	border-radius: var(--radius-card);
+	font-weight: 500;
+}
+
+[data-theme="gourmet-noir"] .cook-list .cook-step.is-current::before {
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .cook-list .cook-step.is-current .cook-step__text {
+	color: var(--color-text);
+}
+
+[data-theme="gourmet-noir"] .cook-list .cook-step.is-done {
+	opacity: 1;
+}
+
+[data-theme="gourmet-noir"] .cook-list .cook-step.is-done::before {
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .cook-list .cook-step.is-done .cook-step__text {
+	color: var(--color-muted);
+}
+
+/* Cook progress container (no bar element in live; just label + nav). */
+[data-theme="gourmet-noir"] .cook-progress {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 14px 18px;
+}
+
+[data-theme="gourmet-noir"] .cook-progress__label {
+	font-family: var(--font-display);
+	font-style: italic;
+	font-weight: 500;
+	font-size: 14px;
+}
+
+[data-theme="gourmet-noir"] .cook-progress__label span {
+	font-family: var(--font-body);
+	font-style: normal;
+	font-weight: 700;
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .cook-progress .btn {
+	padding: 6px 12px;
+	font-size: 12px;
+}
+
+/* Notes → pull-quote: the global motif gives the gold hairline + italic; here
+   we add the oversized opening quote and editorial spacing. */
+[data-theme="gourmet-noir"] .notes {
+	position: relative;
+	margin-top: 2.5rem;
+	padding-top: 14px;
+	padding-bottom: 14px;
+}
+
+[data-theme="gourmet-noir"] .notes::before {
+	content: "\201C";
+	position: absolute;
+	left: 6px;
+	top: -6px;
+	font-family: var(--font-display);
+	font-size: 56px;
+	color: var(--color-accent);
+	opacity: 0.35;
+	line-height: 1;
+}
+
+[data-theme="gourmet-noir"] .notes h2 {
+	color: var(--color-accent);
+	font-size: 16px;
+}
+
+[data-theme="gourmet-noir"] .notes p {
+	font-family: var(--font-display);
+	font-style: italic;
+	font-size: 18px;
+	line-height: 1.5;
+}
+
+/* Recipe footer: framed bar with the Original link pinned left. */
+[data-theme="gourmet-noir"] .recipe-footer {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 12px;
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-top: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+	padding: 14px 18px;
+}
+
+[data-theme="gourmet-noir"] .recipe-footer .btn-link {
+	margin-right: auto;
+	background: none;
+	border: 0;
+	border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
+	color: var(--color-accent);
+	font-family: var(--font-body);
+	font-size: 13px;
+	padding: 2px 0;
+	text-decoration: none;
+}
+
+[data-theme="gourmet-noir"] .recipe-footer .btn-link:hover {
+	color: var(--color-text);
+	border-color: var(--color-accent);
+}
+
+/* ───────────────────────── Tags input (edit form) ───────────────────────── */
+
+[data-theme="gourmet-noir"] .tags-input {
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	background: var(--color-bg);
+	padding: 8px 10px;
+}
+
+[data-theme="gourmet-noir"] .tags-input:focus-within {
+	border-color: var(--color-accent);
+	box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .tags-input__chip {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	font-size: 12.5px;
+	padding: 4px 6px 4px 12px;
+}
+
+[data-theme="gourmet-noir"] .tags-input__remove {
+	color: var(--color-muted);
+}
+
+[data-theme="gourmet-noir"] .tags-input__remove:hover {
+	color: var(--color-danger);
+	background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+	border-radius: var(--radius-card);
+}
+
+[data-theme="gourmet-noir"] .tags-input__field {
+	font-family: var(--font-body);
+	font-size: 13.5px;
+}
+
+[data-theme="gourmet-noir"] .tags-input__field::placeholder {
+	color: var(--color-muted);
+	font-style: italic;
+	font-family: var(--font-display);
+}
+
+[data-theme="gourmet-noir"] .tags-input__suggestions {
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	border-radius: var(--radius-card);
+	padding: 6px;
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="gourmet-noir"] .tags-input__suggestions li {
+	border-radius: var(--radius-card);
+	padding: 9px 12px;
+	font-size: 13.5px;
+}
+
+[data-theme="gourmet-noir"] .tags-input__suggestions li[aria-selected="true"],
+[data-theme="gourmet-noir"] .tags-input__suggestions li:hover {
+	background: var(--color-surface);
+	color: var(--color-accent);
+}
+
+/* Draft / extraction banners → terracotta wash with a gold hairline left. */
+[data-theme="gourmet-noir"] .draft-banner {
+	border-radius: var(--radius-card);
+	padding: 14px 16px;
+	background: color-mix(in srgb, var(--color-danger) 7%, var(--color-surface));
+	border-width: 1px;
+	border-left-width: 3px;
+}
+
+/* ───────────────────────── Settings cards ───────────────────────── */
+
+[data-theme="gourmet-noir"] .settings-card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+	padding: 22px 26px;
+}
+
+[data-theme="gourmet-noir"] .settings-card h2 {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 22px;
+	letter-spacing: -0.005em;
+}
+
+[data-theme="gourmet-noir"] .settings-card p {
+	color: var(--color-muted);
+	font-size: 13px;
+}
+
+[data-theme="gourmet-noir"] .hint {
+	font-family: var(--font-display);
+	font-style: italic;
+	color: var(--color-muted);
+}
+
+[data-theme="gourmet-noir"] .theme-swatch {
+	border-radius: var(--radius-card);
+}
+
+/* ───────────────────────── Auth form ───────────────────────── */
+
+[data-theme="gourmet-noir"] .auth-form {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8);
+	padding: 44px 40px;
+	max-width: 420px;
+	text-align: center;
+}
+
+[data-theme="gourmet-noir"] .auth-form__title {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 36px;
+	letter-spacing: -0.01em;
+	text-align: center;
+}
+
+[data-theme="gourmet-noir"] .auth-form label {
+	font-size: 10px;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--color-accent);
+	font-weight: 500;
+	gap: 6px;
+}
+
+[data-theme="gourmet-noir"] .auth-error {
+	background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+	border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
+	border-left: 3px solid var(--color-danger);
+	color: var(--color-danger);
+	border-radius: var(--radius-card);
+	font-size: 13px;
+	padding: 10px 14px;
+	text-align: left;
+}
+
+[data-theme="gourmet-noir"] .auth-form__submit {
+	margin-top: 8px;
+}
+
+[data-theme="gourmet-noir"] .auth-form__links {
+	justify-content: space-between;
+	flex-direction: row;
+	font-size: 12.5px;
+	margin-top: 1.25rem;
+}
+
+/* ───────────────────────── Dropdown menus ───────────────────────── */
+
+[data-theme="gourmet-noir"] .add-menu > div,
+[data-theme="gourmet-noir"] .sort-menu > div {
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 8px;
+	box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="gourmet-noir"] .add-menu a,
+[data-theme="gourmet-noir"] .sort-option {
+	border-radius: var(--radius-card);
+	padding: 9px 12px;
+	font-size: 13px;
+	color: var(--color-text);
+	border-color: transparent;
+}
+
+[data-theme="gourmet-noir"] .add-menu a:hover,
+[data-theme="gourmet-noir"] .sort-option:hover {
+	background: var(--color-surface);
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .sort-option--active {
+	background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Toasts ───────────────────────── */
+
+[data-theme="gourmet-noir"] .toast,
+[data-theme="gourmet-noir"] .global-toast-area .toast {
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-left: 3px solid var(--color-accent);
+	border-radius: var(--radius-card);
+	box-shadow: 0 30px 60px -25px rgba(0, 0, 0, 0.7);
+	color: var(--color-text);
+}
+
+[data-theme="gourmet-noir"] .toast-close {
+	color: var(--color-muted);
+}
+
+[data-theme="gourmet-noir"] .toast-close:hover {
+	color: var(--color-accent);
+}
+
+[data-theme="gourmet-noir"] .toast-undo,
+[data-theme="gourmet-noir"] .toast-action-btn {
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Bulk action bar ───────────────────────── */
+
+[data-theme="gourmet-noir"] .bulk-actionbar {
+	background: var(--color-elevated);
+	border: 1px solid var(--color-accent);
+	border-radius: var(--radius-card);
+	box-shadow: 0 20px 40px -18px color-mix(in srgb, var(--color-accent) 25%, transparent);
+	padding: 12px 18px;
+}
+
+[data-theme="gourmet-noir"] .bulk-count {
+	font-family: var(--font-display);
+	font-weight: 700;
+}
+
+[data-theme="gourmet-noir"] .bulk-count__n {
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Skeletons + spinner ───────────────────────── */
+
+[data-theme="gourmet-noir"] .skeleton-card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="gourmet-noir"] .skeleton {
+	background: linear-gradient(
+		100deg,
+		var(--color-elevated) 30%,
+		color-mix(in srgb, var(--color-border) 50%, var(--color-elevated)) 50%,
+		var(--color-elevated) 70%
+	);
+	background-size: 200% 100%;
+	animation: gourmet-noir-shimmer 1.6s infinite linear;
+}
+
+[data-theme="gourmet-noir"] .skeleton::after {
+	display: none;
+}
+
+@keyframes gourmet-noir-shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+[data-theme="gourmet-noir"] .spinner {
+	width: 28px;
+	height: 28px;
+	border-width: 2px;
+	border-color: var(--color-border);
+	border-top-color: var(--color-accent);
+}
+
+/* ───────────────────────── Empty states ───────────────────────── */
+/* Live uses .empty for the "no tags" line; .empty-state is added for parity. */
+
+[data-theme="gourmet-noir"] .empty-state {
+	background: var(--color-surface);
+	border: 1px dashed var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 30px 20px;
+	text-align: center;
+}
+
+[data-theme="gourmet-noir"] .empty-state h4 {
+	font-family: var(--font-display);
+	font-style: italic;
+	font-size: 18px;
+	color: var(--color-text);
+}
+
+[data-theme="gourmet-noir"] .empty-state p {
+	color: var(--color-muted);
+	font-size: 13px;
+}
+
+[data-theme="gourmet-noir"] .empty {
+	color: var(--color-muted);
+	font-family: var(--font-display);
+	font-style: italic;
+}
+
+/* Library result count → small-caps eyebrow. */
+[data-theme="gourmet-noir"] .results-count {
+	font-size: 11px;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-theme="gourmet-noir"] .skeleton {
+		animation: none;
+	}
+}
