@@ -288,6 +288,11 @@
 	height: 22px;
 	border-radius: 7px;
 	border-width: 1.5px;
+	margin-top: 0;
+}
+
+[data-theme="hearth"] .ingredients li label {
+	align-items: center;
 }
 
 [data-theme="hearth"] .ingredients input[type="checkbox"]:checked::before {
@@ -593,7 +598,7 @@
 [data-theme="hearth"] .cook-step {
 	counter-increment: step;
 	position: relative;
-	padding: 0 0 14px 46px;
+	padding: 5px 0 14px 46px;
 	margin: 0;
 	border: 1px solid transparent;
 	border-radius: 0;
