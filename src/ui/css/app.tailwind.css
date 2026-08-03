@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./themes/hearth.css";
 
 @theme {
 	--color-bg: #f1f1ef;

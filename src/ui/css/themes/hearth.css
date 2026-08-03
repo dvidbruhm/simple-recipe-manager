@@ -1,0 +1,925 @@
+/*
+ * Hearth theme — component overrides.
+ * Ports the visual language of .mockups/theme-hearth.html onto the live app's
+ * real component classes. Every rule is scoped to [data-theme="hearth"] so it
+ * only applies when the hearth theme is active. Values favour hearth tokens so
+ * light + dark mode both stay consistent; hex/light-dark() is used only where
+ * the mockup does something tokens can't express (gradients, sage-deep text).
+ */
+
+/* ───────────────────────── Base / type ───────────────────────── */
+
+[data-theme="hearth"] body {
+	font-size: 16px;
+	line-height: 1.6;
+	background-image:
+		radial-gradient(circle at 12% 6%, color-mix(in srgb, var(--color-danger) 10%, transparent), transparent 38%),
+		radial-gradient(circle at 88% 2%, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 34%),
+		radial-gradient(circle at 50% 110%, color-mix(in srgb, var(--color-star) 6%, transparent), transparent 55%);
+}
+
+[data-theme="hearth"] h1,
+[data-theme="hearth"] h2,
+[data-theme="hearth"] h3,
+[data-theme="hearth"] h4 {
+	font-family: var(--font-display);
+}
+
+[data-theme="hearth"] a {
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Header ───────────────────────── */
+
+[data-theme="hearth"] .site-header {
+	background: var(--color-surface);
+	border-bottom: 1px solid var(--color-border);
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="hearth"] .site-header .logo {
+	gap: 0.4rem;
+}
+
+[data-theme="hearth"] .site-header .logo-icon {
+	width: 2.4rem;
+	height: 2.4rem;
+	border-radius: 50%;
+	border: 1px solid var(--color-danger);
+	background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--color-star) 25%, transparent), transparent 70%);
+}
+
+[data-theme="hearth"] .site-header .settings-gear {
+	color: var(--color-text);
+}
+
+/* ───────────────────────── Buttons ───────────────────────── */
+/* Base pill button (also covers <summary class="btn"> menus). */
+/* Specific button-like controls are overridden further down so they win ties. */
+
+[data-theme="hearth"] .btn {
+	font-family: var(--font-body);
+	font-weight: 700;
+	font-size: 14.5px;
+	padding: 11px 22px;
+	border-radius: 999px;
+	border: 1.5px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+	gap: 8px;
+	letter-spacing: 0.01em;
+}
+
+[data-theme="hearth"] .btn:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+[data-theme="hearth"] .btn:active {
+	transform: translateY(1px);
+}
+
+[data-theme="hearth"] .btn--primary {
+	background: linear-gradient(180deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 82%, #000));
+	color: light-dark(#ffffff, #1a1410);
+	border-color: transparent;
+	box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 28%, transparent),
+		inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="hearth"] .btn--primary:hover {
+	border-color: transparent;
+	color: light-dark(#ffffff, #1a1410);
+	box-shadow: 0 8px 22px color-mix(in srgb, var(--color-accent) 40%, transparent),
+		inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="hearth"] .btn--danger {
+	background: linear-gradient(180deg, var(--color-danger), color-mix(in srgb, var(--color-danger) 82%, #000));
+	color: light-dark(#ffffff, #1a1410);
+	border-color: transparent;
+	box-shadow: 0 4px 14px color-mix(in srgb, var(--color-danger) 28%, transparent);
+}
+
+[data-theme="hearth"] .btn--danger:hover {
+	border-color: transparent;
+	color: light-dark(#ffffff, #1a1410);
+	background: linear-gradient(180deg, var(--color-danger), color-mix(in srgb, var(--color-danger) 82%, #000));
+	box-shadow: 0 8px 22px color-mix(in srgb, var(--color-danger) 42%, transparent);
+}
+
+/* Icon buttons in the header / toolbars. */
+[data-theme="hearth"] .settings-gear,
+[data-theme="hearth"] .view-toggle {
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border-radius: 50%;
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+}
+
+[data-theme="hearth"] .settings-gear:hover,
+[data-theme="hearth"] .view-toggle:hover {
+	border-color: var(--color-star);
+	color: var(--color-star);
+}
+
+[data-theme="hearth"] .pwa-install-btn {
+	padding: 8px 16px;
+	font-size: 13px;
+	border-radius: 999px;
+}
+
+/* Servings +/- step buttons (round). */
+[data-theme="hearth"] .servings-step {
+	width: 38px;
+	height: 38px;
+	padding: 0;
+	border-radius: 50%;
+	border: 1.5px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-text);
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+[data-theme="hearth"] .servings-step:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+	transform: scale(1.06);
+}
+
+[data-theme="hearth"] .servings-reset {
+	padding: 8px 16px;
+	font-size: 13px;
+	border-radius: 999px;
+}
+
+/* Cook-mode toggle + back link behave as default pills. */
+[data-theme="hearth"] .cook-toggle[aria-pressed="true"] {
+	background: linear-gradient(180deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 82%, #000));
+	color: light-dark(#ffffff, #1a1410);
+	border-color: transparent;
+}
+
+[data-theme="hearth"] .back-link {
+	padding: 4px 10px;
+	font-size: 13.5px;
+	font-weight: 700;
+	border-radius: 999px;
+	color: var(--color-muted);
+}
+
+[data-theme="hearth"] .back-link:hover {
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Favorite button ───────────────────────── */
+
+[data-theme="hearth"] .fav-btn {
+	width: 42px;
+	height: 42px;
+	border-radius: 50%;
+	border: 1.5px solid var(--color-border);
+	background: var(--color-elevated);
+	color: var(--color-muted);
+	font-size: 20px;
+}
+
+[data-theme="hearth"] .fav-btn:hover {
+	color: var(--color-danger);
+	border-color: var(--color-danger);
+	background: var(--color-elevated);
+	transform: scale(1.06);
+}
+
+[data-theme="hearth"] .fav-btn.is-fav {
+	background: color-mix(in srgb, var(--color-danger) 16%, transparent);
+	border-color: var(--color-danger);
+	color: var(--color-danger);
+}
+
+[data-theme="hearth"] .fav-btn.is-fav:hover {
+	color: color-mix(in srgb, var(--color-danger) 80%, #ffffff 20%);
+}
+
+/* ───────────────────────── Form controls ───────────────────────── */
+
+[data-theme="hearth"] input[type="text"],
+[data-theme="hearth"] input[type="search"],
+[data-theme="hearth"] input[type="email"],
+[data-theme="hearth"] input[type="password"],
+[data-theme="hearth"] input[type="url"],
+[data-theme="hearth"] input[type="number"],
+[data-theme="hearth"] textarea,
+[data-theme="hearth"] select {
+	background: var(--color-bg);
+	border: 1.5px solid var(--color-border);
+	border-radius: 14px;
+	color: var(--color-text);
+	padding: 11px 14px;
+	font-family: var(--font-body);
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+[data-theme="hearth"] input::placeholder,
+[data-theme="hearth"] textarea::placeholder {
+	color: var(--color-muted);
+	opacity: 0.85;
+}
+
+[data-theme="hearth"] textarea {
+	resize: vertical;
+	min-height: 80px;
+	line-height: 1.55;
+}
+
+[data-theme="hearth"] input:focus-visible,
+[data-theme="hearth"] textarea:focus-visible,
+[data-theme="hearth"] select:focus-visible {
+	border-color: var(--color-accent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+
+[data-theme="hearth"] .search-form input {
+	padding-left: 14px;
+}
+
+/* Number / servings input: compact, centered. */
+[data-theme="hearth"] .servings-input {
+	width: 64px;
+	text-align: center;
+	padding-left: 6px;
+	padding-right: 6px;
+}
+
+/* File input + its selector button. */
+[data-theme="hearth"] input[type="file"] {
+	padding: 9px;
+	background: var(--color-bg);
+}
+
+[data-theme="hearth"] input[type="file"]::file-selector-button {
+	font-family: var(--font-body);
+	font-weight: 700;
+	background: var(--color-accent);
+	color: light-dark(#ffffff, #1a1410);
+	border: none;
+	border-radius: 999px;
+	padding: 7px 14px;
+	margin-right: 12px;
+	cursor: pointer;
+}
+
+/* Form labels inside the edit form. */
+[data-theme="hearth"] .recipe-edit label,
+[data-theme="hearth"] .settings-card label {
+	font-weight: 700;
+	letter-spacing: 0.01em;
+}
+
+/* Ingredient checkboxes become sage tiles with a cream check. */
+[data-theme="hearth"] .ingredients input[type="checkbox"] {
+	width: 22px;
+	height: 22px;
+	border-radius: 7px;
+	border-width: 1.5px;
+}
+
+[data-theme="hearth"] .ingredients input[type="checkbox"]:checked::before {
+	box-shadow: inset 1em 1em var(--color-bg);
+}
+
+/* ───────────────────────── Tags & chips ───────────────────────── */
+/* Card / inline tags and filter tag-chips share the mockup's elevated pill.
+   The base .tag rule colours them per --tag-color; hearth overrides to the
+   uniform warm chip look, with sage on hover/active. */
+
+[data-theme="hearth"] .tag {
+	background: var(--color-elevated);
+	color: var(--color-text);
+	border: 1px solid var(--color-border);
+	padding: 4px 10px;
+	font-size: 11.5px;
+	font-weight: 700;
+	border-radius: 999px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+	letter-spacing: 0.01em;
+}
+
+[data-theme="hearth"] .tag:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+/* Filter tag-chips are slightly larger (chip, not chip-sm). */
+[data-theme="hearth"] .tag-chip {
+	padding: 7px 14px;
+	font-size: 13px;
+}
+
+[data-theme="hearth"] .tag-chip .count {
+	opacity: 0.7;
+}
+
+/* Active (checked) filter chip = sage gradient. */
+[data-theme="hearth"] .tag-chip:has(input:checked) {
+	background: linear-gradient(135deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 82%, #000));
+	color: light-dark(#ffffff, #1a1410);
+	border-color: transparent;
+	box-shadow: 0 3px 10px color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+[data-theme="hearth"] .tag-chip:has(input:checked) .count {
+	color: light-dark(#ffffff, #1a1410);
+	opacity: 0.8;
+}
+
+/* Active-filter removal chips in the library meta bar. */
+[data-theme="hearth"] .filter-chip {
+	padding: 4px 10px;
+	font-size: 11.5px;
+	font-weight: 700;
+	border-radius: 999px;
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="hearth"] .filter-chip:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+[data-theme="hearth"] .filter-chip--clear {
+	background: transparent;
+	box-shadow: none;
+	color: var(--color-muted);
+}
+
+[data-theme="hearth"] .filter-chip--clear:hover {
+	color: var(--color-danger);
+	border-color: var(--color-danger);
+}
+
+/* ───────────────────────── Grid cards ───────────────────────── */
+
+[data-theme="hearth"] .card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="hearth"] .card:hover {
+	border-color: var(--color-accent);
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="hearth"] .card > img {
+	height: auto;
+	aspect-ratio: 16 / 10;
+	width: 100%;
+	object-fit: cover;
+	background: var(--color-elevated);
+}
+
+/* No-image placeholder container (crosshatch, like .no-image). */
+[data-theme="hearth"] .card > div:first-child:not(.card-body) {
+	height: auto;
+	aspect-ratio: 16 / 10;
+	background: repeating-linear-gradient(
+			45deg,
+			color-mix(in srgb, var(--color-star) 4%, transparent) 0 12px,
+			transparent 12px 24px
+		),
+		var(--color-elevated);
+	border-bottom: 1px solid var(--color-border);
+}
+
+[data-theme="hearth"] .card-body {
+	padding: 16px 18px 18px;
+}
+
+[data-theme="hearth"] .card-title {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 19px;
+	font-variation-settings: "opsz" 144;
+	line-height: 1.2;
+	margin-bottom: 5px;
+}
+
+[data-theme="hearth"] .card-meta {
+	margin-top: 9px;
+	gap: 10px;
+}
+
+/* Domain source span (live has no .card-source class). */
+[data-theme="hearth"] .card-meta > span:first-child {
+	font-size: 12.5px;
+	font-weight: 600;
+}
+
+[data-theme="hearth"] .card-tags {
+	gap: 6px;
+	margin-top: 11px;
+}
+
+/* Stars (text glyphs) → gold. */
+[data-theme="hearth"] .stars {
+	color: var(--color-star);
+	letter-spacing: 0.05em;
+}
+
+/* Select checkbox on cards. */
+[data-theme="hearth"] .check {
+	border-radius: 50%;
+	border: 2px solid var(--color-bg);
+	background: var(--color-elevated);
+	color: var(--color-text);
+}
+
+[data-theme="hearth"] .check.on {
+	background: var(--color-accent);
+	border-color: var(--color-bg);
+	color: var(--color-bg);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Selected card ring + warm tint. */
+[data-theme="hearth"] .card-wrap.is-selected .card,
+[data-theme="hearth"] .list-wrap.is-selected > .list-row {
+	border-color: var(--color-accent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 35%, transparent),
+		var(--shadow-hover);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 7%, transparent), var(--color-surface) 40%);
+}
+
+/* ───────────────────────── List rows ───────────────────────── */
+
+[data-theme="hearth"] .list-row {
+	border-radius: 18px;
+	border-width: 1px;
+	padding: 10px 14px;
+	gap: 14px;
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="hearth"] .list-row:hover {
+	border-color: var(--color-accent);
+	box-shadow: var(--shadow-hover);
+}
+
+/* Thumbnail (real image or placeholder). */
+[data-theme="hearth"] .list-row .shrink-0 {
+	width: 56px;
+	height: 56px;
+	border-radius: 14px;
+	object-fit: cover;
+	flex: none;
+}
+
+[data-theme="hearth"] .list-row .shrink-0 img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+/* List title (live uses .font-medium, no .row-title). */
+[data-theme="hearth"] .list-row .font-medium {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 17px;
+	font-variation-settings: "opsz" 144;
+}
+
+/* ───────────────────────── Cook view ───────────────────────── */
+
+[data-theme="hearth"] .recipe-header {
+	background: var(--color-elevated);
+	border-bottom: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	overflow: hidden;
+}
+
+[data-theme="hearth"] .recipe-header__img {
+	border-radius: 18px;
+	object-fit: cover;
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="hearth"] .recipe-header__info h1 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 36px;
+	font-variation-settings: "opsz" 144;
+	line-height: 1.05;
+	letter-spacing: -0.01em;
+}
+
+[data-theme="hearth"] .description {
+	max-width: 65ch;
+	font-size: 15.5px;
+	line-height: 1.65;
+	opacity: 0.9;
+}
+
+/* Section headings (Ingredients / Steps / Notes). */
+[data-theme="hearth"] .recipe-view h2,
+[data-theme="hearth"] .recipe-edit h1,
+[data-theme="hearth"] .settings-page h1 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 22px;
+	font-variation-settings: "opsz" 144;
+	letter-spacing: -0.01em;
+}
+
+/* Rating stars on the cook view (gold + large). */
+[data-theme="hearth"] #rating {
+	color: var(--color-star);
+	font-size: 34px;
+	letter-spacing: 0.1em;
+}
+
+/* Servings control. */
+[data-theme="hearth"] .servings-control {
+	font-size: 13px;
+}
+
+[data-theme="hearth"] .servings-control label {
+	font-weight: 700;
+	color: var(--color-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+/* Ingredients list — dashed dividers between rows (leaf bullet comes from motif). */
+[data-theme="hearth"] .ingredients ul {
+	gap: 0;
+}
+
+[data-theme="hearth"] .ingredients li {
+	border-bottom: 1px dashed var(--color-border);
+	padding: 9px 0;
+	font-size: 14.5px;
+}
+
+[data-theme="hearth"] .ingredients li:last-child {
+	border-bottom: none;
+}
+
+/* Cook-mode step list → numbered circles. */
+[data-theme="hearth"] .cook-list {
+	list-style: none;
+	counter-reset: step;
+	padding: 0;
+}
+
+[data-theme="hearth"] .cook-step {
+	counter-increment: step;
+	position: relative;
+	padding: 0 0 14px 46px;
+	margin: 0;
+	border: 1px solid transparent;
+	border-radius: 0;
+	background: none;
+	line-height: 1.55;
+	font-size: 14.5px;
+}
+
+[data-theme="hearth"] .cook-step::before {
+	content: counter(step);
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: var(--color-elevated);
+	border: 1.5px solid var(--color-border);
+	color: var(--color-muted);
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+[data-theme="hearth"] .cook-step:hover {
+	background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+}
+
+[data-theme="hearth"] .cook-step.is-current {
+	background: none;
+	border: none;
+	font-weight: 600;
+}
+
+[data-theme="hearth"] .cook-step.is-current::before {
+	background: linear-gradient(180deg, var(--color-danger), color-mix(in srgb, var(--color-danger) 82%, #000));
+	border-color: var(--color-danger);
+	color: #1a1410;
+	box-shadow: 0 4px 12px color-mix(in srgb, var(--color-danger) 40%, transparent);
+}
+
+[data-theme="hearth"] .cook-step.is-done {
+	opacity: 1;
+	color: var(--color-muted);
+}
+
+[data-theme="hearth"] .cook-step.is-done::before {
+	content: "\2713";
+	background: var(--color-accent);
+	border-color: var(--color-accent);
+	color: var(--color-bg);
+}
+
+/* Cook progress bar container. */
+[data-theme="hearth"] .cook-progress {
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-radius: 18px;
+	padding: 14px 16px;
+}
+
+[data-theme="hearth"] .cook-progress__label {
+	font-weight: 700;
+	font-size: 13px;
+}
+
+[data-theme="hearth"] .cook-progress .btn {
+	padding: 8px 16px;
+	font-size: 13px;
+}
+
+/* Notes — warm gold-tinted box with a dashed gold border. */
+[data-theme="hearth"] .notes {
+	background: color-mix(in srgb, var(--color-star) 6%, transparent);
+	border: 1px dashed var(--color-star);
+	border-top: 1px dashed var(--color-star);
+	border-radius: 18px;
+	padding: 18px 22px;
+	margin-top: 2rem;
+	font-size: 14.5px;
+	line-height: 1.6;
+}
+
+[data-theme="hearth"] .notes h2 {
+	color: var(--color-star);
+	font-size: 16px;
+	margin-bottom: 4px;
+}
+
+/* Recipe footer. */
+[data-theme="hearth"] .recipe-footer {
+	border-top: 1px solid var(--color-border);
+	background: var(--color-bg);
+	padding-top: 1.25rem;
+	border-radius: 0;
+}
+
+/* ───────────────────────── Tags input (edit form) ───────────────────────── */
+
+[data-theme="hearth"] .tags-input {
+	border: 1.5px solid var(--color-border);
+	border-radius: 14px;
+	padding: 10px 12px;
+}
+
+[data-theme="hearth"] .tags-input:focus-within {
+	border-color: var(--color-accent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+
+[data-theme="hearth"] .tags-input__chip {
+	border-radius: 999px;
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	font-weight: 700;
+	font-size: 13px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="hearth"] .tags-input__suggestions {
+	border: 1px solid var(--color-border);
+	background: var(--color-elevated);
+	border-radius: 14px;
+	padding: 6px;
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="hearth"] .tags-input__suggestions li {
+	border-radius: 10px;
+	font-weight: 600;
+}
+
+[data-theme="hearth"] .tags-input__suggestions li[aria-selected="true"],
+[data-theme="hearth"] .tags-input__suggestions li:hover {
+	background: var(--color-surface);
+	color: var(--color-accent);
+}
+
+/* Draft / extraction banners. */
+[data-theme="hearth"] .draft-banner {
+	border-radius: 14px;
+	padding: 14px 16px;
+	background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+	border-width: 1px;
+}
+
+/* ───────────────────────── Settings cards ───────────────────────── */
+
+[data-theme="hearth"] .settings-card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+	padding: 22px 26px;
+}
+
+[data-theme="hearth"] .settings-card h2 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 21px;
+	font-variation-settings: "opsz" 144;
+}
+
+[data-theme="hearth"] .settings-card p {
+	color: var(--color-muted);
+	font-size: 14px;
+}
+
+/* ───────────────────────── Auth form ───────────────────────── */
+
+[data-theme="hearth"] .auth-form {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+	padding: 38px 36px;
+	max-width: 440px;
+}
+
+[data-theme="hearth"] .auth-form__title {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 30px;
+	font-variation-settings: "opsz" 144;
+	text-align: center;
+	margin-bottom: 6px;
+}
+
+[data-theme="hearth"] .auth-form label {
+	font-weight: 700;
+	color: var(--color-text);
+}
+
+[data-theme="hearth"] .auth-error {
+	background: color-mix(in srgb, var(--color-danger) 13%, transparent);
+	border: 1px solid var(--color-danger);
+	color: light-dark(#9a3a18, #f0b89a);
+	border-radius: 12px;
+	font-weight: 600;
+	font-size: 13.5px;
+}
+
+[data-theme="hearth"] .auth-form__links {
+	justify-content: space-between;
+	flex-direction: row;
+	font-size: 13.5px;
+	margin-top: 1.125rem;
+}
+
+/* ───────────────────────── Dropdown menus ───────────────────────── */
+
+[data-theme="hearth"] .add-menu > div,
+[data-theme="hearth"] .sort-menu > div {
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-radius: 18px;
+	padding: 8px;
+	box-shadow: var(--shadow-hover);
+}
+
+[data-theme="hearth"] .add-menu a,
+[data-theme="hearth"] .sort-option {
+	border-radius: 12px;
+	padding: 9px 12px;
+	font-weight: 600;
+	font-size: 14px;
+	color: var(--color-text);
+}
+
+[data-theme="hearth"] .add-menu a:hover,
+[data-theme="hearth"] .sort-option:hover {
+	background: var(--color-surface);
+	color: var(--color-text);
+}
+
+[data-theme="hearth"] .sort-option--active {
+	background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Toasts ───────────────────────── */
+
+[data-theme="hearth"] .toast,
+[data-theme="hearth"] .global-toast-area .toast {
+	background: var(--color-elevated);
+	border: 1px solid var(--color-border);
+	border-left: 4px solid var(--color-accent);
+	border-radius: 14px;
+	box-shadow: var(--shadow-hover);
+}
+
+/* ───────────────────────── Bulk action bar ───────────────────────── */
+
+[data-theme="hearth"] .bulk-actionbar {
+	background: linear-gradient(135deg, var(--color-elevated), var(--color-surface));
+	border: 1px solid var(--color-accent);
+	border-top: 1px solid var(--color-accent);
+	border-radius: 16px;
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="hearth"] .bulk-count__n {
+	color: var(--color-accent);
+}
+
+/* ───────────────────────── Skeletons + spinner ───────────────────────── */
+
+[data-theme="hearth"] .skeleton-card {
+	border-radius: var(--radius-card);
+	border-width: 1px;
+	box-shadow: var(--shadow-card);
+}
+
+[data-theme="hearth"] .skeleton {
+	background: linear-gradient(
+		100deg,
+		var(--color-elevated) 30%,
+		color-mix(in srgb, var(--color-border) 50%, var(--color-elevated)) 50%,
+		var(--color-elevated) 70%
+	);
+	background-size: 200% 100%;
+	animation: hearth-shimmer 1.4s infinite;
+}
+
+[data-theme="hearth"] .skeleton::after {
+	display: none;
+}
+
+@keyframes hearth-shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+[data-theme="hearth"] .spinner {
+	width: 34px;
+	height: 34px;
+	border-width: 3.5px;
+	border-color: var(--color-border);
+	border-top-color: var(--color-accent);
+}
+
+/* ───────────────────────── Empty states ───────────────────────── */
+/* Live uses .empty for the "no tags" line; .empty-state is added for parity. */
+
+[data-theme="hearth"] .empty-state {
+	background: var(--color-surface);
+	border: 1.5px dashed var(--color-border);
+	border-radius: var(--radius-card);
+	padding: 36px 28px;
+	text-align: center;
+}
+
+[data-theme="hearth"] .empty-state h4 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 20px;
+	font-variation-settings: "opsz" 144;
+	color: var(--color-text);
+}
+
+[data-theme="hearth"] .empty-state p {
+	color: var(--color-muted);
+	font-size: 14px;
+}
+
+[data-theme="hearth"] .empty {
+	color: var(--color-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-theme="hearth"] .skeleton {
+		animation: none;
+	}
+}
