@@ -713,7 +713,7 @@
 	display: grid;
 	grid-template-columns: 42px 1fr;
 	gap: 16px;
-	align-items: start;
+	align-items: center;
 	padding: 14px 12px;
 	margin: 0 0 6px 0;
 	border: 1px solid transparent;
@@ -727,8 +727,6 @@
 	grid-column: 2;
 }
 
-/* Numeral nudged onto the first text line (symmetric top padding keeps it
-   centered; margin-bottom carries the rhythm, not padding-bottom). */
 [data-theme="gourmet-noir"] .cook-step::before {
 	content: counter(gn-step, decimal-leading-zero);
 	grid-column: 1;
@@ -738,7 +736,6 @@
 	font-size: 26px;
 	line-height: 1;
 	color: var(--color-muted);
-	padding-top: 5px;
 }
 
 [data-theme="gourmet-noir"] .cook-step:hover {
