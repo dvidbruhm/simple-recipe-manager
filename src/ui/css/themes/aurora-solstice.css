@@ -658,7 +658,7 @@
 [data-theme="aurora-solstice"] .cook-step {
 	counter-increment: step;
 	position: relative;
-	padding: 5px 12px 5px 46px;
+	padding: 9px 12px 9px 46px;
 	margin: 0 0 8px 0;
 	border: 1px solid transparent;
 	border-radius: var(--radius-control);
@@ -671,7 +671,8 @@
 	content: counter(step);
 	position: absolute;
 	left: 8px;
-	top: 5px;
+	top: 50%;
+	transform: translateY(-50%);
 	width: 32px;
 	height: 32px;
 	border-radius: 8px;
