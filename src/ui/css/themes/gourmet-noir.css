@@ -736,6 +736,7 @@
 	font-size: 26px;
 	line-height: 1;
 	color: var(--color-muted);
+	transform: translateY(-2px);
 }
 
 [data-theme="gourmet-noir"] .cook-step:hover {
