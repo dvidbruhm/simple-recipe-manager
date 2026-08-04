@@ -1248,3 +1248,10 @@ body.is-cooking .cook-step.is-current {
 .theme-mode-btn {
 	flex: 0 0 auto;
 }
+
+.theme-mode-btn[aria-pressed="true"] {
+	background: var(--color-accent-soft);
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+	font-weight: 700;
+}

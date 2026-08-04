@@ -20,8 +20,8 @@
         {% endfor %}
       </div>
       <div class="flex gap-2" role="group" aria-label="Color mode">
-        <button type="button" class="btn theme-mode-btn" onclick='document.getElementById("theme-mode").value="dark"; this.form.requestSubmit()'>☾ Dark</button>
-        <button type="button" class="btn theme-mode-btn"{% if not active_light_ready %} disabled data-mode-light-disabled title="Light variant not available yet for this theme"{% endif %} onclick='document.getElementById("theme-mode").value="light"; this.form.requestSubmit()'>☀ Light</button>
+        <button type="button" class="btn theme-mode-btn"{% if mode == 'dark' %} aria-pressed="true"{% endif %} onclick='document.getElementById("theme-mode").value="dark"; this.form.requestSubmit()'>☾ Dark</button>
+        <button type="button" class="btn theme-mode-btn"{% if not active_light_ready %} disabled data-mode-light-disabled title="Light variant not available yet for this theme"{% endif %}{% if mode == 'light' %} aria-pressed="true"{% endif %} onclick='document.getElementById("theme-mode").value="light"; this.form.requestSubmit()'>☀ Light</button>
       </div>
     </form>
   </div>
