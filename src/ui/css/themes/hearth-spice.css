@@ -705,7 +705,7 @@
 
 [data-theme="hearth-spice"] .ingredients li {
 	border-bottom: 1px dashed var(--color-border);
-	padding: 9px 0;
+	padding: 4px 0;
 	font-size: 14.5px;
 }
 

@@ -639,7 +639,7 @@
 /* Ingredients list — solid warm dividers between rows. */
 [data-theme="aurora-solstice"] .ingredients li {
 	border-bottom: 1px solid var(--color-border);
-	padding: 9px 4px;
+	padding: 4px 4px;
 	font-size: 14px;
 }
 
