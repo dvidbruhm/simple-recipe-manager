@@ -52,7 +52,40 @@ describe("JsonLdAdapter", () => {
 		expect(recipes[0]?.title).toBe("RecipeSage Test");
 		expect(recipes[0]?.image).toBe("https://example.com/rice.jpg");
 		expect(recipes[0]?.tags).toEqual(["side", "rice"]);
+		expect(recipes[0]?.source_url).toBe("https://example.com/original-recipe");
 		expect(recipes[0]?.ingredients).toEqual(["1 cup rice"]);
+	});
+
+	it("parses RecipeSage export wrapped in a top-level {recipes: [...]} object", async () => {
+		const exportData = {
+			recipes: [
+				{
+					"@context": "http://schema.org",
+					"@type": "Recipe",
+					name: "Wrapped A",
+					recipeIngredient: ["1 cup rice"],
+					recipeInstructions: [{ "@type": "HowToStep", text: "Cook rice" }],
+				},
+				{ "@context": "http://schema.org", "@type": "Recipe", name: "Wrapped B" },
+			],
+		};
+		const buf = new TextEncoder().encode(JSON.stringify(exportData));
+		const recipes = await adapter.parse(buf, { tempDir: "/tmp" });
+		expect(recipes.length).toBe(2);
+		expect(recipes[0]?.title).toBe("Wrapped A");
+		expect(recipes[0]?.ingredients).toEqual(["1 cup rice"]);
+		expect(recipes[1]?.title).toBe("Wrapped B");
+	});
+
+	it("parses JSON-LD wrapped in a top-level @graph array", async () => {
+		const exportData = {
+			"@context": "https://schema.org",
+			"@graph": [{ "@type": "Recipe", name: "Graph Recipe", recipeIngredient: ["2 eggs"] }],
+		};
+		const buf = new TextEncoder().encode(JSON.stringify(exportData));
+		const recipes = await adapter.parse(buf, { tempDir: "/tmp" });
+		expect(recipes.length).toBe(1);
+		expect(recipes[0]?.title).toBe("Graph Recipe");
 	});
 
 	it("strips HTML from ingredients and steps", async () => {
@@ -109,6 +142,59 @@ describe("JsonLdAdapter", () => {
 		);
 		const recipes = await adapter.parse(buf, { tempDir: "/tmp" });
 		expect(recipes[0]?.source_url).toBe("https://example.com/recipe/x");
+	});
+
+	it("falls back to isBasedOn for source_url when @id is absent", async () => {
+		const buf = new TextEncoder().encode(
+			JSON.stringify({
+				"@context": "https://schema.org",
+				"@type": "Recipe",
+				name: "X",
+				isBasedOn: "https://example.com/original",
+			}),
+		);
+		const recipes = await adapter.parse(buf, { tempDir: "/tmp" });
+		expect(recipes[0]?.source_url).toBe("https://example.com/original");
+	});
+
+	it("prefers @id over isBasedOn and ignores non-http isBasedOn", async () => {
+		const buf = new TextEncoder().encode(
+			JSON.stringify({
+				"@type": "Recipe",
+				name: "X",
+				"@id": "https://example.com/a",
+				isBasedOn: "https://example.com/b",
+			}),
+		);
+		const withId = await adapter.parse(buf, { tempDir: "/tmp" });
+		expect(withId[0]?.source_url).toBe("https://example.com/a");
+
+		const nonHttp = new TextEncoder().encode(
+			JSON.stringify({ "@type": "Recipe", name: "Y", isBasedOn: "Some Cookbook" }),
+		);
+		const withoutUrl = await adapter.parse(nonHttp, { tempDir: "/tmp" });
+		expect(withoutUrl[0]?.source_url).toBe("");
+	});
+
+	it("merges keywords and recipeCategory array into tags", async () => {
+		const buf = new TextEncoder().encode(
+			JSON.stringify({
+				"@type": "Recipe",
+				name: "X",
+				keywords: "dinner, easy",
+				recipeCategory: ["repas", "vege", "dinner"],
+			}),
+		);
+		const recipes = await adapter.parse(buf, { tempDir: "/tmp" });
+		expect(recipes[0]?.tags).toEqual(["dinner", "easy", "repas", "vege"]);
+	});
+
+	it("accepts recipeCategory as a single string", async () => {
+		const buf = new TextEncoder().encode(
+			JSON.stringify({ "@type": "Recipe", name: "X", recipeCategory: "dessert" }),
+		);
+		const recipes = await adapter.parse(buf, { tempDir: "/tmp" });
+		expect(recipes[0]?.tags).toEqual(["dessert"]);
 	});
 
 	it("throws on invalid JSON", async () => {

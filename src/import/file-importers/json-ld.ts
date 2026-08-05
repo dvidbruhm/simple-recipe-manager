@@ -56,15 +56,33 @@ export function mapJsonLdToPartial(obj: Record<string, unknown>): PartialRecipe 
 	}
 
 	const atId = obj["@id"];
-	const source_url = typeof atId === "string" && atId.startsWith("http") ? atId : "";
+	const isBasedOn = obj.isBasedOn;
+	const source_url =
+		typeof atId === "string" && atId.startsWith("http")
+			? atId
+			: typeof isBasedOn === "string" && isBasedOn.startsWith("http")
+				? isBasedOn
+				: "";
 
 	const image = extractImageUrl(obj.image);
 
 	const keywords = typeof obj.keywords === "string" ? obj.keywords : "";
-	const tags = keywords
+	const keywordTags = keywords
 		.split(",")
 		.map((s) => s.trim())
 		.filter(Boolean);
+
+	const categoryVal = obj.recipeCategory;
+	const categoryTags: string[] = [];
+	if (typeof categoryVal === "string") {
+		categoryTags.push(categoryVal.trim());
+	} else if (Array.isArray(categoryVal)) {
+		for (const c of categoryVal) {
+			if (typeof c === "string" && c.trim()) categoryTags.push(c.trim());
+		}
+	}
+
+	const tags = [...new Set([...keywordTags, ...categoryTags])];
 
 	const ar = obj.aggregateRating;
 	const rawRating =
@@ -89,6 +107,23 @@ export function mapJsonLdToPartial(obj: Record<string, unknown>): PartialRecipe 
 	};
 }
 
+const WRAPPER_KEYS = ["recipes", "@graph"];
+
+function collectRecipeObjects(data: unknown): Record<string, unknown>[] {
+	if (Array.isArray(data)) {
+		return data.filter((x): x is Record<string, unknown> => x !== null && typeof x === "object");
+	}
+	if (data !== null && typeof data === "object") {
+		const obj = data as Record<string, unknown>;
+		for (const key of WRAPPER_KEYS) {
+			const inner = obj[key];
+			if (Array.isArray(inner)) return collectRecipeObjects(inner);
+		}
+		return [obj];
+	}
+	return [];
+}
+
 export class JsonLdAdapter implements FileImportAdapter {
 	matches(name: string, _mime: string): boolean {
 		const lower = name.toLowerCase();
@@ -103,14 +138,6 @@ export class JsonLdAdapter implements FileImportAdapter {
 		} catch {
 			throw new Error("Invalid JSON");
 		}
-		if (Array.isArray(data)) {
-			return data
-				.filter((x): x is Record<string, unknown> => x !== null && typeof x === "object")
-				.map(mapJsonLdToPartial);
-		}
-		if (data !== null && typeof data === "object") {
-			return [mapJsonLdToPartial(data as Record<string, unknown>)];
-		}
-		return [];
+		return collectRecipeObjects(data).map(mapJsonLdToPartial);
 	}
 }
