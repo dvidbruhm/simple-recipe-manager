@@ -18,6 +18,9 @@
 	--color-danger: #c0392b;
 	--color-favorite: #d6453a;
 	--color-star: #c9a227;
+	--color-hl-ingredient: #c9a227;
+	--color-hl-duration: #2563eb;
+	--color-hl-temperature: #dc2626;
 	--font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 	--font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 	--radius-card: 8px;
@@ -51,6 +54,9 @@
 	--color-danger: light-dark(#c0392b, #e57373);
 	--color-favorite: light-dark(#d6453a, #ff5a5a);
 	--color-star: light-dark(#c9a227, #e0b83a);
+	--color-hl-ingredient: light-dark(#c9a227, #e0b83a);
+	--color-hl-duration: light-dark(#2563eb, #60a5fa);
+	--color-hl-temperature: light-dark(#dc2626, #f87171);
 	--font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 	--font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 	--radius-card: 8px;
@@ -73,6 +79,9 @@
 	--color-danger: light-dark(#dc2626, #f87171);
 	--color-favorite: light-dark(#e11d48, #fb7185);
 	--color-star: light-dark(#b45309, #fbbf24);
+	--color-hl-ingredient: light-dark(#b45309, #fbbf24);
+	--color-hl-duration: light-dark(#0d9488, #2dd4bf);
+	--color-hl-temperature: light-dark(#e11d48, #fb7185);
 	--font-display: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--font-body: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--radius-card: 12px;
@@ -96,6 +105,9 @@
 	--color-danger: light-dark(#dc2626, #ef4444);
 	--color-favorite: light-dark(#e11d48, #fb7185);
 	--color-star: light-dark(#b45309, #fbbf24);
+	--color-hl-ingredient: light-dark(#b45309, #fbbf24);
+	--color-hl-duration: light-dark(#7c3aed, #a78bfa);
+	--color-hl-temperature: light-dark(#dc2626, #f87171);
 	--font-display: "Sora", "Inter", -apple-system, system-ui, sans-serif;
 	--font-body: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--radius-card: 12px;
@@ -119,6 +131,9 @@
 	--color-danger: light-dark(#000000, #ffffff);
 	--color-favorite: light-dark(#000000, #ffffff);
 	--color-star: light-dark(#000000, #ffffff);
+	--color-hl-ingredient: light-dark(#b45309, #e0b83a);
+	--color-hl-duration: light-dark(#2563eb, #60a5fa);
+	--color-hl-temperature: light-dark(#dc2626, #f87171);
 	--font-display: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--font-body: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -142,6 +157,9 @@
 	--color-danger: light-dark(#b15a3a, #c97a4a);
 	--color-favorite: light-dark(#b15a3a, #c97a4a);
 	--color-star: light-dark(#b8862b, #d2b483);
+	--color-hl-ingredient: light-dark(#b8862b, #d2b483);
+	--color-hl-duration: light-dark(#0f766e, #5eead4);
+	--color-hl-temperature: light-dark(#c2410c, #fb923c);
 	--font-display: "Fraunces", Georgia, serif;
 	--font-body: "Nunito", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--radius-card: 28px;
@@ -164,6 +182,9 @@
 	--color-danger: light-dark(#b03a1a, #d2603a);
 	--color-favorite: light-dark(#a06a1a, #e0a82e);
 	--color-star: light-dark(#a06a1a, #e0a82e);
+	--color-hl-ingredient: light-dark(#a06a1a, #e0a82e);
+	--color-hl-duration: light-dark(#1d4ed8, #93c5fd);
+	--color-hl-temperature: light-dark(#b91c1c, #fca5a5);
 	--font-display: "Fraunces", Georgia, serif;
 	--font-body: "Nunito", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--radius-card: 24px;
@@ -186,6 +207,9 @@
 	--color-danger: light-dark(#a8472b, #c97a4a);
 	--color-favorite: light-dark(#a8472b, #c97a4a);
 	--color-star: light-dark(#a07a2e, #d4b483);
+	--color-hl-ingredient: light-dark(#a07a2e, #d4b483);
+	--color-hl-duration: light-dark(#4338ca, #a5b4fc);
+	--color-hl-temperature: light-dark(#be123c, #fda4af);
 	--font-display: "Playfair Display", Georgia, serif;
 	--font-body: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--radius-card: 2px;
@@ -415,6 +439,34 @@ summary.btn::-webkit-details-marker {
 }
 .ingredients input[type="checkbox"]:hover {
 	border-color: var(--color-accent);
+}
+
+mark.hl-ingredient,
+mark.hl-duration,
+mark.hl-temperature {
+	font-weight: 700;
+	color: inherit;
+	border-radius: 3px;
+	padding: 0 0.15em;
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+mark.hl-ingredient {
+	background: color-mix(in srgb, var(--color-hl-ingredient) 40%, transparent);
+}
+mark.hl-duration {
+	background: color-mix(in srgb, var(--color-hl-duration) 40%, transparent);
+}
+mark.hl-temperature {
+	background: color-mix(in srgb, var(--color-hl-temperature) 40%, transparent);
+}
+@media print {
+	mark.hl-ingredient,
+	mark.hl-duration,
+	mark.hl-temperature {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
 }
 
 .rating .star {

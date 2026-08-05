@@ -7,6 +7,7 @@ import { TagRepository } from "@/tags/repository";
 import { render } from "@/ui/nunjucks";
 import { themeVars } from "@/ui/theme";
 import { removeImage, saveUploadedImage } from "./image-upload";
+import { highlightIngredients, highlightSteps } from "./ingredient-highlight";
 import { RecipeRepository } from "./repository";
 import { searchRecipes, sortRecipes } from "./search";
 
@@ -317,9 +318,13 @@ export function recipeRoutes(db: Database, config: Config): App {
 		const recipe = recipes.getById(id);
 		if (!recipe || recipe.deleted_at) return c.notFound();
 		const tagRows = tags.listForRecipe(id);
+		const ingredientViews = highlightIngredients(recipe.ingredients, recipe.steps);
+		const hitWords = ingredientViews.flatMap((v) => v.hits);
 		return c.html(
 			render("recipe-view.html", {
 				r: recipe,
+				ingredients: ingredientViews,
+				steps: highlightSteps(recipe.steps, hitWords),
 				tags: tagRows.map((t) => t.name),
 				title: recipe.title,
 				...themeVars(c),

@@ -84,6 +84,49 @@
     return formatQuantity(parsed.value * factor) + line.slice(parsed.end);
   }
 
+  const UNIT_PHRASES = ["c. à soupe", "c. à thé", "c. à table"];
+
+  function excludedRanges(text) {
+    const ranges = [];
+    for (const m of text.matchAll(/\([^)]*\)/g)) ranges.push([m.index, m.index + m[0].length]);
+    const lower = text.toLowerCase();
+    for (const phrase of UNIT_PHRASES) {
+      let from = 0;
+      for (;;) {
+        const idx = lower.indexOf(phrase, from);
+        if (idx === -1) break;
+        ranges.push([idx, idx + phrase.length]);
+        from = idx + phrase.length;
+      }
+    }
+    return ranges;
+  }
+
+  function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function remark(span) {
+    const words = (span.getAttribute("data-hl") || "").split(",").map((w) => w.trim()).filter(Boolean);
+    const text = span.textContent || "";
+    if (words.length === 0 || !text) return;
+    const re = new RegExp(`(^|[^\\p{L}])(${words.map(escapeRegExp).join("|")})(?![\\p{L}])`, "giu");
+    const ranges = excludedRanges(text);
+    span.textContent = "";
+    let last = 0;
+    for (const m of text.matchAll(re)) {
+      const start = m.index + m[1].length;
+      if (ranges.some(([s, e]) => start >= s && start < e)) continue;
+      if (start > last) span.appendChild(document.createTextNode(text.slice(last, start)));
+      const mark = document.createElement("mark");
+      mark.className = "hl-ingredient";
+      mark.textContent = m[2];
+      span.appendChild(mark);
+      last = start + m[2].length;
+    }
+    if (last < text.length) span.appendChild(document.createTextNode(text.slice(last)));
+  }
+
   function initAll() {
     document.querySelectorAll("[data-ingredients]").forEach((section) => {
       const input = section.querySelector("[data-base-servings]");
@@ -100,6 +143,7 @@
         if (!Number.isFinite(current) || current <= 0) {
           spans.forEach((s) => {
             s.textContent = s.getAttribute("data-original") || "";
+            remark(s);
           });
           if (resetBtn) resetBtn.classList.toggle("hidden", true);
           return;
@@ -108,6 +152,7 @@
         spans.forEach((s) => {
           const original = s.getAttribute("data-original") || "";
           s.textContent = scaleLine(original, factor);
+          remark(s);
         });
         if (resetBtn) resetBtn.classList.toggle("hidden", current === base);
       }

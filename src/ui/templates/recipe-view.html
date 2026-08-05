@@ -41,8 +41,8 @@
         {% endif %}
       </div>
       <ul class="list-none space-y-1">
-        {% for ing in r.ingredients %}
-          <li><label class="flex items-start gap-2 cursor-pointer text-[color:var(--color-text)]"><input type="checkbox" class="mt-1 ing-check" data-ing="{{ loop.index0 }}"> <span data-original="{{ ing }}">{{ ing | fractions }}</span></label></li>
+        {% for ing in ingredients %}
+          <li><label class="flex items-start gap-2 cursor-pointer text-[color:var(--color-text)]"><input type="checkbox" class="mt-1 ing-check" data-ing="{{ loop.index0 }}"> <span data-original="{{ ing.original }}" data-hl="{{ ing.hits | join(',') }}">{% for seg in ing.segments %}{% if seg.hit %}<mark class="hl-ingredient">{{ seg.text | fractions }}</mark>{% else %}{{ seg.text | fractions }}{% endif %}{% endfor %}</span></label></li>
         {% else %}
           <li class="text-[color:var(--color-muted)]">No ingredients listed.</li>
         {% endfor %}
@@ -63,8 +63,8 @@
       </div>
       {% endif %}
       <ol class="list-decimal list-inside space-y-1 text-[color:var(--color-text)] cook-list" data-cook-list>
-        {% for step in r.steps %}
-          <li data-step-index="{{ loop.index0 }}" class="cook-step"><span class="cook-step__text">{{ step }}</span></li>
+        {% for step in steps %}
+          <li data-step-index="{{ loop.index0 }}" class="cook-step"><span class="cook-step__text">{% for seg in step.segments %}{% if seg.kind %}<mark class="hl-{{ seg.kind }}">{{ seg.text }}</mark>{% else %}{{ seg.text }}{% endif %}{% endfor %}</span></li>
         {% else %}
           <li class="text-[color:var(--color-muted)]">No steps listed.</li>
         {% endfor %}

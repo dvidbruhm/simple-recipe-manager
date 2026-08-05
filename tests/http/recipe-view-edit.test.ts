@@ -353,4 +353,32 @@ describe("recipe view & edit pages", () => {
 		expect(body).toContain("Tiramisu");
 		expect(body).not.toContain("Bolognese");
 	});
+
+	it("GET /recipes/:id highlights ingredient words that appear in steps", async () => {
+		const { app, cookie, id1 } = await setupApp();
+		const fd = new FormData();
+		fd.set("title", "Rice Bowl");
+		fd.set("ingredients", "200 g cooked rice\n1 onion, chopped");
+		fd.set("steps", "Rinse the rice, then sauté the onion for 5 minutes at 350°F.");
+		fd.set("rating", "0");
+		fd.set("tags", "");
+		await app.request(`/recipes/${id1}`, {
+			method: "POST",
+			body: fd,
+			headers: { Cookie: `session=${cookie}` },
+		});
+		const res = await app.request(`/recipes/${id1}`, auth(cookie));
+		const body = await res.text();
+		expect(body).toContain('<mark class="hl-ingredient">rice</mark>');
+		expect(body).toContain('<mark class="hl-ingredient">onion</mark>');
+		expect(body).toContain('data-hl="rice"');
+		expect(body).toContain('data-hl="onion"');
+		expect(body).not.toContain('<mark class="hl-ingredient">chopped</mark>');
+		expect(body).not.toContain('<mark class="hl-ingredient">cooked</mark>');
+		expect(body).toContain('<mark class="hl-duration">5 minutes</mark>');
+		expect(body).toContain('<mark class="hl-temperature">350°F</mark>');
+		expect(body).toContain(
+			'<span class="cook-step__text">Rinse the <mark class="hl-ingredient">rice</mark>, then sauté the <mark class="hl-ingredient">onion</mark> for <mark class="hl-duration">5 minutes</mark> at <mark class="hl-temperature">350°F</mark>.</span>',
+		);
+	});
 });

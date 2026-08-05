@@ -18,6 +18,9 @@ const REQUIRED_TOKENS = [
 	"--color-danger",
 	"--color-favorite",
 	"--color-star",
+	"--color-hl-ingredient",
+	"--color-hl-duration",
+	"--color-hl-temperature",
 	"--font-display",
 	"--font-body",
 	"--radius-card",
@@ -40,6 +43,9 @@ const COLOR_TOKENS = [
 	"--color-danger",
 	"--color-favorite",
 	"--color-star",
+	"--color-hl-ingredient",
+	"--color-hl-duration",
+	"--color-hl-temperature",
 ] as const;
 
 function blockFor(css: string, theme: Theme): string {
